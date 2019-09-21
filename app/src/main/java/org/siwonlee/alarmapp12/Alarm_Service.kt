@@ -2,8 +2,16 @@ package org.siwonlee.alarmapp12
 
 import android.content.Intent
 import android.app.Service
+import android.content.Context
+import android.os.Build
 import android.os.IBinder
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.widget.Toast
+import android.media.RingtoneManager
+import android.media.Ringtone
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 
 class Alarm_Service : Service() {
     override fun onBind(intent: Intent): IBinder? {
@@ -13,6 +21,20 @@ class Alarm_Service : Service() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         //알람이 작동함을 알리는 Toast를 출력
         Toast.makeText(this, "Alarm ringing", Toast.LENGTH_LONG).show()
+
+        // 알람 울릴 때 5초간 진동
+        var v = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            v.vibrate(VibrationEffect.createOneShot(5000, VibrationEffect.EFFECT_TICK));
+        } else {
+            v.vibrate(5000)
+        }
+
+        // 알람 울릴 때 소리 : 기본 알람소리
+        val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        val ringtone = RingtoneManager.getRingtone(applicationContext, uri)
+        ringtone.play()
+
         return START_NOT_STICKY
     }
 
