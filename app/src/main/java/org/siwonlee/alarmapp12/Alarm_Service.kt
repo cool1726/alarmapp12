@@ -9,9 +9,14 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.widget.Toast
 import android.media.RingtoneManager
-import android.media.Ringtone
+import android.os.PowerManager
+import android.view.WindowManager
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
+
+
 
 class Alarm_Service : Service() {
     override fun onBind(intent: Intent): IBinder? {
@@ -19,6 +24,7 @@ class Alarm_Service : Service() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+
         //알람이 작동함을 알리는 Toast를 출력
         Toast.makeText(this, "Alarm ringing", Toast.LENGTH_LONG).show()
 
@@ -36,7 +42,18 @@ class Alarm_Service : Service() {
         ringtone.play()
 
         return START_NOT_STICKY
+
+
     }
+
+        /* WakeLock: 화면 꺼진 상태에서 알람 울리면 화면 켜지게 하기 >> 아직 진행중
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val wakeLock = pm.newWakeLock(
+            PowerManager.SCREEN_DIM_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
+            "waketag")
+        wakeLock.acquire(3000)
+        */
+
 
     //이하 작동하지 않아 버린 코드
 /*

@@ -3,12 +3,21 @@ package org.siwonlee.alarmapp12
 import android.content.Intent
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Context.POWER_SERVICE
 import android.os.Build
+import androidx.core.content.ContextCompat.getSystemService
+import android.os.PowerManager
+import androidx.core.content.ContextCompat.getSystemService
+import android.net.ConnectivityManager
+import androidx.core.content.ContextCompat.getSystemService
+
+
 
 
 class Alarm_Receiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+
         // intent로부터 전달받은 Boolean
         val trig = intent.extras!!.getBoolean("state")
 
@@ -22,5 +31,32 @@ class Alarm_Receiver : BroadcastReceiver() {
         if (Build.VERSION.SDK_INT >= 26)
             context.startForegroundService(serviceIntent)
         else context.startService(serviceIntent)
+
+
+        /* WakeLock: 화면 꺼진 상태에서 알람 울리면 화면 켜지게 하기 >> 아직 진행중
+        // 시스템에서 powermanager 받아옴
+        val wakeLock: PowerManager.WakeLock
+
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        var isScreenOn : Boolean = powerManager.isScreenOn()
+
+        if(!isScreenOn) {
+            val wl = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE, "MyWakeLock")
+            wl.acquire(10000)
+            val wl_cpu = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyCpuLock")
+            wl_cpu.acquire(10000)
+        }
+
+        //val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+
+        // 객체의 제어레벨을 설정함
+        var sCpuWakeLock: PowerManager.WakeLock? =
+            pm.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP or
+            PowerManager.ON_AFTER_RELEASE, "app:alarm")
+
+        // acquire로 앱을 깨워 cpu를 획득한다.
+        sCpuWakeLock.acquire()
+        val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+*/
     }
 }
