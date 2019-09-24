@@ -16,26 +16,15 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
     val cal : Calendar = Calendar.getInstance()
+    val ctx: Context = this
 
     //알람 시간을 저장할 파일의 모델과 컨트롤러
     private val prefStorage = "org.siwonlee.alarmapp12.prefs"
     lateinit var pref : SharedPreferences
 
-
-    //알람을 울릴 시간을 리시버에 전달할 AlarmManager와 Intent
-    val alarmManager : AlarmManager by lazy {
-        getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    }
-    val myIntent : Intent by lazy {
-        Intent(this, Alarm_Receiver::class.java)
-    }
-    lateinit var pendingIntent : PendingIntent
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
 
         //모델 prefStorage를 컨트롤러 pref와 연결함
         pref = this.getSharedPreferences(prefStorage, MODE_PRIVATE)
@@ -75,18 +64,26 @@ class MainActivity : AppCompatActivity() {
             pref.edit().putLong("Alarm_time", cal.timeInMillis).apply()
 
 
-            //intent에 알림을 울린다는 정보를 저장
-            myIntent.putExtra("state", true)
-            //pendingIntent에 intent를 담는다
-            pendingIntent = PendingIntent.getBroadcast(this, 1, myIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-
             //알람 설정 시간을 확인하기 위해 시:분 형태로 토스트를 출력
             val str = "Alarm set in ${cal.get(Calendar.HOUR_OF_DAY)} : ${cal.get(Calendar.MINUTE)}"
             Toast.makeText(this@MainActivity, str, Toast.LENGTH_SHORT).show()
 
 
-            //알람 매니저에 알람을 설정
+            //intent에 알림을 울린다는 정보를 저장
+            val myIntent = Intent(this, Alarm_Receiver::class.java)
+            myIntent.putExtra("hr", cal.get(Calendar.HOUR_OF_DAY))
+            myIntent.putExtra("min", cal.get(Calendar.MINUTE))
+            //pendingIntent에 intent를 담는다
+            val pendingIntent = PendingIntent.getBroadcast(
+                this,
+                1,
+                myIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+
+            //알람 매니저를 생성하여 알람을 설정
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
             else
