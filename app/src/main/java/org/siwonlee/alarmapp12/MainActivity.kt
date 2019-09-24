@@ -87,8 +87,7 @@ class MainActivity : AppCompatActivity() {
 
 
             //알람 매니저에 알람을 설정
-            if (Build.VERSION.SDK_INT >= 23)
-                //여기서 동작함 => SDK_INT는 23 이상 26 이하
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
             else
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)

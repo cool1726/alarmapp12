@@ -3,16 +3,7 @@ package org.siwonlee.alarmapp12
 import android.content.Intent
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Context.POWER_SERVICE
 import android.os.Build
-import androidx.core.content.ContextCompat.getSystemService
-import android.os.PowerManager
-import androidx.core.content.ContextCompat.getSystemService
-import android.net.ConnectivityManager
-import androidx.core.content.ContextCompat.getSystemService
-
-
-
 
 class Alarm_Receiver : BroadcastReceiver() {
 
@@ -28,7 +19,7 @@ class Alarm_Receiver : BroadcastReceiver() {
         serviceIntent.putExtra("state", trig)
 
         //serviceIntent를 Alarm_Service로 전달한다
-        if (Build.VERSION.SDK_INT >= 26)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             context.startForegroundService(serviceIntent)
         else context.startService(serviceIntent)
 

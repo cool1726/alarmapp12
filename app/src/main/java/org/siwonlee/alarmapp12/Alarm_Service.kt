@@ -9,13 +9,10 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.widget.Toast
 import android.media.RingtoneManager
-import android.os.PowerManager
-import android.view.WindowManager
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
-
+import android.R
+import androidx.core.app.NotificationCompat
+import android.app.NotificationManager
+import android.app.NotificationChannel
 
 
 class Alarm_Service : Service() {
@@ -24,6 +21,28 @@ class Alarm_Service : Service() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            //NotificationChannel의 ID
+            val CHANNEL_ID = "Alarm_Service"
+            //NotificationChannel
+            val channel = NotificationChannel(
+                CHANNEL_ID, "Alarm Title",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+
+            ///channel을 시스템에 등록한다
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
+                channel
+            )
+
+            //channel을 사용할 notification을 생성
+            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("Alarm_Service")
+                .setContentText("Alarm_Title").build()
+
+            //포어그라운드에서 notification을 준다
+            startForeground(1, notification)
+        }
 
         //알람이 작동함을 알리는 Toast를 출력
         Toast.makeText(this, "Alarm ringing", Toast.LENGTH_LONG).show()
@@ -41,11 +60,6 @@ class Alarm_Service : Service() {
         val ringtone = RingtoneManager.getRingtone(applicationContext, uri)
         ringtone.play()
 
-        return START_NOT_STICKY
-
-
-    }
-
         /* WakeLock: 화면 꺼진 상태에서 알람 울리면 화면 켜지게 하기 >> 아직 진행중
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         val wakeLock = pm.newWakeLock(
@@ -54,47 +68,6 @@ class Alarm_Service : Service() {
         wakeLock.acquire(3000)
         */
 
-
-    //이하 작동하지 않아 버린 코드
-/*
-    var isRunning: Boolean = false
-    var uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-    //프로그램이 여기서 자꾸 Shutdown됨
-    var ringtone = RingtoneManager.getRingtone(applicationContext, uri)
-    var ID : Int = 0
-
-
-
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        val getState = intent.extras!!.getBoolean("state")!!
-        ID = if (getState) 1 else 0
-
-        // 알람음 재생 X , 알람음 시작 클릭
-        if (!this.isRunning && ID == 1) {
-            ringtone.play()
-
-            this.isRunning = true
-            ID = 0
-        }
-        // 알람음 재생 O , 알람음 시작 버튼 클릭
-        else if (this.isRunning && ID == 0) {
-            ringtone.stop()
-
-            this.isRunning = false
-            ID = 0
-        }
-        // 알람음 재생 X , 알람음 종료 버튼 클릭
-        else if (!this.isRunning && ID == 0) {
-            this.isRunning = false
-            ID = 0
-        }
-        // 알람음 재생 O , 알람음 종료 버튼 클릭
-        else if (this.isRunning && ID == 1) {
-            this.isRunning = true
-            ID = 1
-        }
-
-        return START_NOT_STICKY
+        return super.onStartCommand(intent, flags, startId)
     }
- */
 }
