@@ -32,8 +32,8 @@ class Alarm_Ringing : AppCompatActivity() {
         }, 1000)
 
         bt_alarmoff.setOnClickListener {
-            //v.cancel()
-            //ringtone.stop()
+            v.cancel()
+            ringtone.stop()
             finish()
         }
         time_now.text = "${hr}:${min}"

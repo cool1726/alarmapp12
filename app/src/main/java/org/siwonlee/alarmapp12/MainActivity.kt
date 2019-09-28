@@ -16,7 +16,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
     val cal : Calendar = Calendar.getInstance()
-    val ctx: Context = this
 
     //알람 시간을 저장할 파일의 모델과 컨트롤러
     private val prefStorage = "org.siwonlee.alarmapp12.prefs"
@@ -84,10 +83,8 @@ class MainActivity : AppCompatActivity() {
 
             //알람 매니저를 생성하여 알람을 설정
             val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
-            else
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+            var timeInterval: Long = 1000 * 60 * 60 * 24 * 7
+            alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, cal.timeInMillis, timeInterval, pendingIntent)
         }
     }
 }
