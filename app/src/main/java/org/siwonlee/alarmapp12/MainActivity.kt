@@ -11,20 +11,30 @@ import android.widget.Toast
 import java.util.*
 import android.content.Context
 import kotlinx.android.synthetic.main.activity_main.*
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import java.text.SimpleDateFormat;
+
 
 
 class MainActivity : AppCompatActivity() {
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
-    val cal : Calendar = Calendar.getInstance()
+    val cal: Calendar = Calendar.getInstance()
     val ctx: Context = this
 
     //알람 시간을 저장할 파일의 모델과 컨트롤러
     private val prefStorage = "org.siwonlee.alarmapp12.prefs"
-    lateinit var pref : SharedPreferences
+    lateinit var pref: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         //모델 prefStorage를 컨트롤러 pref와 연결함
         pref = this.getSharedPreferences(prefStorage, MODE_PRIVATE)
@@ -43,21 +53,86 @@ class MainActivity : AppCompatActivity() {
             timePicker.setCurrentMinute(cal.get(Calendar.MINUTE))
         }
 
-
         //timePicker를 변경할 때마다
-        timePicker.setOnTimeChangedListener({_, hour, minute ->
-            //cal에 해당 시/분을 저장한다
+        timePicker.setOnTimeChangedListener({ _, hour, minute ->
+            // cal에 해당 시/분을 저장한다
             cal.set(Calendar.HOUR_OF_DAY, hour)
             cal.set(Calendar.MINUTE, minute)
         })
 
 
         //버튼을 누를 시
-        bt_set.setOnClickListener{
+        bt_set.setOnClickListener {
+
+            // 현재 날짜, 시간
+            val now : Long = System.currentTimeMillis()
+            val datestr = Date(now).toString()
+
+            var day: String? = null
+            var isRepeat: Boolean = false
+
             //날짜가 바뀌는 등 오류가 발생할 수 있으므로 현재 날짜를 다시 구한다
             cal.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
-            //알람 시간이 이미 지났다면 내일 알람으로 지정한다
-            if (cal.before(Calendar.getInstance())) cal.add(Calendar.DATE, 1)
+
+            if (cal.before(Calendar.getInstance())) {
+                cal.add(Calendar.DATE, 1)
+                Toast.makeText(this@MainActivity, "다음날로 미뤄짐", Toast.LENGTH_SHORT).show()
+            }
+
+
+            if(tg_sunday.isChecked) {
+                isRepeat = true
+                day = "SUNDAY"
+                cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+            }
+            if(tg_monday.isChecked) {
+                isRepeat = true
+                day = "MONDAY"
+                cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+            }
+            if(tg_tuesday.isChecked) {
+                isRepeat = true
+                day = "TUESDAY"
+                cal.set(Calendar.DAY_OF_WEEK, Calendar.TUESDAY)
+            }
+            if(tg_wednesday.isChecked) {
+                isRepeat = true
+                day = "WEDNESDAY"
+                cal.set(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY)
+            }
+            if(tg_thursday.isChecked) {
+                isRepeat = true
+                day = "THURSDAY"
+                cal.set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY)
+            }
+            if(tg_friday.isChecked) {
+                isRepeat = true
+                day = "FRIDAY"
+                cal.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY)
+            }
+            if(tg_saturday.isChecked) {
+                isRepeat = true
+                day = "SATURDAY"
+                cal.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
+            }
+
+            var str : String
+
+            //intent에 알림을 울린다는 정보를 저장
+            val myIntent = Intent(this, Alarm_Receiver::class.java)
+            myIntent.putExtra("hr", cal.get(Calendar.HOUR_OF_DAY))
+            myIntent.putExtra("min", cal.get(Calendar.MINUTE))
+
+            if (isRepeat) {
+                myIntent.putExtra("dayOfWeek", cal.get(Calendar.DAY_OF_WEEK))
+                str = "Alarm set in " + day +
+                            "${cal.get(Calendar.HOUR_OF_DAY)} : ${cal.get(Calendar.MINUTE)}"
+            }
+            else {
+                myIntent.putExtra("date", cal.get(Calendar.DATE))
+                str = "Alarm set in Day ${cal.get(Calendar.DATE)} " +
+                        "${cal.get(Calendar.HOUR_OF_DAY)} : ${cal.get(Calendar.MINUTE)}"
+            }
 
 
             //알람 설정한 시간을 org.siwonlee.alarmapp12.prefs에 저장
@@ -65,14 +140,10 @@ class MainActivity : AppCompatActivity() {
 
 
             //알람 설정 시간을 확인하기 위해 시:분 형태로 토스트를 출력
-            val str = "Alarm set in ${cal.get(Calendar.HOUR_OF_DAY)} : ${cal.get(Calendar.MINUTE)}"
+            Toast.makeText(this@MainActivity, "현재 시각은 " + datestr, Toast.LENGTH_SHORT).show()
             Toast.makeText(this@MainActivity, str, Toast.LENGTH_SHORT).show()
 
 
-            //intent에 알림을 울린다는 정보를 저장
-            val myIntent = Intent(this, Alarm_Receiver::class.java)
-            myIntent.putExtra("hr", cal.get(Calendar.HOUR_OF_DAY))
-            myIntent.putExtra("min", cal.get(Calendar.MINUTE))
             //pendingIntent에 intent를 담는다
             val pendingIntent = PendingIntent.getBroadcast(
                 this,
@@ -82,12 +153,43 @@ class MainActivity : AppCompatActivity() {
             )
 
 
-            //알람 매니저를 생성하여 알람을 설정
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+            //알람 매니저로 알람 설정
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (isRepeat) {
+                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.timeInMillis,
+                        7 * 24 * 60 * 60 * 1000, pendingIntent)
+                }
+                else {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+                }
+            }
             else
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+
+            /*
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (isRepeat) {
+                    if (System.currentTimeMillis() > cal.getTimeInMillis()) {
+                        cal.timeInMillis = cal.getTimeInMillis() + (7 * 86400000)
+                        Toast.makeText(getApplicationContext(), "next week", Toast.LENGTH_SHORT).show()
+                    } else {
+                        cal.timeInMillis = cal.getTimeInMillis()
+                        Toast.makeText(getApplicationContext(), "this week", Toast.LENGTH_SHORT).show()
+                    }
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+                    //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.timeInMillis,
+                      //  7 * 24 * 60 * 60 * 1000, pendingIntent)
+                }
+                else {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+                    Toast.makeText(getApplicationContext(), "반복없이 울림", Toast.LENGTH_SHORT).show()
+
+            }
+            else
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)*/
         }
+
     }
 }

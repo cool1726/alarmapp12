@@ -32,7 +32,7 @@ class Alarm_Service : Service() {
             val CHANNEL_ID = "Alarm_Service"
             //NotificationChannel
             val channel = NotificationChannel(
-                CHANNEL_ID, "Alarm Title",
+                CHANNEL_ID, "Alarm_Title",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
 
@@ -48,21 +48,6 @@ class Alarm_Service : Service() {
 
             //포어그라운드에서 notification을 준다
             startForeground(1, notification)
-/*
-
-            val delayHandler = Handler()
-            delayHandler.postDelayed(Runnable {
-                // 알람 울릴 때 5초간 진동
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    v.vibrate(VibrationEffect.createOneShot(5000, VibrationEffect.EFFECT_TICK))
-                } else {
-                    v.vibrate(5000)
-                }
-
-                // 알람 울릴 때 소리 : 기본 알람소리
-                ringtone.play()
-            }, 1500)
- */
         }
 
         return super.onStartCommand(intent, flags, startId)

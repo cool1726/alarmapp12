@@ -12,6 +12,8 @@ import android.app.PendingIntent.CanceledException
 class Alarm_Receiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         // intent로부터 전달받은 Boolean
+        val date = intent.extras!!.getInt("date")
+        //val dayOfWeek = intent.extras!!.getInt("dayOfWeek")
         val hr = intent.extras!!.getInt("hr")
         val min = intent.extras!!.getInt("min")
 
@@ -24,6 +26,8 @@ class Alarm_Receiver : BroadcastReceiver() {
         else context.startService(serviceIntent)
 
         val alarmIntent = Intent(context, Alarm_Ringing::class.java)
+        alarmIntent.putExtra("date", date)
+        //alarmIntent.putExtra("dayOfWeek", dayOfWeek)
         alarmIntent.putExtra("hr", hr)
         alarmIntent.putExtra("min", min)
 

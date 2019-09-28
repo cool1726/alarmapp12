@@ -1,44 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
-        <!-- 시간을 변경할 때 사용할 TimePicker -->
-
-    <!-- TimePicker의 시간을 출력할 버튼 -->
     <TimePicker
         android:id="@+id/timePicker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/bt_set"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
+    <LinearLayout
+        android:id="@+id/weekly"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/setting"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/timePicker">
+
+        <ToggleButton
+            android:id="@+id/tg_sunday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textOff="일"
+            android:textOn="일" />
+
+        <ToggleButton
+            android:id="@+id/tg_monday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textOff="월"
+            android:textOn="월" />
+
+        <ToggleButton
+            android:id="@+id/tg_tuesday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textOff="화"
+            android:textOn="화" />
+
+        <ToggleButton
+            android:id="@+id/tg_wednesday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textOff="수"
+            android:textOn="수" />
+
+        <ToggleButton
+            android:id="@+id/tg_thursday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textOff="목"
+            android:textOn="목" />
+
+        <ToggleButton
+            android:id="@+id/tg_friday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textOff="금"
+            android:textOn="금" />
+
+        <ToggleButton
+            android:id="@+id/tg_saturday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textOff="토"
+            android:textOn="토" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/weekly">
+
+        <ToggleButton
+            android:id="@+id/tg_5min"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ToggleButton"
+            android:textOff="5분"
+            android:textOn="5분" />
+
+        <Button
             android:id="@+id/bt_set"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="30dp"
 
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/timePicker"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_weight="1"
             android:text="set" />
     </LinearLayout>
 
