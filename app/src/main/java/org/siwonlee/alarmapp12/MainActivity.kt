@@ -19,12 +19,17 @@ class MainActivity : AppCompatActivity() {
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
     val cal : Calendar = Calendar.getInstance()
 
+    //요일별 알람을 설정할 때 사용할 배열
     var days = arrayOf(false, false, false, false, false, false, false, false)
+    //텍스트뷰를 터치했을 때 바꿀 색
     var tColor = arrayOf(Color.GRAY, /*Color.parseColor("#008577")*/Color.RED)
 
     //알람 시간을 저장할 파일의 모델과 컨트롤러
     private val prefStorage = "org.siwonlee.alarmapp12.prefs"
     lateinit var pref : SharedPreferences
+
+    //알람 매니저를 생성하여 알람을 설정
+    private val alarmManager by lazy{getSystemService(Context.ALARM_SERVICE) as AlarmManager}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,51 +102,55 @@ class MainActivity : AppCompatActivity() {
             //알람 설정 시간을 확인하기 위해 시:분 형태로 토스트를 출력
             var isSet = false
 
-            //알람 매니저를 생성하여 알람을 설정
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
             //각 요일에 대해 i번 요일에 알람을 울리게 설정했다면
             for(i in 1..7) {
-                //정보를 this에서 receiver까지 보내는 intent를 생성
-                val myIntent = Intent(this, Alarm_Receiver::class.java)
-                //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
-                myIntent.putExtra("timeInMillis", cal.timeInMillis)
-                myIntent.putExtra("requestCode", i)
-                myIntent.putExtra("trig", days[i])
-
-                //intent에 해당하는 pendingIntent를 생성
-                val pendingIntent = PendingIntent.getBroadcast(this, i, myIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-                //만일 i요일에 알람을 울려야 한다면
-                if(days[i]){
-                    //알람이 설정되었음을 표시한다
-                    isSet = true
-                    //오늘로부터 가장 가까운 i요일까지 걸리는 일수
-                    val date_diff = (i - cal.get(Calendar.DAY_OF_WEEK) + 7) % 7
-
-                    //알람 삭제를 위해 requestCode를 pref에 저장한다
-                    pref.edit().putInt("requestCode", i).apply()
-
-                    //i요일이 되도록 cal을 조정한다
-                    cal.add(Calendar.DATE, date_diff)
-
-                    //알람 매니저에 알람을 설정
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
-                    else
-                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
-
-                    //날짜를 다시 오늘로 맞춘다
-                    cal.add(Calendar.DATE, -date_diff)
-                }
-
-                //만일 i요일에 알람을 울리지 않아야 한다면 알람을 취소한다
-                else alarmManager.cancel(pendingIntent)
+                setAlarm(i)
+                isSet = isSet || days[i]
             }
 
             if(isSet) Toast.makeText(getApplicationContext(), "Alarm has been set.", Toast.LENGTH_LONG).show()
         }
         //onCreate의 끝
+    }
+
+    fun setAlarm(i: Int) {
+        //정보를 this에서 receiver까지 보내는 intent를 생성
+        val intent = Intent(this, Alarm_Receiver::class.java)
+        //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
+        intent.putExtra("timeInMillis", cal.timeInMillis)
+        intent.putExtra("requestCode", i)
+
+        //requestCode가 i인 PendingIntent를 설정한다
+        val pendingIntent = PendingIntent.getBroadcast(this, i, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        //만일 i요일에 알람을 울려야 한다면
+        if(days[i]) {
+            //알람 삭제를 위해 requestCode를 pref에 저장한다
+            pref.edit().putInt("requestCode", i).apply()
+
+            //알람이 설정되었음을 표시한다
+            //오늘로부터 가장 가까운 i요일까지 걸리는 일수
+            var date_diff = (i - cal.get(Calendar.DAY_OF_WEEK) + 7) % 7
+
+            //i요일이 되도록 cal을 조정한다
+            cal.add(Calendar.DATE, date_diff)
+            if(cal.before(Calendar.getInstance())) {
+                cal.add(Calendar.DATE, 7)
+                date_diff += 7
+            }
+
+            //알람 매니저에 알람을 설정
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+            else
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+
+            //날짜를 다시 오늘로 맞춘다
+            cal.add(Calendar.DATE, -date_diff)
+        }
+
+        //만일 i요일에 알람을 울리지 않아야 한다면 알람을 취소한다
+        else alarmManager.cancel(pendingIntent)
     }
     //클래스의 끝
 }

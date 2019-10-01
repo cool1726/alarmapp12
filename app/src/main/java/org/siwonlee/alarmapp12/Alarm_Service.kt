@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import android.os.*
+import java.util.*
 
 class Alarm_Service : Service() {
     val context = this
@@ -71,8 +72,11 @@ class Alarm_Service : Service() {
         var timeInMillis = intent.extras!!.getLong("timeInMillis")
         val requestCode = intent.extras!!.getInt("requestCode")
 
-        //timeInMillis는 지금 알람이 울릴 시간 정보이므로 timeInMillis에 7일을 더한다
-        timeInMillis += 1000 * 60 * 60 * 24 * 7
+        //하루가 정확하게 24시간이 아니므로 Calendar를 통해 timeInMillis에 7일을 더해준다
+        val cal : Calendar = Calendar.getInstance()
+        cal.timeInMillis = timeInMillis
+        cal.add(Calendar.DATE, 7)
+        timeInMillis = cal.timeInMillis
 
         //정보를 this에서 receiver까지 보내는 intent를 생성
         val repeatIntent = Intent(this, Alarm_Receiver::class.java)
