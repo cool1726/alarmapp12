@@ -122,6 +122,12 @@ class MainActivity : AppCompatActivity() {
             if(isSet) Toast.makeText(getApplicationContext(), "Alarm activated", Toast.LENGTH_LONG).show()
             else Toast.makeText(getApplicationContext(), "Alarm deactivated", Toast.LENGTH_LONG).show()
         }
+
+        // alarm_list.xml로 이동하는 버튼
+        bt_home.setOnClickListener{
+            val intent = Intent(this, AlarmList_Activity::class.java)
+            startActivity(intent)
+        }
         //onCreate의 끝
     }
 

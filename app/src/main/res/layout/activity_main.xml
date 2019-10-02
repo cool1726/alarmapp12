@@ -12,9 +12,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@+id/weekly"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -33,9 +33,9 @@
             android:id="@+id/sun"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SUN"
             android:clickable="true"
             android:focusable="true"
+            android:text="SUN"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/mon"
             app:layout_constraintHorizontal_bias="0.5"
@@ -46,9 +46,9 @@
             android:id="@+id/mon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="MON"
             android:clickable="true"
             android:focusable="true"
+            android:text="MON"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/tue"
             app:layout_constraintHorizontal_bias="0.5"
@@ -59,9 +59,9 @@
             android:id="@+id/tue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TUE"
             android:clickable="true"
             android:focusable="true"
+            android:text="TUE"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/wed"
             app:layout_constraintHorizontal_bias="0.5"
@@ -72,9 +72,9 @@
             android:id="@+id/wed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="WED"
             android:clickable="true"
             android:focusable="true"
+            android:text="WED"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/thu"
             app:layout_constraintHorizontal_bias="0.5"
@@ -85,9 +85,9 @@
             android:id="@+id/thu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="THU"
             android:clickable="true"
             android:focusable="true"
+            android:text="THU"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/fri"
             app:layout_constraintHorizontal_bias="0.5"
@@ -98,9 +98,9 @@
             android:id="@+id/fri"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="FRI"
             android:clickable="true"
             android:focusable="true"
+            android:text="FRI"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/sat"
             app:layout_constraintHorizontal_bias="0.5"
@@ -111,9 +111,9 @@
             android:id="@+id/sat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SAT"
             android:clickable="true"
             android:focusable="true"
+            android:text="SAT"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
@@ -130,8 +130,21 @@
 
         android:text="set"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/weekly"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/weekly" />
+
+    <Button
+        android:id="@+id/bt_home"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="200dp"
+        android:layout_marginEnd="20dp"
+        android:text="HOME"
+        app:layout_constraintBottom_toTopOf="@+id/timePicker"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
