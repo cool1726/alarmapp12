@@ -8,7 +8,7 @@ import android.os.*
 import java.util.*
 
 class Alarm_Service : Service() {
-    val context = this
+    private val context = this
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -69,20 +69,23 @@ class Alarm_Service : Service() {
     }
 
     private fun alarmReassign(intent: Intent) {
-        var timeInMillis = intent.extras!!.getLong("timeInMillis")
+        var hr = intent.extras!!.getInt("HOUR_OF_DAY")
+        var min = intent.extras!!.getInt("MINUTE")
         val requestCode = intent.extras!!.getInt("requestCode")
 
-        //하루가 정확하게 24시간이 아니므로 Calendar를 통해 timeInMillis에 7일을 더해준다
+        //이 함수가 불리는 날짜는 알람이 울려야 하는 요일일 것이므로
+        //알람이 울리는 날에서 7일 뒤에 다시 알람을 울리도록 설정
         val cal : Calendar = Calendar.getInstance()
-        cal.timeInMillis = timeInMillis
+        cal.set(Calendar.HOUR_OF_DAY, hr)
+        cal.set(Calendar.MINUTE, min)
         cal.add(Calendar.DATE, 7)
-        timeInMillis = cal.timeInMillis
 
         //정보를 this에서 receiver까지 보내는 intent를 생성
         val repeatIntent = Intent(this, Alarm_Receiver::class.java)
 
         //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
-        repeatIntent.putExtra("timeInMillis", timeInMillis)
+        repeatIntent.putExtra("HOUR_OF_DAY", cal.get(Calendar.HOUR_OF_DAY))
+        repeatIntent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
         repeatIntent.putExtra("requestCode", requestCode)
 
         //intent에 해당하는 pendingIntent를 생성
@@ -91,8 +94,8 @@ class Alarm_Service : Service() {
         //알람매니저를 생성한 뒤 알람을 추가한다
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
         else
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
     }
 }

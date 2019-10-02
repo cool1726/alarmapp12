@@ -37,8 +37,14 @@ class MainActivity : AppCompatActivity() {
 
         //모델 prefStorage를 컨트롤러 pref와 연결함
         pref = this.getSharedPreferences(prefStorage, MODE_PRIVATE)
-        //알람 시간을 이미 저장했다면 해당 시간을, 아니라면 현재 시간을 cal에 저장한다
-        cal.timeInMillis = pref.getLong("Alarm_time", cal.timeInMillis)
+
+        var hr = pref.getInt("HOUR_OF_DAY", Calendar.getInstance().get(Calendar.HOUR_OF_DAY))
+        var min = pref.getInt("MINUTE", Calendar.getInstance().get(Calendar.MINUTE))
+
+        //pref에 저장된 timeInMillis는 현재보다 이전이므로 cal의 날짜를 현재로 다시 맞춘다
+        cal.set(Calendar.HOUR_OF_DAY, hr)
+        cal.set(Calendar.MINUTE, min)
+
         //알람은 항상 0초에 울린다
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
@@ -55,8 +61,8 @@ class MainActivity : AppCompatActivity() {
         //timePicker를 변경할 때마다
         timePicker.setOnTimeChangedListener({_, hour, minute ->
             //cal에 해당 시/분을 저장한다
-            cal.set(Calendar.HOUR_OF_DAY, hour)
-            cal.set(Calendar.MINUTE, minute)
+            hr = hour
+            min = minute
         })
 
         //각 요일 버튼을 클릭했을 때
@@ -96,8 +102,13 @@ class MainActivity : AppCompatActivity() {
             //날짜가 바뀌는 등 오류가 발생할 수 있으므로 현재 날짜를 다시 구한다
             cal.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
 
+            //알람을 설정한 시간:분을 cal에 저장한다
+            cal.set(Calendar.HOUR_OF_DAY, hr)
+            cal.set(Calendar.MINUTE, min)
+
             //알람 설정한 시간을 org.siwonlee.alarmapp12.prefs에 저장
-            pref.edit().putLong("Alarm_time", cal.timeInMillis).apply()
+            pref.edit().putInt("HOUR_OF_DAY", hr).apply()
+            pref.edit().putInt("MINUTE", min).apply()
 
             //알람 설정 시간을 확인하기 위해 시:분 형태로 토스트를 출력
             var isSet = false
@@ -108,7 +119,8 @@ class MainActivity : AppCompatActivity() {
                 isSet = isSet || days[i]
             }
 
-            if(isSet) Toast.makeText(getApplicationContext(), "Alarm has been set.", Toast.LENGTH_LONG).show()
+            if(isSet) Toast.makeText(getApplicationContext(), "Alarm activated", Toast.LENGTH_LONG).show()
+            else Toast.makeText(getApplicationContext(), "Alarm deactivated", Toast.LENGTH_LONG).show()
         }
         //onCreate의 끝
     }
@@ -116,8 +128,10 @@ class MainActivity : AppCompatActivity() {
     fun setAlarm(i: Int) {
         //정보를 this에서 receiver까지 보내는 intent를 생성
         val intent = Intent(this, Alarm_Receiver::class.java)
+
         //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
-        intent.putExtra("timeInMillis", cal.timeInMillis)
+        intent.putExtra("HOUR_OF_DAY", cal.get(Calendar.HOUR_OF_DAY))
+        intent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
         intent.putExtra("requestCode", i)
 
         //requestCode가 i인 PendingIntent를 설정한다
@@ -125,14 +139,10 @@ class MainActivity : AppCompatActivity() {
 
         //만일 i요일에 알람을 울려야 한다면
         if(days[i]) {
-            //알람 삭제를 위해 requestCode를 pref에 저장한다
-            pref.edit().putInt("requestCode", i).apply()
-
-            //알람이 설정되었음을 표시한다
             //오늘로부터 가장 가까운 i요일까지 걸리는 일수
             var date_diff = (i - cal.get(Calendar.DAY_OF_WEEK) + 7) % 7
 
-            //i요일이 되도록 cal을 조정한다
+            //알람이 울리는 요일이 i요일이 되도록 cal을 조정한다
             cal.add(Calendar.DATE, date_diff)
             if(cal.before(Calendar.getInstance())) {
                 cal.add(Calendar.DATE, 7)

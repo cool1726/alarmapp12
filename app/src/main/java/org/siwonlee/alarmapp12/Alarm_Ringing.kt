@@ -29,7 +29,7 @@ class Alarm_Ringing : AppCompatActivity() {
         //API 제한 없이 사용할 수 있는 코드들을 사용한다
         window.addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                    or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
 
         //API 27부터 사용 불가능한 LayoutParams를 다른 기능으로 대체한다
@@ -61,21 +61,6 @@ class Alarm_Ringing : AppCompatActivity() {
 
         // 알람 울릴 때 소리 : 기본 알람소리
         ringtone.play()
-
-        /* 알람 벨소리/진동이 울리지 않을 경우 시도해볼 것
-        val delayHandler = Handler()
-        delayHandler.postDelayed(Runnable {
-            // 알람 울릴 때 5초간 진동
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                v.vibrate(VibrationEffect.createOneShot(5000, VibrationEffect.EFFECT_TICK))
-            } else {
-                v.vibrate(5000)
-            }
-
-            // 알람 울릴 때 소리 : 기본 알람소리
-            ringtone.play()
-        }, 1000)
-        */
 
         bt_alarmoff.setOnClickListener {
             v.cancel()
