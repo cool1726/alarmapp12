@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     //알람 매니저를 생성하여 알람을 설정
     private val alarmManager by lazy{getSystemService(Context.ALARM_SERVICE) as AlarmManager}
 
+    // 알람리스트_액티비티에 정보를 넘길 intent
     val intents = Intent()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -137,7 +138,6 @@ class MainActivity : AppCompatActivity() {
 
 
             // AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
-
             setResult(Activity.RESULT_OK, intents)
             finish()
 
@@ -152,6 +152,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun setAlarm(i: Int) {
+        //정보를 this에서 receiver까지 보내는 intent를 생성
+        val intent = Intent(this, Alarm_Receiver::class.java)
+
         //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
         intent.putExtra("HOUR_OF_DAY", cal.get(Calendar.HOUR_OF_DAY))
         intent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
