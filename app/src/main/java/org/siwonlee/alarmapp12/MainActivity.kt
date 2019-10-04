@@ -1,5 +1,6 @@
 package org.siwonlee.alarmapp12
 
+import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
@@ -12,6 +13,12 @@ import android.content.Context
 import android.graphics.Color
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 fun Boolean.toInt() = if (this) 1 else 0
 
@@ -28,8 +35,12 @@ class MainActivity : AppCompatActivity() {
     private val prefStorage = "org.siwonlee.alarmapp12.prefs"
     lateinit var pref : SharedPreferences
 
+    val daysInString = arrayOf("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+
     //알람 매니저를 생성하여 알람을 설정
     private val alarmManager by lazy{getSystemService(Context.ALARM_SERVICE) as AlarmManager}
+
+    val intents = Intent()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,8 +130,17 @@ class MainActivity : AppCompatActivity() {
                 isSet = isSet || days[i]
             }
 
-            if(isSet) Toast.makeText(getApplicationContext(), "Alarm activated", Toast.LENGTH_LONG).show()
+            if(isSet){
+                Toast.makeText(getApplicationContext(), "Alarm activated", Toast.LENGTH_LONG).show()
+            }
             else Toast.makeText(getApplicationContext(), "Alarm deactivated", Toast.LENGTH_LONG).show()
+
+
+            // AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
+
+            setResult(Activity.RESULT_OK, intents)
+            finish()
+
         }
 
         // alarm_list.xml로 이동하는 버튼
@@ -132,9 +152,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun setAlarm(i: Int) {
-        //정보를 this에서 receiver까지 보내는 intent를 생성
-        val intent = Intent(this, Alarm_Receiver::class.java)
-
         //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
         intent.putExtra("HOUR_OF_DAY", cal.get(Calendar.HOUR_OF_DAY))
         intent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
@@ -155,6 +172,14 @@ class MainActivity : AppCompatActivity() {
                 date_diff += 7
             }
 
+            // Alarm_Data arraylist에 알람 셋팅 정보 저장
+            // alarmlist.add(Alarm_Data("${cal.get(Calendar.HOUR_OF_DAY)}:${cal.get(Calendar.MINUTE)}", daysInString[i-1]))
+            // val intent = Intent(this, AlarmList_Activity::class.java)
+
+            // intents를 이용해 알람 셋팅 정보를 AlarmList_Acitivity로 넘긴다
+            intents.putExtra("time", "${cal.get(Calendar.HOUR_OF_DAY)}:${cal.get(Calendar.MINUTE)}")
+            intents.putExtra("date", daysInString[i-1])
+
             //알람 매니저에 알람을 설정
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
@@ -163,6 +188,7 @@ class MainActivity : AppCompatActivity() {
 
             //날짜를 다시 오늘로 맞춘다
             cal.add(Calendar.DATE, -date_diff)
+
         }
 
         //만일 i요일에 알람을 울리지 않아야 한다면 알람을 취소한다

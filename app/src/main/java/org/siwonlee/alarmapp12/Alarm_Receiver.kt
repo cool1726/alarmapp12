@@ -35,6 +35,7 @@ class Alarm_Receiver : BroadcastReceiver() {
             context.startForegroundService(serviceIntent)
         else context.startService(serviceIntent)
 
+
         //acquire한 wakeLock을 release한다
         if (wakeLock != null) {
             wakeLock.release()
