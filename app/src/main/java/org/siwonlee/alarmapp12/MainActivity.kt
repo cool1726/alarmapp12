@@ -4,56 +4,57 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Build
 import java.util.*
 import android.content.Context
 import android.graphics.Color
-import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
 
 fun Boolean.toInt() = if (this) 1 else 0
 
 class MainActivity : AppCompatActivity() {
+    //액티비티 생성 시 알람 설정 시간을 받아온다
+    var hr = 6
+    var min = 0
+    var index = 0
+    var switch = booleanArrayOf(true, false, false, false, false, false, false, false)
+
+    var stringSwitch = ""
+    val days = arrayOf("일 ", "월 ", "화 ", "수 ", "목 ", "금 ", "토 ")
+
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
     val cal : Calendar = Calendar.getInstance()
 
-    //요일별 알람을 설정할 때 사용할 배열
-    var days = arrayOf(false, false, false, false, false, false, false, false)
     //텍스트뷰를 터치했을 때 바꿀 색
     var tColor = arrayOf(Color.GRAY, /*Color.parseColor("#008577")*/Color.RED)
-
-    //알람 시간을 저장할 파일의 모델과 컨트롤러
-    private val prefStorage = "org.siwonlee.alarmapp12.prefs"
-    lateinit var pref : SharedPreferences
-
-    val daysInString = arrayOf("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
-
-    //알람 매니저를 생성하여 알람을 설정
-    private val alarmManager by lazy{getSystemService(Context.ALARM_SERVICE) as AlarmManager}
-
-    // 알람리스트_액티비티에 정보를 넘길 intent
-    val intents = Intent()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //모델 prefStorage를 컨트롤러 pref와 연결함
-        pref = this.getSharedPreferences(prefStorage, MODE_PRIVATE)
+        //알람 설정 시간과 분은 그대로 받아온다
+        hr = intent.getIntExtra("hr", 6)
+        min = intent.getIntExtra("min", 0)
 
-        var hr = pref.getInt("HOUR_OF_DAY", Calendar.getInstance().get(Calendar.HOUR_OF_DAY))
-        var min = pref.getInt("MINUTE", Calendar.getInstance().get(Calendar.MINUTE))
+        //알람 설정 요일은 String타입으로 받아오기 때문에 각 글자를 decoding해준다
+        stringSwitch = intent.getStringExtra("switch")
+        for(i in 1..7) switch[i] = (stringSwitch[i] == 'T')
 
-        //pref에 저장된 timeInMillis는 현재보다 이전이므로 cal의 날짜를 현재로 다시 맞춘다
+        //설정된 요일에 따라 텍스트 색을 다르게 바꿔준다
+        sun.setTextColor(tColor[switch[1].toInt()])
+        mon.setTextColor(tColor[switch[2].toInt()])
+        tue.setTextColor(tColor[switch[3].toInt()])
+        wed.setTextColor(tColor[switch[4].toInt()])
+        thu.setTextColor(tColor[switch[5].toInt()])
+        fri.setTextColor(tColor[switch[6].toInt()])
+        sat.setTextColor(tColor[switch[7].toInt()])
+
+        //현재 알람이 몇 번째 알람인지 받아온다
+        index = intent.getIntExtra("index", 0)
+
+        //cal의 시간을 알람을 설정한 시간으로 바꾼다
         cal.set(Calendar.HOUR_OF_DAY, hr)
         cal.set(Calendar.MINUTE, min)
 
@@ -61,15 +62,16 @@ class MainActivity : AppCompatActivity() {
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
 
-        //timePicker의 초기값을 현재 시간으로 지정
+        //timePicker의 초기값을 hr/min으로 지정
         if (Build.VERSION.SDK_INT >= 23) {
-            timePicker.hour = cal.get(Calendar.HOUR_OF_DAY)
-            timePicker.minute = cal.get(Calendar.MINUTE)
+            timePicker.hour = hr
+            timePicker.minute = min
         } else {
-            timePicker.setCurrentHour(cal.get(Calendar.HOUR_OF_DAY))
-            timePicker.setCurrentMinute(cal.get(Calendar.MINUTE))
+            timePicker.setCurrentHour(hr)
+            timePicker.setCurrentMinute(min)
         }
 
+        //------------------------------------------------------------------setOnClickListener 시작
         //timePicker를 변경할 때마다
         timePicker.setOnTimeChangedListener({_, hour, minute ->
             //cal에 해당 시/분을 저장한다
@@ -81,36 +83,35 @@ class MainActivity : AppCompatActivity() {
         //알람이 해당 요일에 울리는 것을 표시하고
         //이를 텍스트의 색으로 나타낸다
         sun.setOnClickListener{
-            days[1] = !days[1]
-            sun.setTextColor(tColor[days[1].toInt()])
+            switch[1] = !switch[1]
+            sun.setTextColor(tColor[switch[1].toInt()])
         }
         mon.setOnClickListener{
-            days[2] = !days[2]
-            mon.setTextColor(tColor[days[2].toInt()])
+            switch[2] = !switch[2]
+            mon.setTextColor(tColor[switch[2].toInt()])
         }
         tue.setOnClickListener{
-            days[3] = !days[3]
-            tue.setTextColor(tColor[days[3].toInt()])
+            switch[3] = !switch[3]
+            tue.setTextColor(tColor[switch[3].toInt()])
         }
         wed.setOnClickListener{
-            days[4] = !days[4]
-            wed.setTextColor(tColor[days[4].toInt()])
+            switch[4] = !switch[4]
+            wed.setTextColor(tColor[switch[4].toInt()])
         }
         thu.setOnClickListener{
-            days[5] = !days[5]
-            thu.setTextColor(tColor[days[5].toInt()])
+            switch[5] = !switch[5]
+            thu.setTextColor(tColor[switch[5].toInt()])
         }
         fri.setOnClickListener{
-            days[6] = !days[6]
-            fri.setTextColor(tColor[days[6].toInt()])
+            switch[6] = !switch[6]
+            fri.setTextColor(tColor[switch[6].toInt()])
         }
         sat.setOnClickListener{
-            days[7] = !days[7]
-            sat.setTextColor(tColor[days[7].toInt()])
+            switch[7] = !switch[7]
+            sat.setTextColor(tColor[switch[7].toInt()])
         }
 
-        //버튼을 누를 시
-        bt_set.setOnClickListener{
+        bt_set.setOnClickListener {
             //날짜가 바뀌는 등 오류가 발생할 수 있으므로 현재 날짜를 다시 구한다
             cal.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
 
@@ -118,55 +119,62 @@ class MainActivity : AppCompatActivity() {
             cal.set(Calendar.HOUR_OF_DAY, hr)
             cal.set(Calendar.MINUTE, min)
 
-            //알람 설정한 시간을 org.siwonlee.alarmapp12.prefs에 저장
-            pref.edit().putInt("HOUR_OF_DAY", hr).apply()
-            pref.edit().putInt("MINUTE", min).apply()
-
-            //알람 설정 시간을 확인하기 위해 시:분 형태로 토스트를 출력
-            var isSet = false
-
-            //각 요일에 대해 i번 요일에 알람을 울리게 설정했다면
-            for(i in 1..7) {
-                setAlarm(i)
-                isSet = isSet || days[i]
-            }
-
-            if(isSet){
-                Toast.makeText(getApplicationContext(), "Alarm activated", Toast.LENGTH_LONG).show()
-            }
-            else Toast.makeText(getApplicationContext(), "Alarm deactivated", Toast.LENGTH_LONG).show()
+            //액티비티를 종료하기 전, 알람을 설정한 요일을 stringSwitch에 저장한다
+            stringSwitch = ""
+            //각 요일에 대해 알람을 설정하거나 제거한다
+            for(i in 1..7) setAlarm(i)
 
 
-            // AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
-            setResult(Activity.RESULT_OK, intents)
+            //AlarmList_Activity에 정보를 넘길 intent
+            val returnIntent = Intent()
+
+            //설정한 알람 정보를 AlarmList_Acitivity로 넘긴다
+            returnIntent.putExtra("hr", hr)
+            returnIntent.putExtra("min", min)
+            returnIntent.putExtra("switch", stringSwitch)
+
+            //기존에 알람을 설정하면 반환하던 값
+            //요일이 여러 개 설정된 걸 보여주도록 바꿔주세요
+            returnIntent.putExtra("time", "${hr.toTime()}:${min.toTime()}")
+            returnIntent.putExtra("date", stringSwitch)
+
+            //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
+            setResult(Activity.RESULT_OK, returnIntent)
             finish()
-
         }
-
-        // alarm_list.xml로 이동하는 버튼
-        bt_home.setOnClickListener{
-            val intent = Intent(this, AlarmList_Activity::class.java)
-            startActivity(intent)
-        }
-        //onCreate의 끝
     }
 
-    fun setAlarm(i: Int) {
+    //requestCode: 알람이 울리는 요일을 Calendar의 요일 형식으로 넘김
+    fun setAlarm(requestCode: Int) {
         //정보를 this에서 receiver까지 보내는 intent를 생성
         val intent = Intent(this, Alarm_Receiver::class.java)
 
         //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
-        intent.putExtra("HOUR_OF_DAY", cal.get(Calendar.HOUR_OF_DAY))
-        intent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
-        intent.putExtra("requestCode", i)
+        intent.putExtra("HOUR_OF_DAY", hr)
+        intent.putExtra("MINUTE", min)
+        //한 알람 객체당 알람을 최대 7개 설정하므로
+        //index를 이용해 각 알람 객체 당 알람이 겹치지 않게 설정한다
+        intent.putExtra("requestCode", index * 7 + requestCode)
 
-        //requestCode가 i인 PendingIntent를 설정한다
-        val pendingIntent = PendingIntent.getBroadcast(this, i, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        //정해진 요일에 맞는 PendingIntent를 설정한다
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            //한 알람 객체당 알람을 최대 7개 설정하므로
+            //index를 이용해 각 알람 객체 당 알람이 겹치지 않게 설정한다
+            index * 7 + requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
-        //만일 i요일에 알람을 울려야 한다면
-        if(days[i]) {
-            //오늘로부터 가장 가까운 i요일까지 걸리는 일수
-            var date_diff = (i - cal.get(Calendar.DAY_OF_WEEK) + 7) % 7
+        //알람을 설정할 AlarmManager 클래스
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        if(switch[requestCode]) {
+            //현재 요일에 알람이 울림을 stringSwitch에 표시
+            stringSwitch = "${stringSwitch}${days[requestCode - 1]}"
+
+            //오늘부터 requestCode요일까지 남은 일 수
+            var date_diff = (requestCode - cal.get(Calendar.DAY_OF_WEEK) + 7) % 7
 
             //알람이 울리는 요일이 i요일이 되도록 cal을 조정한다
             cal.add(Calendar.DATE, date_diff)
@@ -175,15 +183,7 @@ class MainActivity : AppCompatActivity() {
                 date_diff += 7
             }
 
-            // Alarm_Data arraylist에 알람 셋팅 정보 저장
-            // alarmlist.add(Alarm_Data("${cal.get(Calendar.HOUR_OF_DAY)}:${cal.get(Calendar.MINUTE)}", daysInString[i-1]))
-            // val intent = Intent(this, AlarmList_Activity::class.java)
-
-            // intents를 이용해 알람 셋팅 정보를 AlarmList_Acitivity로 넘긴다
-            intents.putExtra("time", "${cal.get(Calendar.HOUR_OF_DAY)}:${cal.get(Calendar.MINUTE)}")
-            intents.putExtra("date", daysInString[i-1])
-
-            //알람 매니저에 알람을 설정
+            //알람 매니저에 알람을 설정한다
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
             else
@@ -191,11 +191,9 @@ class MainActivity : AppCompatActivity() {
 
             //날짜를 다시 오늘로 맞춘다
             cal.add(Calendar.DATE, -date_diff)
-
         }
 
-        //만일 i요일에 알람을 울리지 않아야 한다면 알람을 취소한다
+        //만일 requestCode요일에 알람을 울리지 않아야 한다면 알람을 취소한다
         else alarmManager.cancel(pendingIntent)
     }
-    //클래스의 끝
 }

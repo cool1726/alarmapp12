@@ -17,7 +17,7 @@ class Alarm_Receiver : BroadcastReceiver() {
         )
 
         //wakeLock을 acquire한다
-        wakeLock.acquire()
+        wakeLock.acquire(60 * 1000)
 
         //intent로부터 전달받은 인자를 그대로 전달해준다
         val hr = intent.extras!!.getInt("HOUR_OF_DAY")
@@ -34,7 +34,6 @@ class Alarm_Receiver : BroadcastReceiver() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             context.startForegroundService(serviceIntent)
         else context.startService(serviceIntent)
-
 
         //acquire한 wakeLock을 release한다
         if (wakeLock != null) {

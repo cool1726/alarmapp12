@@ -27,7 +27,7 @@ class Alarm_Ringing : AppCompatActivity() {
 
         //잠금화면 위에서 액티비티를 띄울 수 있게 해준다
         //API 제한 없이 사용할 수 있는 코드들을 사용한다
-        window.addFlags(
+        this.window.addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
@@ -54,7 +54,7 @@ class Alarm_Ringing : AppCompatActivity() {
 
         // 알람 울릴 때 5초간 진동
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            v.vibrate(VibrationEffect.createOneShot(5000, VibrationEffect.EFFECT_TICK))
+            v.vibrate(VibrationEffect.createOneShot(5000, VibrationEffect.DEFAULT_AMPLITUDE))
         } else {
             v.vibrate(5000)
         }
