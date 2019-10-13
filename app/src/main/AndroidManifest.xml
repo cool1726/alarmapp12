@@ -14,14 +14,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".Alarm_Data" />
-        <activity android:name=".MainActivity" />
-        <activity android:name=".MainActivity_edit"/>
+        <activity android:name=".MainActivity"
+            android:screenOrientation="portrait"/>
         <activity android:name=".Alarm_Ringing">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <activity android:name=".AlarmList_Activity">
+        <activity android:name=".AlarmList_Activity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

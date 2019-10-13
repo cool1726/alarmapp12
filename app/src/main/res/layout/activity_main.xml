@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,10 +12,11 @@
         android:id="@+id/timePicker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/weekly"
+
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/weekly" />
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -24,10 +26,10 @@
         android:gravity="center"
         android:orientation="horizontal"
 
-        app:layout_constraintBottom_toTopOf="@+id/bt_set"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timePicker">
+        app:layout_constraintTop_toBottomOf="@+id/timePicker"
+        app:layout_constraintBottom_toTopOf="@+id/buttons">
 
         <TextView
             android:id="@+id/sun"
@@ -36,11 +38,12 @@
             android:clickable="true"
             android:focusable="true"
             android:text="SUN"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/mon"
+
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/mon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <TextView
             android:id="@+id/mon"
@@ -49,11 +52,12 @@
             android:clickable="true"
             android:focusable="true"
             android:text="MON"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/tue"
+
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/sun"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/tue"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <TextView
             android:id="@+id/tue"
@@ -62,11 +66,12 @@
             android:clickable="true"
             android:focusable="true"
             android:text="TUE"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/wed"
+
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/mon"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/wed"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <TextView
             android:id="@+id/wed"
@@ -75,11 +80,12 @@
             android:clickable="true"
             android:focusable="true"
             android:text="WED"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/thu"
+
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/tue"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/thu"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <TextView
             android:id="@+id/thu"
@@ -88,11 +94,12 @@
             android:clickable="true"
             android:focusable="true"
             android:text="THU"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/fri"
+
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/wed"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/fri"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <TextView
             android:id="@+id/fri"
@@ -101,11 +108,12 @@
             android:clickable="true"
             android:focusable="true"
             android:text="FRI"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/sat"
+
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/thu"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/sat"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <TextView
             android:id="@+id/sat"
@@ -114,44 +122,53 @@
             android:clickable="true"
             android:focusable="true"
             android:text="SAT"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/fri"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- TimePicker의 시간을 출력할 버튼 -->
-    <Button
-        android:id="@+id/bt_set"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
 
-        android:text="set"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/weekly" />
+        app:layout_constraintTop_toBottomOf="@+id/weekly">
 
-    <Button
-        android:id="@+id/bt_home"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="HOME"
-        app:layout_constraintBottom_toTopOf="@+id/timePicker"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/bt_delete"
-        app:layout_constraintTop_toTopOf="parent" />
+        <Button
+            android:id="@+id/bt_set"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="set"
 
-    <Button
-        android:id="@+id/bt_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="DELETE"
-        app:layout_constraintBottom_toTopOf="@+id/timePicker"
-        app:layout_constraintEnd_toStartOf="@+id/bt_home"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/bt_delete"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <Button
+            android:id="@+id/bt_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DELETE"
+
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/bt_set"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
