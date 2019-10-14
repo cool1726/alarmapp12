@@ -11,7 +11,6 @@ import android.os.Build
 import java.util.*
 import android.content.Context
 import android.graphics.Color
-import androidx.core.content.ContextCompat.getSystemService
 import kotlinx.android.synthetic.main.activity_main.*
 
 fun Boolean.toInt() = if (this) 1 else 0
@@ -23,7 +22,8 @@ class MainActivity : AppCompatActivity() {
     var index = 0
     var switch = booleanArrayOf(true, false, false, false, false, false, false, false)
 
-    var stringSwitch : String = ""
+    var stringDate : String = ""        // 한글로 날짜 저장
+    var stringSwitch : String = ""      // T/F로 날짜 저장
     val days = arrayOf("일 ", "월 ", "화 ", "수 ", "목 ", "금 ", "토 ")
 
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
@@ -43,13 +43,12 @@ class MainActivity : AppCompatActivity() {
         // 알람 수정 또는 삭제 시 사용됨
         val position = intent.getIntExtra("position", -1)
 
+
         //알람 설정 요일은 String타입으로 받아오기 때문에 각 글자를 decoding해준다
-        stringSwitch = intent.getStringExtra("switch") ?: "TFFFFFFF"
-        if (position != -1)
-            switch = intent.getBooleanArrayExtra("datearray")       // 알람 수정 또는 삭제
-        else {
-            for(i in 1..7) switch[i] = (stringSwitch[i] == 'T')           // 알람 생성
-        }
+        // 'TFFFFFFF' 형식의 (저장된) stringSwitch값
+        stringSwitch = intent.getStringExtra("stringSwitch") ?: "TFFFFFFF"
+
+        for(i in 1..7) switch[i] = (stringSwitch[i] == 'T')
 
         //설정된 요일에 따라 텍스트 색을 다르게 바꿔준다
         sun.setTextColor(tColor[switch[1].toInt()])
@@ -132,6 +131,7 @@ class MainActivity : AppCompatActivity() {
             val returnIntent = Intent(this, AlarmList_Activity::class.java)
             returnIntent.putExtra("position", position)
             returnIntent.putExtra("delete", true)
+            returnIntent.putExtra("index", index)
 
             //삭제할지 여부를 묻는 Dialog
             val builder = AlertDialog.Builder(this)
@@ -163,7 +163,7 @@ class MainActivity : AppCompatActivity() {
             cal.set(Calendar.MINUTE, min)
 
             //액티비티를 종료하기 전, 알람을 설정한 요일을 stringSwitch에 저장한다
-            stringSwitch = ""
+            stringDate = ""
 
             //AlarmList_Activity에 정보를 넘길 intent
             val returnIntent = Intent()
@@ -171,10 +171,9 @@ class MainActivity : AppCompatActivity() {
             //설정한 알람 정보를 AlarmList_Acitivity로 넘긴다
             returnIntent.putExtra("hr", hr)
             returnIntent.putExtra("min", min)
-            returnIntent.putExtra("index", index)
-
             returnIntent.putExtra("time", "${hr.toTime()}:${min.toTime()}")
-            returnIntent.putExtra("datearray", switch)
+            returnIntent.putExtra("stringSwitch", stringSwitch)
+            returnIntent.putExtra("index", index)
 
             // 알람 수정 or 초기 셋팅
             if (position != -1) {
@@ -188,8 +187,7 @@ class MainActivity : AppCompatActivity() {
                 for(i in 1..7) setAlarm(i)
             }
 
-            returnIntent.putExtra("switch", stringSwitch)
-            returnIntent.putExtra("date", stringSwitch)
+            returnIntent.putExtra("date", stringDate)
 
             //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
             setResult(Activity.RESULT_OK, returnIntent)
@@ -253,7 +251,7 @@ class MainActivity : AppCompatActivity() {
 
         if(switch[requestCode]) {
             //현재 요일에 알람이 울림을 stringSwitch에 표시
-            stringSwitch = "${stringSwitch}${days[requestCode - 1]}"
+            stringDate = "${stringDate}${days[requestCode - 1]}"
 
             //오늘부터 requestCode요일까지 남은 일 수
             var date_diff = (requestCode - cal.get(Calendar.DAY_OF_WEEK) + 7) % 7
