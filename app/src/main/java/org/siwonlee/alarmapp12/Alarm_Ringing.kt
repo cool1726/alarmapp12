@@ -86,4 +86,7 @@ class Alarm_Ringing : AppCompatActivity() {
             finish()
         }
     }
+
+    //뒤로가기로 알람 해제를 막기 위한 빈 함수
+    override fun onBackPressed() { }
 }
