@@ -9,10 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.alarm_ringing.*
 import java.util.*
 import android.view.WindowManager
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 
 
 
@@ -24,10 +20,6 @@ fun Int.toTime(): String {
 }
 
 class Alarm_Ringing : AppCompatActivity() {
-    val v by lazy { getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
-    val uri by lazy{ RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM) }
-    val ringtone by lazy{ RingtoneManager.getRingtone(applicationContext, uri) }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.alarm_ringing)
@@ -59,27 +51,41 @@ class Alarm_Ringing : AppCompatActivity() {
 
         time_now.text = "${hr.toTime()}:${min.toTime()}"
 
-        val pattern = longArrayOf(1000, 500, 1000, 500)
 
-        // 알람 울릴 때 5초간 진동
+        //알람 진동을 울리게 할 Vibrator
+        val v = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
+        // 알람 울릴 때 1초 진동, 1초 휴식을 반복
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            v.vibrate(VibrationEffect.createWaveform(pattern, -1))
+            v.vibrate(VibrationEffect.createWaveform(longArrayOf(1000, 1000, 1000, 1000), 0))
         } else {
-            v.vibrate(pattern, -1)
+            v.vibrate(longArrayOf(1000, 1000, 1000, 1000), 0)
         }
+
+        //알람음을 울릴 RingtoneManager
+        val ringtone = RingtoneManager.getRingtone(
+            applicationContext,
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        )
 
         // 알람 울릴 때 소리 : 기본 알람소리
         ringtone.play()
 
+
+        //알람 해제 버튼을 눌렀을 때
         bt_alarmoff.setOnClickListener {
+            //알람 해제 방식을 읽어들인 뒤
             val solver = intent.extras!!.getInt("solver")
             when(solver) {
+                //1번 방식을 택한다면 알람 해제 시 산수 계산을 해야 한다
                 1 -> {
+                    //산수 계산 액티비티를 띄운다
                     val solveIntent = Intent(this, AlarmSolving1::class.java)
                     startActivity(solveIntent)
                 }
             }
 
+            //알람 소리와 진동을 해제한다
             v.cancel()
             ringtone.stop()
 

@@ -1,6 +1,11 @@
 package org.siwonlee.alarmapp12
 
+import android.content.Context
+import android.media.RingtoneManager
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.alarm_solving_1.*
 import java.util.*
@@ -24,6 +29,20 @@ class AlarmSolving1 : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.alarm_solving_1)
 
+        //액티비티를 넘어가면 알람 진동과 알람음이 제거되므로
+        // //모든 알람 해제 액티비티에 알람음과 알람 진동을 추가한다
+        val v = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            v.vibrate(VibrationEffect.createWaveform(longArrayOf(1000, 1000, 1000, 1000), 0))
+        } else {
+            v.vibrate(longArrayOf(1000, 1000, 1000, 1000), 0)
+        }
+        val ringtone = RingtoneManager.getRingtone(
+            applicationContext,
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        )
+        ringtone.play()
+
         //amount개의 랜덤 정수를 생성해 내림차순으로 정렬한다
         var nums = Array(amount, {getRandomNumber(2)}).sortedDescending()
         //가장 큰 수부터 차례로 사용하여 수식을 만든다
@@ -40,9 +59,12 @@ class AlarmSolving1 : AppCompatActivity() {
             answer += nums[i] * (1 - 2 * (i % 2))
         }
 
+        //알람 해제 버튼을 눌렀을 때 EditText에 정답을 입력했다면 액티비티를 종료한다
         bt_alarmoff.setOnClickListener {
-            val ans = Integer.parseInt(nswr.text.toString())
-            if(ans == answer) finish()
+            if(Integer.parseInt(nswr.text.toString()) == answer) {
+                ringtone.stop()
+                finish()
+            }
         }
     }
 
