@@ -16,7 +16,8 @@
         <activity android:name=".Alarm_Data" />
         <activity android:name=".MainActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".Alarm_Ringing">
+        <activity android:name=".Alarm_Ringing"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
@@ -29,6 +30,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".AlarmSolving1"
+            android:screenOrientation="portrait"/>
 
         <receiver android:name=".Alarm_Receiver"/>
         <service

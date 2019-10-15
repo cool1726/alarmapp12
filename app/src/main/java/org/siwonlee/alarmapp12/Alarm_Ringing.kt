@@ -2,12 +2,19 @@ package org.siwonlee.alarmapp12
 
 import android.app.KeyguardManager
 import android.content.Context
+import android.content.Intent
 import android.media.RingtoneManager
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.alarm_ringing.*
 import java.util.*
 import android.view.WindowManager
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 fun Int.toTime(): String {
     var ret = ""
@@ -52,17 +59,27 @@ class Alarm_Ringing : AppCompatActivity() {
 
         time_now.text = "${hr.toTime()}:${min.toTime()}"
 
+        val pattern = longArrayOf(1000, 500, 1000, 500)
+
         // 알람 울릴 때 5초간 진동
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            v.vibrate(VibrationEffect.createOneShot(5000, VibrationEffect.DEFAULT_AMPLITUDE))
+            v.vibrate(VibrationEffect.createWaveform(pattern, -1))
         } else {
-            v.vibrate(5000)
+            v.vibrate(pattern, -1)
         }
 
         // 알람 울릴 때 소리 : 기본 알람소리
         ringtone.play()
 
         bt_alarmoff.setOnClickListener {
+            val solver = intent.extras!!.getInt("solver")
+            when(solver) {
+                1 -> {
+                    val solveIntent = Intent(this, AlarmSolving1::class.java)
+                    startActivity(solveIntent)
+                }
+            }
+
             v.cancel()
             ringtone.stop()
 

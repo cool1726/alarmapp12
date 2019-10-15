@@ -49,8 +49,12 @@ class Alarm_Service : Service() {
     }
 
     private fun alarmService(intent: Intent) {
+        //알람 해제 방식을 intent에서 받아와 alarmIntent에 전달한다
+        val solver = intent.extras!!.getInt("solver")
+
         //pendingIntent 설정을 위한 intent
         val alarmIntent = Intent(context, Alarm_Ringing::class.java)
+        alarmIntent.putExtra("solver", solver)
 
         //알람 해제 액티비티를 띄울 PendingIntent
         val p = PendingIntent.getActivity(
@@ -72,6 +76,7 @@ class Alarm_Service : Service() {
         var hr = intent.extras!!.getInt("HOUR_OF_DAY")
         var min = intent.extras!!.getInt("MINUTE")
         val requestCode = intent.extras!!.getInt("requestCode")
+        val solver = intent.extras!!.getInt("solver")
 
         //이 함수가 불리는 날짜는 알람이 울려야 하는 요일일 것이므로
         //알람이 울리는 날에서 7일 뒤에 다시 알람을 울리도록 설정
@@ -87,6 +92,7 @@ class Alarm_Service : Service() {
         repeatIntent.putExtra("HOUR_OF_DAY", cal.get(Calendar.HOUR_OF_DAY))
         repeatIntent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
         repeatIntent.putExtra("requestCode", requestCode)
+        repeatIntent.putExtra("solver", solver)
 
         //intent에 해당하는 pendingIntent를 생성
         val pendingIntent = PendingIntent.getBroadcast(this, requestCode, repeatIntent, PendingIntent.FLAG_UPDATE_CURRENT)

@@ -12,6 +12,11 @@ import java.util.*
 import android.content.Context
 import android.graphics.Color
 import kotlinx.android.synthetic.main.activity_main.*
+import android.widget.ArrayAdapter
+import android.widget.AdapterView
+import android.widget.Toast
+import android.view.View
+
 
 fun Boolean.toInt() = if (this) 1 else 0
 
@@ -21,6 +26,10 @@ class MainActivity : AppCompatActivity() {
     var min = 0
     var index = 0
     var switch = booleanArrayOf(true, false, false, false, false, false, false, false)
+
+
+    var solver = 0
+
 
     var stringDate : String = ""        // 한글로 날짜 저장
     var stringSwitch : String = ""      // T/F로 날짜 저장
@@ -58,6 +67,22 @@ class MainActivity : AppCompatActivity() {
         thu.setTextColor(tColor[switch[5].toInt()])
         fri.setTextColor(tColor[switch[6].toInt()])
         sat.setTextColor(tColor[switch[7].toInt()])
+
+        //Spinner를 이용해 알람 해제 방식을 결정한다
+        //Spinner에 들어갈 알람 해제 방식을 ArrayList에 저장
+        var solvingMethod = ArrayList<String>()
+        solvingMethod.add("버튼 누르기")
+        solvingMethod.add("산수문제 풀기")
+
+        //solvingMethod를 스피너에 연결하기 위한 어댑터
+        val solvingMethodAdapter = ArrayAdapter(
+            applicationContext,
+            android.R.layout.simple_spinner_dropdown_item,
+            solvingMethod
+        )
+
+        //solving 스피너의 어댑터를 solvingMethodAdapter로 지정한다
+        solving.adapter = solvingMethodAdapter
 
         //현재 알람이 몇 번째 알람인지 받아온다
         index = intent.getIntExtra("index", 0)
@@ -120,6 +145,14 @@ class MainActivity : AppCompatActivity() {
             sat.setTextColor(tColor[switch[7].toInt()])
         }
 
+        solving.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
+                solver = i
+            }
+
+            override fun onNothingSelected(adapterView: AdapterView<*>) {}
+        })
+
 
 
         // 알람 삭제 버튼 (bt_set.setOnClickListener와 유사)
@@ -174,6 +207,7 @@ class MainActivity : AppCompatActivity() {
             returnIntent.putExtra("time", "${hr.toTime()}:${min.toTime()}")
             returnIntent.putExtra("stringSwitch", stringSwitch)
             returnIntent.putExtra("index", index)
+            returnIntent.putExtra("solver", solver)
 
             // 알람 수정 or 초기 셋팅
             if (position != -1) {
@@ -197,33 +231,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-    // requestCode: setAlarm과 동일하게 받아온다
-    // 동일한 requestCode와 intent로 pendingIntent를 구분해 alarmManager에서 삭제한다
-    fun delAlarm(requestCode: Int) {
-        val intent = Intent(this, Alarm_Receiver::class.java)
-
-        intent.putExtra("HOUR_OF_DAY", hr)
-        intent.putExtra("MINUTE", min)
-        intent.putExtra("requestCode", index * 7 + requestCode)
-
-        //setAlarm 시 설정한 pendingIntent와 동일하게 설정
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            //한 알람 객체당 알람을 최대 7개 설정하므로
-            //index를 이용해 각 알람 객체 당 알람이 겹치지 않게 설정한다
-            index * 7 + requestCode,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        // 알람을 삭제한다
-        alarmManager.cancel(pendingIntent)
-    }
-
-
     //requestCode: 알람이 울리는 요일을 Calendar의 요일 형식으로 넘김
     fun setAlarm(requestCode: Int) {
         //정보를 this에서 receiver까지 보내는 intent를 생성
@@ -235,6 +242,8 @@ class MainActivity : AppCompatActivity() {
         //한 알람 객체당 알람을 최대 7개 설정하므로
         //index를 이용해 각 알람 객체 당 알람이 겹치지 않게 설정한다
         intent.putExtra("requestCode", index * 7 + requestCode)
+        //알람 해제 방식을 int타입으로 intent에 담는다
+        intent.putExtra("solver", solver)
 
         //정해진 요일에 맞는 PendingIntent를 설정한다
         val pendingIntent = PendingIntent.getBroadcast(
@@ -275,5 +284,26 @@ class MainActivity : AppCompatActivity() {
 
         //만일 requestCode요일에 알람을 울리지 않아야 한다면 알람을 취소한다
         else alarmManager.cancel(pendingIntent)
+    }
+
+
+    // requestCode: setAlarm과 동일하게 받아온다
+    // 동일한 requestCode와 intent로 pendingIntent를 구분해 alarmManager에서 삭제한다
+    fun delAlarm(requestCode: Int) {
+        val intent = Intent(this, Alarm_Receiver::class.java)
+        //setAlarm 시 설정한 pendingIntent와 동일하게 설정
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            //한 알람 객체당 알람을 최대 7개 설정하므로
+            //index를 이용해 각 알람 객체 당 알람이 겹치지 않게 설정한다
+            index * 7 + requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        // 알람을 삭제한다
+        alarmManager.cancel(pendingIntent)
     }
 }
