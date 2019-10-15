@@ -62,6 +62,7 @@ class AlarmSolving1 : AppCompatActivity() {
         //알람 해제 버튼을 눌렀을 때 EditText에 정답을 입력했다면 액티비티를 종료한다
         bt_alarmoff.setOnClickListener {
             if(Integer.parseInt(nswr.text.toString()) == answer) {
+                v.cancel()
                 ringtone.stop()
                 finish()
             }
