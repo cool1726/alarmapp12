@@ -1,9 +1,6 @@
 package org.siwonlee.alarmapp12
 
-import android.app.Activity
-import android.app.AlarmManager
-import android.app.AlertDialog
-import android.app.PendingIntent
+import android.app.*
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -16,6 +13,13 @@ import android.widget.ArrayAdapter
 import android.widget.AdapterView
 import android.widget.Toast
 import android.view.View
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import java.text.SimpleDateFormat
 
 
 fun Boolean.toInt() = if (this) 1 else 0
@@ -30,6 +34,10 @@ class MainActivity : AppCompatActivity() {
 
     var solver = 0
 
+    var diffHr = 0
+    var diffMin = 0
+    var notifyTime  : Long = 0
+
 
     var stringDate : String = ""        // 한글로 날짜 저장
     var stringSwitch : String = ""      // T/F로 날짜 저장
@@ -37,6 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
     val cal : Calendar = Calendar.getInstance()
+    val cal2 : Calendar = Calendar.getInstance()
 
     //텍스트뷰를 터치했을 때 바꿀 색
     var tColor = arrayOf(Color.GRAY, /*Color.parseColor("#008577")*/Color.RED)
@@ -94,6 +103,9 @@ class MainActivity : AppCompatActivity() {
         //알람은 항상 0초에 울린다
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
+
+        cal2.set(Calendar.SECOND, 0)
+        cal2.set(Calendar.MILLISECOND, 0)
 
         //timePicker의 초기값을 hr/min으로 지정
         if (Build.VERSION.SDK_INT >= 23) {
@@ -209,6 +221,24 @@ class MainActivity : AppCompatActivity() {
             returnIntent.putExtra("index", index)
             returnIntent.putExtra("solver", solver)
 
+            if (inputhr.text.toString().length > 0) {
+                diffHr = Integer.parseInt(inputhr.text.toString())
+            }
+            if (inputmin.text.toString().length > 0) {
+                diffMin = Integer.parseInt(inputmin.text.toString())
+            }
+
+            var notifyHour = diffHr*1000*60*60
+            var notifyMin = diffMin*1000*60
+            notifyTime = cal.timeInMillis - notifyHour - notifyMin
+
+            val format2 = SimpleDateFormat("HH시mm분")
+            var format_time2 : String = format2.format(notifyTime)
+
+            cal2.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
+            cal2.set(Calendar.HOUR_OF_DAY, notifyHour)
+            cal2.set(Calendar.MINUTE, notifyMin)
+
             // 알람 수정 or 초기 셋팅
             if (position != -1) {
                 returnIntent.putExtra("position", position)
@@ -222,6 +252,9 @@ class MainActivity : AppCompatActivity() {
             }
 
             returnIntent.putExtra("date", stringDate)
+
+            //showNotify(notifyTime)
+            Toast.makeText(this, "Notify at ${diffHr}:${diffMin}", Toast.LENGTH_LONG).show()
 
             //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
             setResult(Activity.RESULT_OK, returnIntent)
@@ -244,6 +277,7 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("requestCode", index * 7 + requestCode)
         //알람 해제 방식을 int타입으로 intent에 담는다
         intent.putExtra("solver", solver)
+        intent.putExtra("notify", notifyTime)
 
         //정해진 요일에 맞는 PendingIntent를 설정한다
         val pendingIntent = PendingIntent.getBroadcast(
@@ -261,6 +295,8 @@ class MainActivity : AppCompatActivity() {
         if(switch[requestCode]) {
             //현재 요일에 알람이 울림을 stringSwitch에 표시
             stringDate = "${stringDate}${days[requestCode - 1]}"
+
+            // showNotify(notifyTime, index * 7 + requestCode)
 
             //오늘부터 requestCode요일까지 남은 일 수
             var date_diff = (requestCode - cal.get(Calendar.DAY_OF_WEEK) + 7) % 7
@@ -281,9 +317,9 @@ class MainActivity : AppCompatActivity() {
             //날짜를 다시 오늘로 맞춘다
             cal.add(Calendar.DATE, -date_diff)
         }
-
         //만일 requestCode요일에 알람을 울리지 않아야 한다면 알람을 취소한다
         else alarmManager.cancel(pendingIntent)
+
     }
 
 
@@ -306,4 +342,49 @@ class MainActivity : AppCompatActivity() {
         // 알람을 삭제한다
         alarmManager.cancel(pendingIntent)
     }
+
+
+    // n시간 m분 전에 알림을 띄우는 것
+    /*fun showNotify(time : Long) {
+
+        val CHANNEL_ID = "Alarm"
+        val CHANNEL_NAME = "Remaining Time"
+
+        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager // NotificationManager로 캐스팅
+        var builder: NotificationCompat.Builder? = null
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "this is alarm notification"
+            }
+            // Register the channel with the system
+            manager.createNotificationChannel(channel)
+            builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        }else {
+            builder = NotificationCompat.Builder(this)
+        }
+
+
+        builder.setContentTitle("Alarm Notification") // 제목
+        builder.setContentText("${diffHr}시간 ${diffMin}분 후 알람이 울립니다") // 내용
+        builder.setSmallIcon(android.R.drawable.ic_menu_view)
+        builder.setAutoCancel(true)
+        builder.setWhen(notifyTime)
+        builder.setShowWhen(true)
+        builder.setDefaults(Notification.DEFAULT_VIBRATE)
+
+        //builder.setAutoCancel(true)
+        val intent = Intent(this, MainActivity::class.java)
+        val pendingIntent =
+            PendingIntent.getActivity(this, 100, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        builder.setContentIntent(pendingIntent)  // pendingIntent를 실행
+
+
+        //val notify = builder.build() // 만들어진 알림 메시지를 매니저에게 요청
+        //manager.notify(index, notify)         // 매니저는 알림 메시지를 폰에 알려줌
+        with(NotificationManagerCompat.from(this)) {
+            // notificationId is a unique int for each notification that you must define
+            notify(1, builder.build())
+        }
+    }*/
 }

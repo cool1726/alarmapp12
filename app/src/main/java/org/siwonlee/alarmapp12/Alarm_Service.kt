@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import android.os.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import java.util.*
 
 class Alarm_Service : Service() {
@@ -39,6 +41,7 @@ class Alarm_Service : Service() {
         }
 
         //알람이 한 번 울릴 때마다 Service에서 알람을 반복시켜야 한다
+        //showNotify(intent)
         alarmService(intent)
         alarmReassign(intent)
 
@@ -47,6 +50,48 @@ class Alarm_Service : Service() {
 
         return super.onStartCommand(intent, flags, startId)
     }
+
+    /*private fun showNotify(intent: Intent) {
+        val notify = intent.extras!!.getLong("notify")
+
+        val CHANNEL_ID = "Alarm"
+        val CHANNEL_NAME = "Remaining Time"
+
+        val manager = getSystemService(AppCompatActivity.NOTIFICATION_SERVICE) as NotificationManager // NotificationManager로 캐스팅
+        var builder: NotificationCompat.Builder? = null
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "this is alarm notification"
+            }
+            // Register the channel with the system
+            manager.createNotificationChannel(channel)
+            builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        }else {
+            builder = NotificationCompat.Builder(this)
+        }
+
+        builder.setContentTitle("Alarm Notification") // 제목
+        builder.setContentText("${notify/1000*60*60}시간 ${notify/1000*60}분 후 알람이 울립니다") // 내용
+        builder.setSmallIcon(android.R.drawable.ic_menu_view)
+        builder.setAutoCancel(true)
+        builder.setWhen(notify)
+        builder.setDefaults(Notification.DEFAULT_VIBRATE)
+
+        //builder.setAutoCancel(true)
+        val intent = Intent(this, MainActivity::class.java)
+        val pendingIntent =
+            PendingIntent.getActivity(this, 100, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        builder.setContentIntent(pendingIntent)  // pendingIntent를 실행
+
+
+        //val notify = builder.build() // 만들어진 알림 메시지를 매니저에게 요청
+        //manager.notify(index, notify)         // 매니저는 알림 메시지를 폰에 알려줌
+        with(NotificationManagerCompat.from(this)) {
+            // notificationId is a unique int for each notification that you must define
+            notify(1, builder.build())
+        }
+    }*/
 
     private fun alarmService(intent: Intent) {
         //알람 해제 방식을 intent에서 받아와 alarmIntent에 전달한다
