@@ -14,6 +14,8 @@
         android:layout_height="wrap_content"
 
         app:layout_constraintBottom_toTopOf="@+id/weekly"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 
@@ -25,6 +27,8 @@
         android:orientation="horizontal"
 
         app:layout_constraintBottom_toTopOf="@+id/solving"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/timePicker">
 
         <TextView
@@ -133,8 +137,9 @@
         android:layout_height="wrap_content"
 
         app:layout_constraintBottom_toTopOf="@+id/buttons"
-        app:layout_constraintTop_toBottomOf="@+id/weekly"
-        tools:layout_editor_absoluteX="182dp"></Spinner>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/weekly"></Spinner>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/buttons"
@@ -144,6 +149,8 @@
         android:orientation="horizontal"
 
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/solving">
 
         <Button
