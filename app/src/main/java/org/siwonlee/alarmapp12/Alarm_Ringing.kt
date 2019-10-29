@@ -74,6 +74,10 @@ class Alarm_Ringing : AppCompatActivity() {
 
         //알람 해제 버튼을 눌렀을 때
         bt_alarmoff.setOnClickListener {
+            //우선 알람 소리와 진동을 해제한다
+            v.cancel()
+            ringtone.stop()
+
             //알람 해제 방식을 읽어들인 뒤
             val solver = intent.extras!!.getInt("solver")
             when(solver) {
@@ -85,10 +89,7 @@ class Alarm_Ringing : AppCompatActivity() {
                 }
             }
 
-            //알람 소리와 진동을 해제한다
-            v.cancel()
-            ringtone.stop()
-
+            //알람 해제에 성공했으므로 알람 액티비티를 제거한다
             finish()
         }
     }
