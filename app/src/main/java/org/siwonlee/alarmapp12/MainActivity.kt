@@ -20,7 +20,7 @@ import android.view.View
 fun Boolean.toInt() = if (this) 1 else 0
 
 class MainActivity : AppCompatActivity() {
-        //액티비티 생성 시 알람 설정 시간을 받아온다
+    //액티비티 생성 시 알람 설정 시간을 받아온다
     var hr = 6
     var min = 0
     var ID = 0
@@ -49,8 +49,11 @@ class MainActivity : AppCompatActivity() {
         // 알람 수정 또는 삭제 시 사용됨
         val position = intent.getIntExtra("position", -1)
 
-        //에러 방지를 위해 ID값을 계속 받아옴
+        //각 알람을 구분할 ID를 받아온다
         ID = intent.getIntExtra("ID", 0)
+
+        //알람 해제 방식을 받아와 설정한다
+        solver = intent.getIntExtra("solver", 0)
 
         //알람 설정 요일은 String타입으로 받아오기 때문에 각 글자를 decoding해준다
         // 'TFFFFFFF' 형식의 (저장된) stringSwitch값
@@ -66,22 +69,6 @@ class MainActivity : AppCompatActivity() {
         thu.setTextColor(tColor[switch[5].toInt()])
         fri.setTextColor(tColor[switch[6].toInt()])
         sat.setTextColor(tColor[switch[7].toInt()])
-
-        //Spinner를 이용해 알람 해제 방식을 결정한다
-        //Spinner에 들어갈 알람 해제 방식을 ArrayList에 저장
-        var solvingMethod = ArrayList<String>()
-        solvingMethod.add("버튼 누르기")
-        solvingMethod.add("산수문제 풀기")
-
-        //solvingMethod를 스피너에 연결하기 위한 어댑터
-        val solvingMethodAdapter = ArrayAdapter(
-            applicationContext,
-            android.R.layout.simple_spinner_dropdown_item,
-            solvingMethod
-        )
-
-        //solving 스피너의 어댑터를 solvingMethodAdapter로 지정한다
-        solving.adapter = solvingMethodAdapter
 
         //cal의 시간을 알람을 설정한 시간으로 바꾼다
         cal.set(Calendar.HOUR_OF_DAY, hr)
@@ -106,6 +93,22 @@ class MainActivity : AppCompatActivity() {
             hr = hour
             min = minute
         })
+
+        //Spinner를 이용해 알람 해제 방식을 결정한다
+        val solvingMethod = resources.getStringArray(R.array.spinnerItem)
+
+        //solvingMethod를 스피너에 연결하기 위한 어댑터
+        val solvingMethodAdapter = ArrayAdapter(
+            applicationContext,
+            android.R.layout.simple_spinner_dropdown_item,
+            solvingMethod
+        )
+
+        //solving 스피너의 어댑터를 solvingMethodAdapter로 지정한다
+        solving.adapter = solvingMethodAdapter
+
+        //스피너의 값을 solver로 지정한다
+        solving.setSelection(solver)
 
         //------------------------------------------------------------------setOnClickListener 시작
 
@@ -181,8 +184,6 @@ class MainActivity : AppCompatActivity() {
             builder.create().show()
         }
 
-
-
         // 알람 저장 버튼
         bt_set.setOnClickListener {
 
@@ -254,9 +255,7 @@ class MainActivity : AppCompatActivity() {
         //알람을 설정할 AlarmManager 클래스
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        //기존에 알람이
-        alarmManager.cancel(pendingIntent)
-
+        //day요일에 알람을 울려야 한다면
         if(set) {
             //현재 요일에 알람이 울림을 stringSwitch에 표시
             ringDate = "${ringDate}${days[day - 1]}"

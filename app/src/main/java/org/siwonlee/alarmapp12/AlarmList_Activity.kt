@@ -43,6 +43,8 @@ class AlarmList_Activity : AppCompatActivity() {
             cintent.putExtra("stringSwitch", alarmlist[position].ringSwitch)
 
             cintent.putExtra("ID", alarmlist[position].ID)
+            cintent.putExtra("solver", alarmlist[position].solver)
+
             cintent.putExtra("position", position)
 
             //알람을 수정한다
@@ -71,9 +73,10 @@ class AlarmList_Activity : AppCompatActivity() {
                 val hr = pref.getInt("hr${i}", 6)
                 val min = pref.getInt("min${i}", 0)
                 val stringSwitch = pref.getString("stringSwitch${i}", "TFFFFFFF")
+                val solver = pref.getInt("solver", 0)
 
                 //ID 순서대로 alarmlist에 알람 추가
-                alarmlist.add(Alarm_Data(hr, min, time, date, stringSwitch, i))
+                alarmlist.add(Alarm_Data(hr, min, time, date, stringSwitch, i, solver))
             }
         }
 
@@ -95,6 +98,7 @@ class AlarmList_Activity : AppCompatActivity() {
             intent.putExtra("min", 0)
             intent.putExtra("ID", size)
             intent.putExtra("stringSwitch",  "TFFFFFFF")
+            intent.putExtra("solver", 0)
 
             //알람의 수를 하나 늘렸으므로 이를 pref에 기록한다
             pref.edit().putInt("size", size).apply()
@@ -123,9 +127,10 @@ class AlarmList_Activity : AppCompatActivity() {
                     val date = data!!.getStringExtra("date")
                     val stringSwitch = data!!.getStringExtra("stringSwitch")
                     val ID = data!!.getIntExtra("ID", 0)
+                    val solver = data!!.getIntExtra("solver", 0)
 
                     // 이 액티비티 내의 alarmlist(Alarm_Data형식의 arraylist)에 받아온 시간, 요일 정보 추가
-                    alarmlist.add(Alarm_Data(hr, min, time, date, stringSwitch, ID))
+                    alarmlist.add(Alarm_Data(hr, min, time, date, stringSwitch, ID, solver))
 
                     // 알람이 설정될 때마다 sharedPreferences로 데이터 저장
                     editor.putString("time${ID}", time)
@@ -133,6 +138,7 @@ class AlarmList_Activity : AppCompatActivity() {
                     editor.putInt("hr${ID}", hr)
                     editor.putInt("min${ID}", min)
                     editor.putString("stringSwitch${ID}", stringSwitch)
+                    editor.putInt("solver${ID}", solver)
 
                     editor.commit()
                 }
@@ -152,6 +158,8 @@ class AlarmList_Activity : AppCompatActivity() {
                         editor.remove("hr${ID}")
                         editor.remove("min${ID}")
                         editor.remove("stringSwitch${ID}")
+                        editor.remove("solver${ID}")
+
                         editor.commit()
                     }
                     else { // 알람 수정
@@ -164,8 +172,9 @@ class AlarmList_Activity : AppCompatActivity() {
                         val date = data!!.getStringExtra("date")
                         val stringSwitch = data!!.getStringExtra("stringSwitch")
                         val ID = data!!.getIntExtra("ID", 0)
+                        val solver = data!!.getIntExtra("solver", 0)
 
-                        alarmlist[position] = Alarm_Data(hr, min, time, date, stringSwitch, ID)
+                        alarmlist[position] = Alarm_Data(hr, min, time, date, stringSwitch, ID, solver)
 
                         //pref의 데이터 삭제 후
                         editor.remove("time${ID}")
@@ -173,6 +182,7 @@ class AlarmList_Activity : AppCompatActivity() {
                         editor.remove("hr${ID}")
                         editor.remove("min${ID}")
                         editor.remove("stringSwitch${ID}")
+                        editor.remove("solver${ID}")
 
                         //pref에 데이터 추가
                         editor.putString("time${ID}", time)
@@ -180,6 +190,7 @@ class AlarmList_Activity : AppCompatActivity() {
                         editor.putInt("hr${ID}", hr)
                         editor.putInt("min${ID}", min)
                         editor.putString("stringSwitch${ID}", stringSwitch)
+                        editor.putInt("solver${ID}", solver)
 
                         editor.commit()
                     }

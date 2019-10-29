@@ -10,11 +10,21 @@ import java.util.*
 class Alarm_Service : Service() {
     private val context = this
 
+    var hr = 0
+    var min = 0
+    var requestCode = 0
+    var solver = 0
+
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        hr = intent.extras!!.getInt("HOUR_OF_DAY")
+        min = intent.extras!!.getInt("MINUTE")
+        requestCode = intent.extras!!.getInt("requestCode")
+        solver = intent.extras!!.getInt("solver")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             //NotificationChannel의 ID
             val CHANNEL_ID = "Alarm_Service"
@@ -38,9 +48,10 @@ class Alarm_Service : Service() {
             startForeground(1, notification)
         }
 
-        //알람이 한 번 울릴 때마다 Service에서 알람을 반복시켜야 한다
+        //알람을 울리게 만들 액티비티를 실행한다
         alarmService(intent)
-        alarmReassign(intent)
+        //0번 requestCode에는 알람을 5분 뒤에 울리게 만드는 임시 알람을 배정한다
+        if(requestCode != 0) alarmReassign(intent)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             stopForeground(true)
@@ -49,11 +60,12 @@ class Alarm_Service : Service() {
     }
 
     private fun alarmService(intent: Intent) {
-        //알람 해제 방식을 intent에서 받아와 alarmIntent에 전달한다
-        val solver = intent.extras!!.getInt("solver")
 
         //pendingIntent 설정을 위한 intent
         val alarmIntent = Intent(context, Alarm_Ringing::class.java)
+        alarmIntent.putExtra("hr", hr)
+        alarmIntent.putExtra("min", min)
+        alarmIntent.putExtra("requestCode", requestCode)
         alarmIntent.putExtra("solver", solver)
 
         //알람 해제 액티비티를 띄울 PendingIntent
@@ -73,16 +85,13 @@ class Alarm_Service : Service() {
     }
 
     private fun alarmReassign(intent: Intent) {
-        var hr = intent.extras!!.getInt("HOUR_OF_DAY")
-        var min = intent.extras!!.getInt("MINUTE")
-        val requestCode = intent.extras!!.getInt("requestCode")
-        val solver = intent.extras!!.getInt("solver")
-
         //이 함수가 불리는 날짜는 알람이 울려야 하는 요일일 것이므로
         //알람이 울리는 날에서 7일 뒤에 다시 알람을 울리도록 설정
         val cal : Calendar = Calendar.getInstance()
         cal.set(Calendar.HOUR_OF_DAY, hr)
         cal.set(Calendar.MINUTE, min)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
         cal.add(Calendar.DATE, 7)
 
         //정보를 this에서 receiver까지 보내는 intent를 생성
