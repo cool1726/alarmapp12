@@ -1,10 +1,13 @@
 package org.siwonlee.alarmapp12
 
+import android.app.AlarmManager
 import android.app.KeyguardManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
 import android.os.*
+import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.alarm_ringing.*
 import java.util.*
@@ -74,6 +77,10 @@ class Alarm_Ringing : AppCompatActivity() {
 
         //알람 해제 버튼을 눌렀을 때
         bt_alarmoff.setOnClickListener {
+            //우선 알람 소리와 진동을 해제한다
+            v.cancel()
+            ringtone.stop()
+
             //알람 해제 방식을 읽어들인 뒤
             val solver = intent.extras!!.getInt("solver")
             when(solver) {
@@ -85,14 +92,51 @@ class Alarm_Ringing : AppCompatActivity() {
                 }
             }
 
-            //알람 소리와 진동을 해제한다
+            //알람 해제에 성공했으므로 알람 액티비티를 제거한다
+            finish()
+        }
+
+        //딜레이 버튼을 눌렀을 때
+        bt_delay.setOnClickListener {
+            //알람 생성에 필요한 정보를 가져온다
+            val hr = intent.extras!!.getInt("hr")
+            val min = intent.extras!!.getInt("min")
+            val solver = intent.extras!!.getInt("solver")
+
+            //Calendar를 버튼을 누른 시점에서 5분 후로 설정한다
+            val cal : Calendar = Calendar.getInstance()
+            cal.set(Calendar.HOUR_OF_DAY, hr)
+            cal.set(Calendar.MINUTE, min)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            cal.add(Calendar.MINUTE, 5)
+
+            //알람을 설정할 intent를 만든다
+            val delayIntent = Intent(this, Alarm_Receiver::class.java)
+            delayIntent.putExtra("HOUR_OF_DAY", cal.get(Calendar.HOUR_OF_DAY))
+            delayIntent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
+            delayIntent.putExtra("requestCode", 0)
+            delayIntent.putExtra("solver", solver)
+
+            //임시 알람 정보를 담은 pendingIntent를 만든다
+            val pendingIntent = PendingIntent.getBroadcast(this, 0, delayIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+            //알람매니저를 생성한 뒤 임시 알람을 추가한다
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+            else
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+
+            //알람을 5분 후로 미뤘으므로 알람 소리와 진동을 해제한 뒤 액티비티를 끝낸다
             v.cancel()
             ringtone.stop()
-
             finish()
         }
     }
 
     //뒤로가기로 알람 해제를 막기 위한 빈 함수
     override fun onBackPressed() { }
+    //홈버튼으로 알람 해제를 막기 위한 빈 함수
+    //eoverride fun onMenuOpened(featureId: Int, menu: Menu): Boolean { return false }
 }
