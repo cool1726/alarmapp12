@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
 import android.os.*
-import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.alarm_ringing.*
 import java.util.*
