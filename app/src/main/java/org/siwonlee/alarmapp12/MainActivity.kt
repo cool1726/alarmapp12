@@ -17,7 +17,15 @@ import android.widget.ArrayAdapter
 import android.widget.AdapterView
 import android.view.View
 import android.widget.Toast
-import kotlinx.android.synthetic.main.alarm_solving_1.*
+import kotlinx.android.synthetic.main.activity_main.fri
+import kotlinx.android.synthetic.main.activity_main.mon
+import kotlinx.android.synthetic.main.activity_main.preMin
+import kotlinx.android.synthetic.main.activity_main.sat
+import kotlinx.android.synthetic.main.activity_main.sun
+import kotlinx.android.synthetic.main.activity_main.thu
+import kotlinx.android.synthetic.main.activity_main.tue
+import kotlinx.android.synthetic.main.activity_main.wed
+import kotlinx.android.synthetic.main.previous_alarmset.*
 
 
 fun Boolean.toInt() = if (this) 1 else 0
@@ -160,9 +168,8 @@ class MainActivity : AppCompatActivity() {
         })
 
 
-
         // 알람 삭제 버튼 (bt_set.setOnClickListener와 유사)
-        bt_delete.setOnClickListener {
+        bt_del1.setOnClickListener {
             //pendingIntent로 alarmManager의 알람은 여기서 삭제하고
             //알람 recyclerview의 해당 알람 item은 returnIntent로 정보를 넘겨서 삭제하게 한다
 
@@ -192,7 +199,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 알람 저장 버튼
-        bt_set.setOnClickListener {
+        bt_set1.setOnClickListener {
 
             //날짜가 바뀌는 등 오류가 발생할 수 있으므로 현재 날짜를 다시 구한다
             cal.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
@@ -201,11 +208,11 @@ class MainActivity : AppCompatActivity() {
             cal.set(Calendar.HOUR_OF_DAY, hr)
             cal.set(Calendar.MINUTE, min)
 
-            if ( isEmpty(preHr.text) )  prehr = 0
-            else  prehr = Integer.parseInt(preHr.text.toString())
+            if ( isEmpty(preHr2.text) )  prehr = 0
+            else  prehr = Integer.parseInt(preHr2.text.toString())
 
-            if ( isEmpty(preMin.text) )  premin = 0
-            else  premin = Integer.parseInt(preMin.text.toString())
+            if ( isEmpty(preMin2.text) )  premin = 0
+            else  premin = Integer.parseInt(preMin2.text.toString())
 
             cal.add(Calendar.HOUR_OF_DAY, -prehr)
             cal.add(Calendar.MINUTE, -premin)

@@ -202,19 +202,19 @@
         app:layout_constraintTop_toBottomOf="@+id/solving">
 
         <Button
-            android:id="@+id/bt_set"
+            android:id="@+id/bt_set1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="set"
 
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/bt_delete"
+            app:layout_constraintEnd_toStartOf="@+id/bt_del1"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/bt_delete"
+            android:id="@+id/bt_del1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="DELETE"
@@ -222,7 +222,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/bt_set"
+            app:layout_constraintStart_toEndOf="@+id/bt_set1"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
