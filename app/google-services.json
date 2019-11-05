@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "6061204487",
+    "firebase_url": "https://alarm12-ec45a.firebaseio.com",
+    "project_id": "alarm12-ec45a",
+    "storage_bucket": "alarm12-ec45a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:6061204487:android:e8e27dc1491b8d0d9b36a2",
+        "android_client_info": {
+          "package_name": "org.siwonlee.alarmapp12"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "6061204487-vd7oc0j88tja41b3bdoc7q6hnio0jmr4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuXtpo2S4JjCmK9Cy5L8vkxrmJ87AfApw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "6061204487-vd7oc0j88tja41b3bdoc7q6hnio0jmr4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
