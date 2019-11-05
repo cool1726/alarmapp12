@@ -200,7 +200,7 @@ class PreviousAlarmAcitivity : AppCompatActivity() {
             //ringDate = "${ringDate}${days[day]}"
 
             //오늘부터 day요일까지 남은 일 수
-            var date_diff = (day + 1 - cal.get(Calendar.DAY_OF_WEEK) + 7) % 7
+            var date_diff = (day - 1 - cal.get(Calendar.DAY_OF_WEEK) + 7) % 7
 
             //알람이 울리는 요일이 i요일이 되도록 cal을 조정한다
             cal.add(Calendar.DATE, date_diff)

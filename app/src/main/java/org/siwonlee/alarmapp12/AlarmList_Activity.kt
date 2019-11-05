@@ -1,29 +1,29 @@
 package org.siwonlee.alarmapp12
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.alarm_list.*
-import android.R.attr.key
-import java.nio.file.Files.size
 import org.json.JSONArray
+import android.R.attr.key
+import android.util.Log
+import android.view.View
+import org.json.JSONException
 import androidx.core.app.ComponentActivity
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.text.TextUtils.isEmpty
-import org.json.JSONException
 
 
 
 class AlarmList_Activity : AppCompatActivity() {
-    val REQ_BASIC_SET : Int = 1000
-    val REQ_PREV_SET : Int = 2000
-    val REQ_WEEK_SET : Int = 3000
-    val REQUEST_CLICK : Int = 4000
+    val REQUEST_SET : Int = 1000
+    val REQUEST_CLICK : Int = 2000
     val alarmlist = ArrayList<Alarm_Data>()
 
     private val prefStorage = "org.siwonlee.alarmapp12.prefs"
@@ -44,7 +44,6 @@ class AlarmList_Activity : AppCompatActivity() {
 
             cintent.putExtra("ID", alarmlist[position].ID)
             cintent.putExtra("solver", alarmlist[position].solver)
-
 
             cintent.putExtra("position", position)
 
@@ -76,38 +75,8 @@ class AlarmList_Activity : AppCompatActivity() {
                 val stringSwitch = pref.getString("stringSwitch${i}", "TFFFFFFF")
                 val solver = pref.getInt("solver", 0)
 
-                // json -> array
-                val ahrstr = pref.getString("ahr", null)
-                val aminstr = pref.getString("amin", null)
-
-                val ahr = intArrayOf()
-                if (ahrstr != null) {
-                    try {
-                        val a = JSONArray(ahrstr)
-                        for (i in 0 until a.length()) {
-                            val url = Integer.parseInt(a.optString(i))
-                            ahr.plus(url)
-                        }
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                    }
-                }
-
-                val amin = intArrayOf()
-                if (aminstr != null) {
-                    try {
-                        val a = JSONArray(aminstr)
-                        for (i in 0 until a.length()) {
-                            val url = Integer.parseInt(a.optString(i))
-                            amin.plus(url)
-                        }
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                    }
-                }
-
                 //ID 순서대로 alarmlist에 알람 추가
-                alarmlist.add(Alarm_Data(hr, min, ahr, amin, time, date, stringSwitch, i, solver))
+                alarmlist.add(Alarm_Data(hr, min, time, date, stringSwitch, i, solver))
             }
         }
 
@@ -135,26 +104,7 @@ class AlarmList_Activity : AppCompatActivity() {
             pref.edit().putInt("size", size).apply()
 
             //알람을 설정한다
-            startActivityForResult(intent, REQ_BASIC_SET)
-        }
-
-        // () 요일 알람 초기셋팅 : 알람 셋팅 화면으로 이동 (previous_alarmset.xml로 이동)
-        fab_add2.setOnClickListener {
-            size += 1
-            val intent = Intent(this, PreviousAlarmAcitivity::class.java)
-            //알람의 정보를 intent에 담아서 전송한다
-            //지금은 default가 6시 정각 및 요일 미설정으로 고정되어 있음
-            intent.putExtra("hr", 6)
-            intent.putExtra("min", 0)
-            intent.putExtra("ID", size)
-            intent.putExtra("stringSwitch",  "TFFFFFFF")
-            intent.putExtra("solver", 0)
-
-            //알람의 수를 하나 늘렸으므로 이를 pref에 기록한다
-            pref.edit().putInt("size", size).apply()
-
-            //알람을 설정한다
-            startActivityForResult(intent, REQ_PREV_SET)
+            startActivityForResult(intent, REQUEST_SET)
         }
     }
 
@@ -170,7 +120,7 @@ class AlarmList_Activity : AppCompatActivity() {
 
         if (resultCode == Activity.RESULT_OK) { // MainActivity에서 RESULT_OK 사인을 보내면
             when (requestCode) {
-                REQ_BASIC_SET -> {   // MainActivity에서 intents로 추가한 time, date 데이터 받아오기 (초기 설정)
+                REQUEST_SET -> {   // MainActivity에서 intents로 추가한 time, date 데이터 받아오기 (초기 설정)
                     val hr = data!!.getIntExtra("hr", -1)
                     val min = data!!.getIntExtra("min", -1)
                     val time = data!!.getStringExtra("time")
@@ -180,71 +130,13 @@ class AlarmList_Activity : AppCompatActivity() {
                     val solver = data!!.getIntExtra("solver", 0)
 
                     // 이 액티비티 내의 alarmlist(Alarm_Data형식의 arraylist)에 받아온 시간, 요일 정보 추가
-                    alarmlist.add(Alarm_Data(hr, min, null, null, time, date, stringSwitch, ID, solver))
+                    alarmlist.add(Alarm_Data(hr, min, time, date, stringSwitch, ID, solver))
 
                     // 알람이 설정될 때마다 sharedPreferences로 데이터 저장
                     editor.putString("time${ID}", time)
                     editor.putString("date${ID}", date)
                     editor.putInt("hr${ID}", hr)
                     editor.putInt("min${ID}", min)
-                    editor.putString("stringSwitch${ID}", stringSwitch)
-                    editor.putInt("solver${ID}", solver)
-
-                    editor.commit()
-                }
-
-                REQ_PREV_SET -> {
-                    var ahrstr : String = ""
-                    var aminstr : String = ""
-                    val hr = data!!.getIntExtra("prehr", 0)
-                    val min = data!!.getIntExtra("premin", 0)
-                    val ahr = data!!.getIntArrayExtra("ahr")
-                    val amin = data!!.getIntArrayExtra("amin")
-                    val time = data!!.getStringExtra("time")
-                    val date = data!!.getStringExtra("date")
-
-                    val stringSwitch = data!!.getStringExtra("stringSwitch")
-                    val ID = data!!.getIntExtra("ID", 0)
-                    val solver = data!!.getIntExtra("solver", 0)
-
-                    // array -> json (ahr)
-                    if (ahr != null) {
-                        val ahr_arr = JSONArray()
-                        for (i in 0 until ahr.size) {
-                            ahr_arr.put(ahr.get(i))
-                        }
-                        if ( !(ahr.isEmpty()) )
-                            editor.putString(ahrstr, ahr_arr.toString())
-                        else
-                            editor.putString(ahrstr, null)
-                        editor.commit()
-                    }
-
-
-                    // array -> json (amin)
-                    if (amin != null) {
-                        val amin_arr = JSONArray()
-                        for (i in 0 until amin.size) {
-                            amin_arr.put(amin.get(i))
-                        }
-                        if ( !(amin.isEmpty()) )
-                            editor.putString(aminstr, amin_arr.toString())
-                        else
-                            editor.putString(aminstr, null)
-                        editor.commit()
-                    }
-
-
-                    // 이 액티비티 내의 alarmlist(Alarm_Data형식의 arraylist)에 받아온 시간, 요일 정보 추가
-                    alarmlist.add(Alarm_Data(hr, min, ahr, amin, time, date, stringSwitch, ID, solver))
-
-                    // 알람이 설정될 때마다 sharedPreferences로 데이터 저장
-                    editor.putString("time${ID}", time)
-                    editor.putString("date${ID}", date)
-                    editor.putInt("hr${ID}", hr)
-                    editor.putInt("min${ID}", min)
-                    editor.putString("ahr${ID}", ahrstr)
-                    editor.putString("amin${ID}", ahrstr)
                     editor.putString("stringSwitch${ID}", stringSwitch)
                     editor.putInt("solver${ID}", solver)
 
@@ -268,51 +160,21 @@ class AlarmList_Activity : AppCompatActivity() {
                         editor.remove("stringSwitch${ID}")
                         editor.remove("solver${ID}")
 
-                        editor.remove("ahr${ID}")
-                        editor.remove("amin${ID}")
-
                         editor.commit()
                     }
                     else { // 알람 수정
-                        var ahrstr : String = ""
-                        var aminstr : String = ""
-
                         //수정될 알람의 alarmlist 인덱스값을 position으로 받아온다
                         val position = data!!.getIntExtra("position", -1)
 
-                        val hr = data!!.getIntExtra("prehr", 0)
-                        val min = data!!.getIntExtra("premin", 0)
-                        val ahr = data!!.getIntArrayExtra("hr")
-                        val amin = data!!.getIntArrayExtra("min")
+                        val hr = data!!.getIntExtra("hr", -1)
+                        val min = data!!.getIntExtra("min", -1)
                         val time = data!!.getStringExtra("time")
                         val date = data!!.getStringExtra("date")
                         val stringSwitch = data!!.getStringExtra("stringSwitch")
                         val ID = data!!.getIntExtra("ID", 0)
                         val solver = data!!.getIntExtra("solver", 0)
 
-                        alarmlist.add(Alarm_Data(hr, min, ahr, amin, time, date, stringSwitch, ID, solver))
-
-                        // array -> json (ahr)
-                        val ahr_arr = JSONArray()
-                        for (i in 0 until ahr.size) {
-                            ahr_arr.put(ahr.get(i))
-                        }
-                        if ( ahr != null )
-                            editor.putString(ahrstr, ahr_arr.toString())
-                        else
-                            editor.putString(ahrstr, null)
-                        editor.commit()
-
-                        // array -> json (amin)
-                        val amin_arr = JSONArray()
-                        for (i in 0 until ahr.size) {
-                            amin_arr.put(ahr.get(i))
-                        }
-                        if ( ahr != null )
-                            editor.putString(aminstr, amin_arr.toString())
-                        else
-                            editor.putString(aminstr, null)
-                        editor.commit()
+                        alarmlist[position] = Alarm_Data(hr, min, time, date, stringSwitch, ID, solver)
 
                         //pref의 데이터 삭제 후
                         editor.remove("time${ID}")
@@ -322,9 +184,6 @@ class AlarmList_Activity : AppCompatActivity() {
                         editor.remove("stringSwitch${ID}")
                         editor.remove("solver${ID}")
 
-                        editor.remove("ahr${ID}")
-                        editor.remove("amin${ID}")
-
                         //pref에 데이터 추가
                         editor.putString("time${ID}", time)
                         editor.putString("date${ID}", date)
@@ -333,8 +192,7 @@ class AlarmList_Activity : AppCompatActivity() {
                         editor.putString("stringSwitch${ID}", stringSwitch)
                         editor.putInt("solver${ID}", solver)
 
-                        editor.putString("ahr${ID}", ahrstr)
-                        editor.putString("amin${ID}", ahrstr)
+                        editor.commit()
                     }
                 }
             }
