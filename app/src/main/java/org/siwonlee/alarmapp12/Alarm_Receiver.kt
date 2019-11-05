@@ -24,6 +24,7 @@ class Alarm_Receiver : BroadcastReceiver() {
         val min = intent.extras!!.getInt("MINUTE")
         val requestCode = intent.extras!!.getInt("requestCode")
         val solver = intent.extras!!.getInt("solver")
+        val notify = intent.extras!!.getLong("notify")
 
         // RingtonePlayingService 서비스 intent 생성
         val serviceIntent = Intent(context, Alarm_Service::class.java)
@@ -31,6 +32,7 @@ class Alarm_Receiver : BroadcastReceiver() {
         serviceIntent.putExtra("MINUTE", min)
         serviceIntent.putExtra("requestCode", requestCode)
         serviceIntent.putExtra("solver", solver)
+        serviceIntent.putExtra("notify", notify)
 
         //serviceIntent를 Alarm_Service로 전달한다
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -44,5 +46,6 @@ class Alarm_Receiver : BroadcastReceiver() {
         }
         //onReceive의 끝
     }
+
     //Alarm_Receiver의 끝
 }
