@@ -12,17 +12,18 @@ import java.util.*
 import android.content.Context
 import android.graphics.Color
 import kotlinx.android.synthetic.main.activity_main.*
-import android.widget.ArrayAdapter
-import android.widget.AdapterView
-import android.view.View
 
 
 fun Boolean.toInt() = if (this) 1 else 0
+
+var ADVANCE_SETTING = 2019
 
 class MainActivity : AppCompatActivity() {
     //액티비티 생성 시 알람 설정 시간을 받아온다
     var hr = 6
     var min = 0
+    var phr = 0
+    var pmin = 0
     var ID = 0
     var solver = 0
     var switch = booleanArrayOf(true, false, false, false, false, false, false, false)
@@ -45,6 +46,8 @@ class MainActivity : AppCompatActivity() {
         //알람 설정 시간과 분은 그대로 받아온다
         hr = intent.getIntExtra("hr", 6)
         min = intent.getIntExtra("min", 0)
+        phr = intent.getIntExtra("phr", 0)
+        pmin = intent.getIntExtra("pmin", 0)
 
         // 알람 수정 또는 삭제 시 사용됨
         val position = intent.getIntExtra("position", -1)
@@ -94,22 +97,6 @@ class MainActivity : AppCompatActivity() {
             min = minute
         })
 
-        //Spinner를 이용해 알람 해제 방식을 결정한다
-        val solvingMethod = resources.getStringArray(R.array.spinnerItem)
-
-        //solvingMethod를 스피너에 연결하기 위한 어댑터
-        val solvingMethodAdapter = ArrayAdapter(
-            applicationContext,
-            android.R.layout.simple_spinner_dropdown_item,
-            solvingMethod
-        )
-
-        //solving 스피너의 어댑터를 solvingMethodAdapter로 지정한다
-        solving.adapter = solvingMethodAdapter
-
-        //스피너의 값을 solver로 지정한다
-        solving.setSelection(solver)
-
         //------------------------------------------------------------------setOnClickListener 시작
 
         //각 요일 버튼을 클릭했을 때
@@ -144,15 +131,14 @@ class MainActivity : AppCompatActivity() {
             sat.setTextColor(tColor[switch[7].toInt()])
         }
 
-        solving.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
-                solver = i
-            }
+        advance.setOnClickListener {
+            val aIntent = Intent(this, AlarmSettingAdvanced::class.java)
+            aIntent.putExtra("solver", solver)
+            aIntent.putExtra("phr", phr)
+            aIntent.putExtra("pmin", pmin)
 
-            override fun onNothingSelected(adapterView: AdapterView<*>) {}
-        })
-
-
+            startActivityForResult(aIntent, ADVANCE_SETTING)
+        }
 
         // 알람 삭제 버튼 (bt_set.setOnClickListener와 유사)
         bt_delete.setOnClickListener {
@@ -284,4 +270,11 @@ class MainActivity : AppCompatActivity() {
         else alarmManager.cancel(pendingIntent)
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        solver = data!!.getIntExtra("solver", solver)
+        phr = data.getIntExtra("phr", phr)
+        pmin = data!!.getIntExtra("pmin", pmin)
+    }
 }
