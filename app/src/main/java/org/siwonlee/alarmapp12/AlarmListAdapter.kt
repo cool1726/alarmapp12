@@ -27,8 +27,6 @@ class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder (itemView) { // View 재사용 위한 ViewHolder
 
         fun bindItems(data : Alarm_Data) {
-            val days = arrayOf("일 ", "월 ", "화 ", "수 ", "목 ", "금 ", "토 ")
-
             // 전달받은 Alarm_Data 형식의 data에서 시간과 요일(날짜)을 불러온다
             // itemView의 list 구성 요소에 text로 전달한다
             itemView.time_in_list.text = "${data.hr.toTime()}:${data.min.toTime()}"

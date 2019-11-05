@@ -65,6 +65,7 @@ class MainActivity : AppCompatActivity() {
         for(i in 1..7) switch[i] = (stringSwitch[i] == 'T')
 
         //설정된 요일에 따라 텍스트 색을 다르게 바꿔준다
+        //date.setTextColor(tColor[switch[0].toInt()])
         sun.setTextColor(tColor[switch[1].toInt()])
         mon.setTextColor(tColor[switch[2].toInt()])
         tue.setTextColor(tColor[switch[3].toInt()])
@@ -104,14 +105,17 @@ class MainActivity : AppCompatActivity() {
         //이를 텍스트의 색으로 나타낸다
         sun.setOnClickListener{
             switch[1] = !switch[1]
+            switch[0] = false
             sun.setTextColor(tColor[switch[1].toInt()])
         }
         mon.setOnClickListener{
             switch[2] = !switch[2]
+            switch[0] = false
             mon.setTextColor(tColor[switch[2].toInt()])
         }
         tue.setOnClickListener{
             switch[3] = !switch[3]
+            switch[0] = false
             tue.setTextColor(tColor[switch[3].toInt()])
         }
         wed.setOnClickListener{
@@ -120,14 +124,17 @@ class MainActivity : AppCompatActivity() {
         }
         thu.setOnClickListener{
             switch[5] = !switch[5]
+            switch[0] = false
             thu.setTextColor(tColor[switch[5].toInt()])
         }
         fri.setOnClickListener{
             switch[6] = !switch[6]
+            switch[0] = false
             fri.setTextColor(tColor[switch[6].toInt()])
         }
         sat.setOnClickListener{
             switch[7] = !switch[7]
+            switch[0] = false
             sat.setTextColor(tColor[switch[7].toInt()])
         }
 
@@ -172,7 +179,6 @@ class MainActivity : AppCompatActivity() {
 
         // 알람 저장 버튼
         bt_set.setOnClickListener {
-
             //날짜가 바뀌는 등 오류가 발생할 수 있으므로 현재 날짜를 다시 구한다
             cal.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
 
@@ -198,12 +204,28 @@ class MainActivity : AppCompatActivity() {
 
             //알람의 요일 설정 정보를 stringDate에 담는다
             ringDate = ""
+
+            //알람을 phr시간 pmin분 이전에 울리도록 설정한 뒤
+            cal.add(Calendar.HOUR_OF_DAY, -phr)
+            cal.add(Calendar.MINUTE, -pmin)
+            //hr와 min을 이에 맞게 설정한다
+            hr = cal.get(Calendar.HOUR_OF_DAY)
+            min = cal.get(Calendar.MINUTE)
+
             //각 요일마다 알람을 설정하거나 삭제한다
             for(i in 1..7) setAlarm(i, switch[i])
+
+            //hr와 min을 원래대로 복원한다
+            cal.add(Calendar.HOUR_OF_DAY, phr)
+            cal.add(Calendar.MINUTE, pmin)
+            hr = cal.get(Calendar.HOUR_OF_DAY)
+            min = cal.get(Calendar.MINUTE)
 
             //설정한 알람 정보를 AlarmList_Acitivity로 넘긴다
             returnIntent.putExtra("hr", hr)
             returnIntent.putExtra("min", min)
+            returnIntent.putExtra("phr", phr)
+            returnIntent.putExtra("pmin", pmin)
             returnIntent.putExtra("time", "${hr.toTime()}:${min.toTime()}")
             returnIntent.putExtra("stringSwitch", stringSwitch)
             returnIntent.putExtra("solver", solver)
@@ -272,9 +294,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-        solver = data!!.getIntExtra("solver", solver)
-        phr = data.getIntExtra("phr", phr)
-        pmin = data!!.getIntExtra("pmin", pmin)
+        if (resultCode == Activity.RESULT_OK) {
+            solver = data!!.getIntExtra("solver", solver)
+            phr = data.getIntExtra("phr", phr)
+            pmin = data.getIntExtra("pmin", pmin)
+        }
     }
 }

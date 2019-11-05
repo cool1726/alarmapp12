@@ -3,12 +3,14 @@ package org.siwonlee.alarmapp12
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.size
 import kotlinx.android.synthetic.main.alarm_setting_advanced.*
 
 class AlarmSettingAdvanced : AppCompatActivity() {
@@ -24,8 +26,8 @@ class AlarmSettingAdvanced : AppCompatActivity() {
         phr = intent.extras!!.getInt("phr", 0)
         pmin = intent.extras!!.getInt("pmin", 0)
 
-        preHr.setText(phr.toString())
-        preMin.setText(pmin.toString())
+        if (phr != 0) preHr.setText(phr.toString())
+        if (pmin != 0) preMin.setText(pmin.toString())
 
         solving.adapter = ArrayAdapter(
             applicationContext,
@@ -44,11 +46,15 @@ class AlarmSettingAdvanced : AppCompatActivity() {
         })
 
         done.setOnClickListener {
-            var str = preHr.toString().toInt()
-            phr = str
+            var str = preHr.text.toString()
+            if (str == "") str = "0"
+            var temp = str.toInt()
+            phr = temp
 
-            str = preMin.toString().toInt()
-            pmin = str
+            str = preMin.text.toString()
+            if (str == "") str = "0"
+            temp = str.toInt()
+            pmin = temp
 
             var returnIntent = Intent()
             returnIntent.putExtra("solver", solver)

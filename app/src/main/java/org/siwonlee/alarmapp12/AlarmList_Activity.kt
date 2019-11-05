@@ -3,9 +3,11 @@ package org.siwonlee.alarmapp12
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import kotlinx.android.synthetic.main.alarm_list.*
 
 
@@ -27,6 +29,9 @@ class AlarmList_Activity : AppCompatActivity() {
             val cintent = Intent(this, MainActivity::class.java)
             cintent.putExtra("hr", alarmlist[position].hr)
             cintent.putExtra("min", alarmlist[position].min)
+
+            cintent.putExtra("phr", alarmlist[position].phr)
+            cintent.putExtra("pmin", alarmlist[position].pmin)
 
             cintent.putExtra("date", alarmlist[position].ringDate)
             cintent.putExtra("stringSwitch", alarmlist[position].ringSwitch)
@@ -51,6 +56,13 @@ class AlarmList_Activity : AppCompatActivity() {
 
         size = pref.getInt("size", 0)
 
+
+        // Configure Google Sign In
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
         //앱이 실행되어 AlarmList_Acitivity가 생성될 때마다 pref에 저장된 값 불러와서 alarmlist 생성
         for (i in 0..size) {
             if (pref.getString("time${i}", "no alarm") != "no alarm") {
@@ -61,11 +73,13 @@ class AlarmList_Activity : AppCompatActivity() {
                 val date = pref.getString("date${i}", "no date")
                 val hr = pref.getInt("hr${i}", 6)
                 val min = pref.getInt("min${i}", 0)
+                val phr = pref.getInt("phr${i}", 0)
+                val pmin = pref.getInt("pmin${i}", 0)
                 val stringSwitch = pref.getString("stringSwitch${i}", "TFFFFFFF")
                 val solver = pref.getInt("solver", 0)
 
                 //ID 순서대로 alarmlist에 알람 추가
-                alarmlist.add(Alarm_Data(hr, min, time, date, stringSwitch, i, solver))
+                alarmlist.add(Alarm_Data(hr, min, phr, pmin, time, date, stringSwitch, i, solver))
             }
         }
 
@@ -95,6 +109,12 @@ class AlarmList_Activity : AppCompatActivity() {
             //알람을 설정한다
             startActivityForResult(intent, REQUEST_SET)
         }
+
+        signInButton.setOnClickListener {
+            fun onClick(view: View) {
+
+            }
+        }
     }
 
     // item을 오래 클릭할 시 바로 알람 삭제여부를 묻는 dialog 띄우기 (나중에)
@@ -112,22 +132,28 @@ class AlarmList_Activity : AppCompatActivity() {
                 REQUEST_SET -> {   // MainActivity에서 intents로 추가한 time, date 데이터 받아오기 (초기 설정)
                     val hr = data!!.getIntExtra("hr", -1)
                     val min = data!!.getIntExtra("min", -1)
+                    val phr = data!!.getIntExtra("phr", -1)
+                    val pmin = data!!.getIntExtra("pmin", -1)
                     val time = data!!.getStringExtra("time")
                     val date = data!!.getStringExtra("date")
                     val stringSwitch = data!!.getStringExtra("stringSwitch")
                     val ID = data!!.getIntExtra("ID", 0)
                     val solver = data!!.getIntExtra("solver", 0)
 
-                    // 이 액티비티 내의 alarmlist(Alarm_Data형식의 arraylist)에 받아온 시간, 요일 정보 추가
-                    alarmlist.add(Alarm_Data(hr, min, time, date, stringSwitch, ID, solver))
+                    if(hr != -1) {
+                        // 이 액티비티 내의 alarmlist(Alarm_Data형식의 arraylist)에 받아온 시간, 요일 정보 추가
+                        alarmlist.add(Alarm_Data(hr, min, phr, pmin, time, date, stringSwitch, ID, solver))
 
-                    // 알람이 설정될 때마다 sharedPreferences로 데이터 저장
-                    editor.putString("time${ID}", time)
-                    editor.putString("date${ID}", date)
-                    editor.putInt("hr${ID}", hr)
-                    editor.putInt("min${ID}", min)
-                    editor.putString("stringSwitch${ID}", stringSwitch)
-                    editor.putInt("solver${ID}", solver)
+                        // 알람이 설정될 때마다 sharedPreferences로 데이터 저장
+                        editor.putString("time${ID}", time)
+                        editor.putString("date${ID}", date)
+                        editor.putInt("hr${ID}", hr)
+                        editor.putInt("min${ID}", min)
+                        editor.putInt("phr${ID}", phr)
+                        editor.putInt("pmin${ID}", pmin)
+                        editor.putString("stringSwitch${ID}", stringSwitch)
+                        editor.putInt("solver${ID}", solver)
+                    }
 
                     editor.commit()
                 }
@@ -146,6 +172,8 @@ class AlarmList_Activity : AppCompatActivity() {
                         editor.remove("date${ID}")
                         editor.remove("hr${ID}")
                         editor.remove("min${ID}")
+                        editor.remove("phr${ID}")
+                        editor.remove("pmin${ID}")
                         editor.remove("stringSwitch${ID}")
                         editor.remove("solver${ID}")
 
@@ -157,19 +185,23 @@ class AlarmList_Activity : AppCompatActivity() {
 
                         val hr = data!!.getIntExtra("hr", -1)
                         val min = data!!.getIntExtra("min", -1)
+                        val phr = data!!.getIntExtra("phr", -1)
+                        val pmin = data!!.getIntExtra("pmin", -1)
                         val time = data!!.getStringExtra("time")
                         val date = data!!.getStringExtra("date")
                         val stringSwitch = data!!.getStringExtra("stringSwitch")
                         val ID = data!!.getIntExtra("ID", 0)
                         val solver = data!!.getIntExtra("solver", 0)
 
-                        alarmlist[position] = Alarm_Data(hr, min, time, date, stringSwitch, ID, solver)
+                        alarmlist[position] = Alarm_Data(hr, min, phr, pmin, time, date, stringSwitch, ID, solver)
 
                         //pref의 데이터 삭제 후
                         editor.remove("time${ID}")
                         editor.remove("date${ID}")
                         editor.remove("hr${ID}")
                         editor.remove("min${ID}")
+                        editor.remove("phr${ID}")
+                        editor.remove("pmin${ID}")
                         editor.remove("stringSwitch${ID}")
                         editor.remove("solver${ID}")
 
@@ -178,6 +210,8 @@ class AlarmList_Activity : AppCompatActivity() {
                         editor.putString("date${ID}", date)
                         editor.putInt("hr${ID}", hr)
                         editor.putInt("min${ID}", min)
+                        editor.putInt("phr${ID}", phr)
+                        editor.putInt("pmin${ID}", pmin)
                         editor.putString("stringSwitch${ID}", stringSwitch)
                         editor.putInt("solver${ID}", solver)
 
