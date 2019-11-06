@@ -3,13 +3,12 @@ package org.siwonlee.alarmapp12
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import kotlinx.android.synthetic.main.alarm_list.*
-
+import kotlin.math.sign
 
 
 class AlarmList_Activity : AppCompatActivity() {
@@ -52,16 +51,10 @@ class AlarmList_Activity : AppCompatActivity() {
 
         val pref = this.getSharedPreferences(prefStorage, MODE_PRIVATE)
         val editor = pref!!.edit()
+
         //editor.clear() pref에 등록된 알람 데이터 삭제용
 
         size = pref.getInt("size", 0)
-
-
-        // Configure Google Sign In
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
 
         //앱이 실행되어 AlarmList_Acitivity가 생성될 때마다 pref에 저장된 값 불러와서 alarmlist 생성
         for (i in 0..size) {
@@ -111,9 +104,8 @@ class AlarmList_Activity : AppCompatActivity() {
         }
 
         signInButton.setOnClickListener {
-            fun onClick(view: View) {
-
-            }
+            val logInIntent = Intent(this, GoogleSignInActivity::class.java)
+            startActivity(logInIntent)
         }
     }
 
