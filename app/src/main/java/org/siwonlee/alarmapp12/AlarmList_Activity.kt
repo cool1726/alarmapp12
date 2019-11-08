@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.alarm_list.*
 
-
 class AlarmList_Activity : AppCompatActivity() {
     val REQUEST_SET : Int = 1000
     val REQUEST_CLICK : Int = 2000
@@ -136,19 +135,19 @@ class AlarmList_Activity : AppCompatActivity() {
                     if (data!!.getBooleanExtra("delete", false)) { //알람 삭제
                         // MainActivity에서 position 값 받아오기
                         val position = data!!.getIntExtra("position", -1)
-                        val ID = data!!.getIntExtra("ID", -1)
+                        val before_id = data!!.getIntExtra("before_id", -1)
 
-                        if(ID != -1) {
+                        if(before_id != -1) {
                             //alarmlist에서 삭제할 알람의 position(인덱스값)으로 항목 삭제
                             alarmlist.removeAt(position)
 
                             //마찬가지로 pref에 저장된 데이터도 삭제
-                            editor.remove("time${ID}")
-                            editor.remove("date${ID}")
-                            editor.remove("phr${ID}")
-                            editor.remove("pmin${ID}")
-                            editor.remove("stringSwitch${ID}")
-                            editor.remove("solver${ID}")
+                            editor.remove("time${before_id}")
+                            editor.remove("date${before_id}")
+                            editor.remove("phr${before_id}")
+                            editor.remove("pmin${before_id}")
+                            editor.remove("stringSwitch${before_id}")
+                            editor.remove("solver${before_id}")
                         }
 
                         editor.commit()
@@ -165,18 +164,21 @@ class AlarmList_Activity : AppCompatActivity() {
                         val pmin = data!!.getIntExtra("pmin", -1)
                         val stringSwitch = data!!.getStringExtra("stringSwitch")
                         val solver = data!!.getIntExtra("solver", 0)
+                        val before_id = data!!.getIntExtra("before_id", -1)
 
                         val ID = hr * 60 + min
 
                         alarmlist[position] = Alarm_Data(hr, min, phr, pmin, time, date, stringSwitch, solver)
 
-                        //pref의 데이터 삭제 후
-                        editor.remove("time${ID}")
-                        editor.remove("date${ID}")
-                        editor.remove("phr${ID}")
-                        editor.remove("pmin${ID}")
-                        editor.remove("stringSwitch${ID}")
-                        editor.remove("solver${ID}")
+                        if(before_id != -1) {
+                            //pref의 데이터 삭제 후
+                            editor.remove("time${before_id}")
+                            editor.remove("date${before_id}")
+                            editor.remove("phr${before_id}")
+                            editor.remove("pmin${before_id}")
+                            editor.remove("stringSwitch${before_id}")
+                            editor.remove("solver${before_id}")
+                        }
 
                         //pref에 데이터 추가
                         editor.putString("time${ID}", time)

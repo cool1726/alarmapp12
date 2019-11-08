@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     var solver = 0
     var switch = booleanArrayOf(true, false, false, false, false, false, false, false)
 
+    var before_id = 0
 
     var ringDate : String = ""        // 한글로 날짜 저장
     var stringSwitch : String = ""      // T/F로 날짜 저장
@@ -47,6 +48,8 @@ class MainActivity : AppCompatActivity() {
         min = intent.getIntExtra("min", 0)
         phr = intent.getIntExtra("phr", 0)
         pmin = intent.getIntExtra("pmin", 0)
+
+        before_id = hr * 60 + min
 
         // 알람 수정 또는 삭제 시 사용됨
         val position = intent.getIntExtra("position", -1)
@@ -152,7 +155,7 @@ class MainActivity : AppCompatActivity() {
             val returnIntent = Intent(this, AlarmList_Activity::class.java)
             returnIntent.putExtra("position", position)
             returnIntent.putExtra("delete", true)
-            returnIntent.putExtra("ID", hr * 60 + min)
+            returnIntent.putExtra("before_id", before_id)
 
             //삭제할지 여부를 묻는 Dialog
             val builder = AlertDialog.Builder(this)
@@ -218,9 +221,10 @@ class MainActivity : AppCompatActivity() {
             returnIntent.putExtra("phr", phr)
             returnIntent.putExtra("pmin", pmin)
             returnIntent.putExtra("time", "${hr.toTime()}:${min.toTime()}")
+            returnIntent.putExtra("date", ringDate)
             returnIntent.putExtra("stringSwitch", stringSwitch)
             returnIntent.putExtra("solver", solver)
-            returnIntent.putExtra("date", ringDate)
+            returnIntent.putExtra("before_id", before_id)
 
             //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
             setResult(Activity.RESULT_OK, returnIntent)
