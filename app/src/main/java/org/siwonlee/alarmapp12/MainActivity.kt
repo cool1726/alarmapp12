@@ -24,7 +24,6 @@ class MainActivity : AppCompatActivity() {
     var min = 0
     var phr = 0
     var pmin = 0
-    var ID = 0
     var solver = 0
     var switch = booleanArrayOf(true, false, false, false, false, false, false, false)
 
@@ -51,9 +50,6 @@ class MainActivity : AppCompatActivity() {
 
         // 알람 수정 또는 삭제 시 사용됨
         val position = intent.getIntExtra("position", -1)
-
-        //각 알람을 구분할 ID를 받아온다
-        ID = intent.getIntExtra("ID", 0)
 
         //알람 해제 방식을 받아와 설정한다
         solver = intent.getIntExtra("solver", 0)
@@ -156,9 +152,7 @@ class MainActivity : AppCompatActivity() {
             val returnIntent = Intent(this, AlarmList_Activity::class.java)
             returnIntent.putExtra("position", position)
             returnIntent.putExtra("delete", true)
-
-            //에러 방지를 위해 남겨둠
-            returnIntent.putExtra("ID", ID)
+            returnIntent.putExtra("ID", hr * 60 + min)
 
             //삭제할지 여부를 묻는 Dialog
             val builder = AlertDialog.Builder(this)
@@ -195,9 +189,6 @@ class MainActivity : AppCompatActivity() {
 
             //AlarmList_Activity에 정보를 넘길 intent
             val returnIntent = Intent()
-
-            //에러 방지를 위해 남겨둠
-            returnIntent.putExtra("ID", ID)
 
             // 알람을 수정하는 경우 현재 알람의 위치를 returnIntent에 담는다
             if (position != -1) returnIntent.putExtra("position", position)
