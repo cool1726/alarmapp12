@@ -11,6 +11,12 @@ import android.os.Build
 import java.util.*
 import android.content.Context
 import android.graphics.Color
+import android.text.TextUtils.isEmpty
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.Spinner
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -166,16 +172,51 @@ class MainActivity : AppCompatActivity() {
         }
 
         //알람에 대한 추가 설정이 필요하다면
-        advance.setOnClickListener {
-            //AlarmSettingAdvance까지 이동하는 intent에 기존 추가 설정 정보를 담고
-            val aIntent = Intent(this, AlarmSettingAdvanced::class.java)
-            aIntent.putExtra("solver", solver)
-            aIntent.putExtra("phr", phr)
-            aIntent.putExtra("pmin", pmin)
+        advance.setOnClickListener({
+            val builder = AlertDialog.Builder(this)
+            val dialogView = layoutInflater.inflate(R.layout.alarm_setting_advanced, null)
+            val dialogSolving = dialogView.findViewById<Spinner>(R.id.solving)
+            val dialogHr = dialogView.findViewById<EditText>(R.id.preHr)
+            val dialogMin = dialogView.findViewById<EditText>(R.id.preMin)
 
-            //AlarmSettingAdvance을 실행시킨다
-            startActivityForResult(aIntent, ADVANCE_SETTING)
-        }
+            if (phr != 0)
+                dialogHr.setText(phr.toString())
+            if (pmin != 0)
+                dialogMin.setText(pmin.toString())
+
+            dialogSolving.adapter = ArrayAdapter(
+                applicationContext,
+                android.R.layout.simple_spinner_dropdown_item,
+                resources.getStringArray(R.array.spinnerItem)
+            )
+
+            dialogSolving.setSelection(solver)
+
+            dialogSolving.setOnItemSelectedListener(object :
+                AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    adapterView: AdapterView<*>,
+                    view: View,
+                    i: Int,
+                    l: Long
+                ) {
+                    solver = i
+                }
+
+                override fun onNothingSelected(adapterView: AdapterView<*>) {}
+            })
+
+            builder.setView(dialogView)
+            builder.setPositiveButton("확인") { _, _ ->
+                if (isEmpty(dialogHr.text)) phr = 0
+                else phr = Integer.parseInt(dialogHr.text.toString())
+
+                if (isEmpty(dialogMin.text)) pmin = 0
+                else pmin = Integer.parseInt(dialogMin.text.toString())
+            }
+            builder.setNegativeButton("취소") { _, _ -> /* 취소일 때 아무 액션이 없으므로 빈칸 */ }
+            builder.create().show()
+        })
 
         // 알람 삭제 버튼 (bt_set.setOnClickListener와 유사)
         bt_delete.setOnClickListener {
