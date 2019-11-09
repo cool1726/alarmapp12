@@ -2,12 +2,15 @@ package org.siwonlee.alarmapp12
 
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.RatingBar
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.alarm_setting_advanced.*
 
@@ -18,14 +21,18 @@ class AlarmSettingAdvanced : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.alarm_setting_advanced)
+
+        val builder = AlertDialog.Builder(this)
+        val dialogView = layoutInflater.inflate(R.layout.alarm_setting_advanced, null)
+        val dialogHr = dialogView.findViewById<EditText>(R.id.preHr)
+        val dialogMin = dialogView.findViewById<EditText>(R.id.preMin)
 
         solver = intent.extras!!.getInt("solver", 0)
         phr = intent.extras!!.getInt("phr", 0)
         pmin = intent.extras!!.getInt("pmin", 0)
 
-        preHr.setText(phr.toString())
-        preMin.setText(pmin.toString())
+        dialogHr.setText(phr.toString())
+        dialogMin.setText(pmin.toString())
 
         solving.adapter = ArrayAdapter(
             applicationContext,
@@ -43,20 +50,24 @@ class AlarmSettingAdvanced : AppCompatActivity() {
             override fun onNothingSelected(adapterView: AdapterView<*>) {}
         })
 
-        done.setOnClickListener {
-            var str = preHr.toString().toInt()
-            phr = str
+        var returnIntent = Intent()
 
-            str = preMin.toString().toInt()
-            pmin = str
+        builder.setView(dialogView)
+        builder.setPositiveButton("확인") { _, _ ->
+            phr = dialogHr.toString().toInt()
+            pmin = dialogMin.toString().toInt()
 
-            var returnIntent = Intent()
+
             returnIntent.putExtra("solver", solver)
             returnIntent.putExtra("phr", phr)
             returnIntent.putExtra("pmin", pmin)
 
             setResult(Activity.RESULT_OK, returnIntent)
             finish()
-        }
+            }
+        builder.setNegativeButton("취소") { _, _ -> /* 취소일 때 아무 액션이 없으므로 빈칸 */ }
+        builder.create().show()
+
+
     }
 }

@@ -1,9 +1,5 @@
 package org.siwonlee.alarmapp12
 
-import android.app.Activity
-import android.app.AlarmManager
-import android.app.AlertDialog
-import android.app.PendingIntent
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -11,35 +7,36 @@ import android.os.Build
 import java.util.*
 import android.content.Context
 import android.graphics.Color
-import android.text.TextUtils.isEmpty
 import kotlinx.android.synthetic.main.activity_main.*
-import android.widget.ArrayAdapter
-import android.widget.AdapterView
+import android.content.DialogInterface
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.view.WindowManager
+import android.R.attr.dial
+import android.app.*
+import android.text.TextUtils.isEmpty
 import android.view.View
-import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_main.fri
-import kotlinx.android.synthetic.main.activity_main.mon
-import kotlinx.android.synthetic.main.activity_main.preMin
-import kotlinx.android.synthetic.main.activity_main.sat
-import kotlinx.android.synthetic.main.activity_main.sun
-import kotlinx.android.synthetic.main.activity_main.thu
-import kotlinx.android.synthetic.main.activity_main.tue
-import kotlinx.android.synthetic.main.activity_main.wed
-import kotlinx.android.synthetic.main.previous_alarmset.*
+import android.widget.*
+import kotlinx.android.synthetic.main.alarm_setting_advanced.*
+import kotlinx.android.synthetic.main.alarm_solving_1.*
 
 
 fun Boolean.toInt() = if (this) 1 else 0
+
+var ADVANCE_SETTING = 2019
 
 class MainActivity : AppCompatActivity() {
     //액티비티 생성 시 알람 설정 시간을 받아온다
     var hr = 6
     var min = 0
+    var phr = 0
+    var pmin = 0
     var ID = 0
     var solver = 0
     var switch = booleanArrayOf(true, false, false, false, false, false, false, false)
 
-    var prehr : Int = 0
-    var premin : Int = 0
 
     var ringDate : String = ""        // 한글로 날짜 저장
     var stringSwitch : String = ""      // T/F로 날짜 저장
@@ -47,7 +44,6 @@ class MainActivity : AppCompatActivity() {
 
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
     val cal : Calendar = Calendar.getInstance()
-    val cal2 : Calendar = Calendar.getInstance()
 
     //텍스트뷰를 터치했을 때 바꿀 색
     var tColor = arrayOf(Color.GRAY, /*Color.parseColor("#008577")*/Color.RED)
@@ -59,7 +55,8 @@ class MainActivity : AppCompatActivity() {
         //알람 설정 시간과 분은 그대로 받아온다
         hr = intent.getIntExtra("hr", 6)
         min = intent.getIntExtra("min", 0)
-
+        phr = intent.getIntExtra("prehr", 0)
+        pmin = intent.getIntExtra("premin", 0)
 
         // 알람 수정 또는 삭제 시 사용됨
         val position = intent.getIntExtra("position", -1)
@@ -109,22 +106,6 @@ class MainActivity : AppCompatActivity() {
             min = minute
         })
 
-        //Spinner를 이용해 알람 해제 방식을 결정한다
-        val solvingMethod = resources.getStringArray(R.array.spinnerItem)
-
-        //solvingMethod를 스피너에 연결하기 위한 어댑터
-        val solvingMethodAdapter = ArrayAdapter(
-            applicationContext,
-            android.R.layout.simple_spinner_dropdown_item,
-            solvingMethod
-        )
-
-        //solving 스피너의 어댑터를 solvingMethodAdapter로 지정한다
-        solving.adapter = solvingMethodAdapter
-
-        //스피너의 값을 solver로 지정한다
-        solving.setSelection(solver)
-
         //------------------------------------------------------------------setOnClickListener 시작
 
         //각 요일 버튼을 클릭했을 때
@@ -159,17 +140,48 @@ class MainActivity : AppCompatActivity() {
             sat.setTextColor(tColor[switch[7].toInt()])
         }
 
-        solving.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
-                solver = i
+        advance.setOnClickListener {
+            val builder = AlertDialog.Builder(this)
+            val dialogView = layoutInflater.inflate(R.layout.alarm_setting_advanced, null)
+            val dialogSolving = dialogView.findViewById<Spinner>(R.id.solving)
+            val dialogHr = dialogView.findViewById<EditText>(R.id.preHr)
+            val dialogMin = dialogView.findViewById<EditText>(R.id.preMin)
+
+            if(phr != 0)
+                dialogHr.setText(phr.toString())
+            if(pmin != 0)
+                dialogMin.setText(pmin.toString())
+
+            dialogSolving.adapter = ArrayAdapter(
+                applicationContext,
+                android.R.layout.simple_spinner_dropdown_item,
+                resources.getStringArray(R.array.spinnerItem)
+            )
+
+            dialogSolving.setSelection(solver)
+
+            dialogSolving.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
+                    solver = i
+                }
+
+                override fun onNothingSelected(adapterView: AdapterView<*>) {}
+            })
+
+            builder.setView(dialogView)
+            builder.setPositiveButton("확인") { _, _ ->
+                if ( isEmpty(dialogHr.text) )  phr = 0
+                else phr = Integer.parseInt(dialogHr.text.toString())
+
+                if ( isEmpty(dialogMin.text) )  pmin = 0
+                else  pmin = Integer.parseInt(dialogMin.text.toString())
             }
-
-            override fun onNothingSelected(adapterView: AdapterView<*>) {}
-        })
-
+            builder.setNegativeButton("취소") { _, _ -> /* 취소일 때 아무 액션이 없으므로 빈칸 */ }
+            builder.create().show()
+        }
 
         // 알람 삭제 버튼 (bt_set.setOnClickListener와 유사)
-        bt_del1.setOnClickListener {
+        bt_delete.setOnClickListener {
             //pendingIntent로 alarmManager의 알람은 여기서 삭제하고
             //알람 recyclerview의 해당 알람 item은 returnIntent로 정보를 넘겨서 삭제하게 한다
 
@@ -199,7 +211,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 알람 저장 버튼
-        bt_set1.setOnClickListener {
+        bt_set.setOnClickListener {
 
             //날짜가 바뀌는 등 오류가 발생할 수 있으므로 현재 날짜를 다시 구한다
             cal.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
@@ -208,23 +220,15 @@ class MainActivity : AppCompatActivity() {
             cal.set(Calendar.HOUR_OF_DAY, hr)
             cal.set(Calendar.MINUTE, min)
 
-            if ( isEmpty(preHr2.text) )  prehr = 0
-            else  prehr = Integer.parseInt(preHr2.text.toString())
+            cal.add(Calendar.HOUR_OF_DAY, -phr)
+            cal.add(Calendar.MINUTE, -pmin)
 
-            if ( isEmpty(preMin2.text) )  premin = 0
-            else  premin = Integer.parseInt(preMin2.text.toString())
-
-            cal.add(Calendar.HOUR_OF_DAY, -prehr)
-            cal.add(Calendar.MINUTE, -premin)
-
-
-           //액티비티를 종료하기 전, 알람을 설정한 요일을 stringSwitch에 저장한다
+            //액티비티를 종료하기 전, 알람을 설정한 요일을 stringSwitch에 저장한다
             stringSwitch = ""
             for(i in 0..7) {
                 if(switch[i]) stringSwitch = "${stringSwitch}T"
                 else stringSwitch = "${stringSwitch}F"
             }
-
             //AlarmList_Activity에 정보를 넘길 intent
             val returnIntent = Intent()
 
@@ -240,17 +244,15 @@ class MainActivity : AppCompatActivity() {
             for(i in 1..7) setAlarm(i, switch[i])
 
             //설정한 알람 정보를 AlarmList_Acitivity로 넘긴다
-            returnIntent.putExtra("hr", cal.get(Calendar.HOUR_OF_DAY))
-            returnIntent.putExtra("min", cal.get(Calendar.MINUTE))
-            returnIntent.putExtra("time", "${(hr).toTime()}:${(min).toTime()}")
+            returnIntent.putExtra("hr", hr)
+            returnIntent.putExtra("min", min)
+            returnIntent.putExtra("time", "${hr.toTime()}:${min.toTime()}")
             returnIntent.putExtra("stringSwitch", stringSwitch)
             returnIntent.putExtra("solver", solver)
             returnIntent.putExtra("date", ringDate)
 
-            returnIntent.putExtra("prehr", prehr)
-            returnIntent.putExtra("premin", premin)
-
-            Toast.makeText(this, "${prehr}H ${premin}M previous", Toast.LENGTH_LONG).show()
+            returnIntent.putExtra("prehr", phr)
+            returnIntent.putExtra("premin", pmin)
 
             Toast.makeText(this, "Alarm will be ringing in ${cal.get(Calendar.HOUR_OF_DAY)}:${cal.get(Calendar.MINUTE)}", Toast.LENGTH_LONG).show()
 
@@ -270,10 +272,10 @@ class MainActivity : AppCompatActivity() {
         val requestCode: Int = (day * 10000) + (hr * 100 + min)
 
         //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
-        intent.putExtra("HOUR_OF_DAY", cal.get(Calendar.HOUR_OF_DAY))
-        intent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
-
+        intent.putExtra("HOUR_OF_DAY", hr)
+        intent.putExtra("MINUTE", min)
         intent.putExtra("requestCode", requestCode)
+
         //알람 해제 방식을 int타입으로 intent에 담는다
         intent.putExtra("solver", solver)
 

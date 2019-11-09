@@ -33,7 +33,7 @@ class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data
             // itemView의 list 구성 요소에 text로 전달한다
             itemView.time_in_list.text = "${data.hr.toTime()}:${data.min.toTime()}"
             itemView.date_in_list.text = data.ringDate
-            //itemView.gap_in_list.text = "${data.prehr.toTime()}H ${data.premin.toTime()}M before ${data.ringTime}"
+            itemView.gap_in_list.text = "${data.prehr.toTime()}H ${data.premin.toTime()}M before ${data.ringTime}"
 
             // ViewHolder내에서 setOnClickListener 아이템 클릭 event
             // adapterPosition으로 클릭한 아이템의 인덱스값 전달

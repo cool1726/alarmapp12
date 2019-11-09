@@ -1,17 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/alarm_advance"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".AlarmSettingAdvanced">
+    android:orientation="vertical">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="#66366F"
+        android:gravity="center"
+        android:text="advanced alarm setting"
+        android:textColor="#ffffff"
+        android:textSize="16dp"
+        android:textStyle="bold" />
+
     <LinearLayout
         android:id="@+id/linearLayout4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="horizontal"
+        android:layout_marginTop="15dp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="15dp">
@@ -35,33 +48,35 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="horizontal"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         app:layout_constraintBottom_toTopOf="@+id/done"
         app:layout_constraintEnd_toEndOf="@+id/linearLayout4"
         app:layout_constraintStart_toStartOf="@+id/linearLayout4"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
 
         <TextView
+            android:id="@+id/aaa"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="미리 울리기: "
-            android:id="@+id/aaa"
             android:textSize="18sp" />
 
         <EditText
             android:id="@+id/preHr"
             android:layout_width="60dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
+            android:layout_weight="0"
 
             android:ems="10"
             android:inputType="number" />
 
         <TextView
+            android:id="@+id/aab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:id="@+id/aab"
             android:text="시간   "
             android:textSize="18sp" />
 
@@ -69,29 +84,19 @@
             android:id="@+id/preMin"
             android:layout_width="60dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0"
             android:layout_gravity="center"
+            android:layout_weight="0"
 
             android:ems="10"
             android:inputType="number" />
 
         <TextView
+            android:id="@+id/aac"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:id="@+id/aac"
             android:text="분 전"
             android:textSize="18sp" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/done"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Done"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
-        app:layout_constraintStart_toStartOf="@+id/linearLayout3"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
