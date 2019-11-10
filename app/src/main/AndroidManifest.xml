@@ -18,8 +18,6 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".GoogleSignInActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".AlarmSettingAdvanced"
-            android:screenOrientation="portrait"/>
         <activity android:name=".Alarm_Ringing"
             android:screenOrientation="portrait">
             <intent-filter>

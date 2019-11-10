@@ -12,6 +12,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.alarm_list.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -58,18 +59,15 @@ class AlarmList_Activity : AppCompatActivity() {
         //앱이 실행되어 AlarmList_Acitivity가 생성될 때마다 pref에 저장된 값 불러와서 alarmlist 생성
         for(dates in 1..127)  for (hr in 0 until 24)  for (min in 0 until 60) {
             val code = (dates * 100 + hr) * 100 + min
-            if (pref.getString("time${code}", "no alarm") != "no alarm") {
+            if (pref.getString("data${code}", "") != "") {
                 //알람이 삭제되어 ID 값이 비었을 경우엔 alarmlist에 데이터를 저장하지 않는다
                 //but 리사이클러뷰에서 position값(위치)이 바뀌면 Alarm_Data의 ID 값도 바꾸는 방법이 좋을 듯합니다
 
-                val time = pref.getString("time${code}", "no alarm")
-                val date = pref.getString("date${code}", "no date")
-                val phr = pref.getInt("phr${code}", 0)
-                val pmin = pref.getInt("pmin${code}", 0)
-                val solver = pref.getInt("solver${code}", 0)
+                val strData = pref.getString("data${code}", "")
+                val data = GsonBuilder().create().fromJson(strData, Alarm_Data::class.java)
 
                 //ID 순서대로 alarmlist에 알람 추가
-                alarmlist.add(Alarm_Data(hr, min, phr, pmin, time, date, dates, solver))
+                alarmlist.add(data)
             }
         }
 
@@ -119,33 +117,30 @@ class AlarmList_Activity : AppCompatActivity() {
             if(before != -1) {
                 //알람을 삭제한 것이라면 alarmlist에서 알람을 제거한다
                 if (delete) alarmlist.removeAt(position)
-
                 //pref에 존재하는 옛날 정보를 제거한다
-                editor.remove("time${before}")
-                editor.remove("date${before}")
-                editor.remove("phr${before}")
-                editor.remove("pmin${before}")
-                editor.remove("solver${before}")
+                editor.remove("data${before}")
             }
 
             //알람을 수정 혹은 생성했다면 delete는 false이다
             if (!delete) {
+                //alarmlist에 저장할 Alarm_Data 객체
+                val data = Alarm_Data(hr, min, phr, pmin, time, date, intSwitch, solver)
+
                 //알람을 생성했다면 position은 반드시 -1이다
                 if (position == -1) {
                     position = alarmlist.size
-                    alarmlist.add(Alarm_Data(hr, min, phr, pmin, time, date, intSwitch, solver))
+                    alarmlist.add(data)
                 }
                 //그렇지 않다면 기존에 존재하던 알람을 수정한다
-                else alarmlist[position] = Alarm_Data(hr, min, phr, pmin, time, date, intSwitch, solver)
+                else alarmlist[position] = data
 
+                //알람이 울릴 요일/시각 정보를 하나의 정수로 압축한다
                 val ID = (intSwitch * 100 + hr) * 100 + min
+                //data를 gson을 이용해 String타입으로 형변환한다
+                val strData = GsonBuilder().create().toJson(data, Alarm_Data::class.java)
 
-                // 설정/수정한 알람 정보를 pref에 추가한다
-                editor.putString("time${ID}", time)
-                editor.putString("date${ID}", date)
-                editor.putInt("phr${ID}", phr)
-                editor.putInt("pmin${ID}", pmin)
-                editor.putInt("solver${ID}", solver)
+                //형변환한 data를 pref에 저장한다
+                editor.putString("data${ID}", strData)
 
                 for(day in 7 downTo 1) {
                     if(intSwitch % 2 == 1) setAlarm(day, position, true)
