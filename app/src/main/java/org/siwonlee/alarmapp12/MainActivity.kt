@@ -35,9 +35,7 @@ class MainActivity : AppCompatActivity() {
 
     var before_id = -1
 
-    var ringDate : String = ""        // 한글로 날짜 저장
     var intSwitch = 0
-    private val days = arrayOf("일", "월", "화", "수", "목", "금", "토")
 
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
     val cal : Calendar = Calendar.getInstance()
@@ -267,10 +265,6 @@ class MainActivity : AppCompatActivity() {
             // 알람을 수정하는 경우 현재 알람의 위치를 returnIntent에 담는다
             if (position != -1) returnIntent.putExtra("position", position)
 
-            //알람의 요일 설정 정보를 stringDate에 담는다
-            ringDate = ""
-            for(i in 1..7) if(switch[i]) ringDate = "${ringDate} ${days[i - 1]}"
-
             //설정한 알람 정보를 AlarmList_Acitivity로 넘긴다
             returnIntent.putExtra("hr", hr)
             returnIntent.putExtra("min", min)
@@ -279,9 +273,6 @@ class MainActivity : AppCompatActivity() {
             returnIntent.putExtra("solver", solver)
             returnIntent.putExtra("phr", phr)
             returnIntent.putExtra("pmin", pmin)
-
-            returnIntent.putExtra("time", "${hr.toTime()}:${min.toTime()}")
-            returnIntent.putExtra("date", ringDate)
 
             returnIntent.putExtra("before_id", before_id)
 

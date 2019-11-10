@@ -15,38 +15,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.alarm_list.*
 import java.util.*
-import kotlin.collections.ArrayList
 
 class AlarmList_Activity : AppCompatActivity() {
     val REQUEST_SET : Int = 1000
     val REQUEST_CLICK : Int = 2000
-    val alarmlist = ArrayList<Alarm_Data>()
+    lateinit var alarmlist: UserData
 
     private val prefStorage = "org.siwonlee.alarmapp12.prefs"
-
-    // AlarmlistAdapter의 ViewHolder
-    val adapter = AlarmListAdapter(this, alarmlist, { position ->
-        val cintent = Intent(this, MainActivity::class.java)
-        cintent.putExtra("hr", alarmlist[position].hr)
-        cintent.putExtra("min", alarmlist[position].min)
-
-        cintent.putExtra("phr", alarmlist[position].phr)
-        cintent.putExtra("pmin", alarmlist[position].pmin)
-
-        cintent.putExtra("date", alarmlist[position].ringDate)
-        cintent.putExtra("intSwitch", alarmlist[position].intSwitch)
-
-        cintent.putExtra("solver", alarmlist[position].solver)
-
-        cintent.putExtra("position", position)
-        cintent.putExtra("isInit", false)
-
-            //알람을 수정한다
-        startActivityForResult(cintent, REQUEST_CLICK)
-    }, {
-            position -> onLongClickEvent()
-    })
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,27 +31,16 @@ class AlarmList_Activity : AppCompatActivity() {
         val editor = pref!!.edit()
         //editor.clear() pref에 등록된 알람 데이터 삭제용
 
-        //앱이 실행되어 AlarmList_Acitivity가 생성될 때마다 pref에 저장된 값 불러와서 alarmlist 생성
-        for(dates in 1..127)  for (hr in 0 until 24)  for (min in 0 until 60) {
-            val code = (dates * 100 + hr) * 100 + min
-            if (pref.getString("data${code}", "") != "") {
-                //알람이 삭제되어 ID 값이 비었을 경우엔 alarmlist에 데이터를 저장하지 않는다
-                //but 리사이클러뷰에서 position값(위치)이 바뀌면 Alarm_Data의 ID 값도 바꾸는 방법이 좋을 듯합니다
-
-                val strData = pref.getString("data${code}", "")
-                val data = GsonBuilder().create().fromJson(strData, Alarm_Data::class.java)
-
-                //ID 순서대로 alarmlist에 알람 추가
-                alarmlist.add(data)
-            }
-        }
-
+        val strList = pref.getString("list", "")
+        if(strList != "")
+            alarmlist = GsonBuilder().create().fromJson(strList, UserData::class.java)
+        else alarmlist = UserData(ArrayList())
         editor.apply()
 
         // LinearLayoutManager : alarm_list.xml의 alarm_recyclerview에 세로형태로 아이템을 배치한다
         alarm_recyclerview.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         alarm_recyclerview.setHasFixedSize(true)
-        alarm_recyclerview.adapter = adapter
+        alarm_recyclerview.adapter = makeAdapter()
 
         // 알람 초기 셋팅 : 알람 셋팅 화면으로 이동 (activity_main.xml로 이동)
         fab_add.setOnClickListener{
@@ -106,9 +70,6 @@ class AlarmList_Activity : AppCompatActivity() {
             val phr = data.getIntExtra("phr", -1)
             val pmin = data.getIntExtra("pmin", -1)
 
-            val time = data.getStringExtra("time")
-            val date = data.getStringExtra("date")
-
             val before = data.getIntExtra("before_id", -1)
             var position = data.getIntExtra("position", -1)
             val delete = data.getBooleanExtra("delete", false)
@@ -116,31 +77,21 @@ class AlarmList_Activity : AppCompatActivity() {
             //알람을 수정하거나 삭제했다면 before_id는 -1이 아니다
             if(before != -1) {
                 //알람을 삭제한 것이라면 alarmlist에서 알람을 제거한다
-                if (delete) alarmlist.removeAt(position)
-                //pref에 존재하는 옛날 정보를 제거한다
-                editor.remove("data${before}")
+                if (delete) alarmlist.pop(position)
             }
 
             //알람을 수정 혹은 생성했다면 delete는 false이다
             if (!delete) {
                 //alarmlist에 저장할 Alarm_Data 객체
-                val data = Alarm_Data(hr, min, phr, pmin, time, date, intSwitch, solver)
+                val data = Alarm_Data(hr, min, phr, pmin, intSwitch, solver)
 
                 //알람을 생성했다면 position은 반드시 -1이다
                 if (position == -1) {
-                    position = alarmlist.size
+                    position = alarmlist.size()
                     alarmlist.add(data)
                 }
                 //그렇지 않다면 기존에 존재하던 알람을 수정한다
-                else alarmlist[position] = data
-
-                //알람이 울릴 요일/시각 정보를 하나의 정수로 압축한다
-                val ID = (intSwitch * 100 + hr) * 100 + min
-                //data를 gson을 이용해 String타입으로 형변환한다
-                val strData = GsonBuilder().create().toJson(data, Alarm_Data::class.java)
-
-                //형변환한 data를 pref에 저장한다
-                editor.putString("data${ID}", strData)
+                else alarmlist.set(position, data)
 
                 for(day in 7 downTo 1) {
                     if(intSwitch % 2 == 1) setAlarm(day, position, true)
@@ -148,11 +99,16 @@ class AlarmList_Activity : AppCompatActivity() {
                 }
             }
 
+            //data를 gson을 이용해 String타입으로 형변환한다
+            val strList = GsonBuilder().create().toJson(alarmlist, UserData::class.java)
+            //형변환한 data를 pref에 저장한다
+            editor.putString("list", strList)
+
             //수정한 정보를 pref에 commit한다
             editor.apply()
         }
         // 바뀐 alarmlist 때문에 adapter 갱신
-        alarm_recyclerview.adapter = adapter
+        alarm_recyclerview.adapter = makeAdapter()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -175,11 +131,11 @@ class AlarmList_Activity : AppCompatActivity() {
         val intent = Intent(this, Alarm_Receiver::class.java)
 
         //alarmlist에서 알람 설정에 필요한 정보를 가져온다
-        val hr = alarmlist[position].hr
-        val min = alarmlist[position].min
-        val phr = alarmlist[position].phr
-        val pmin = alarmlist[position].pmin
-        val solver = alarmlist[position].solver
+        val hr = alarmlist.get(position).hr
+        val min = alarmlist.get(position).min
+        val phr = alarmlist.get(position).phr * -1
+        val pmin = alarmlist.get(position).pmin * -1
+        val solver = alarmlist.get(position).solver
 
         //알람 정보를 dHHMM로 나타내면 알람이 서로 겹치지 않는다
         val requestCode: Int = (day * 100 + hr) * 100 + min
@@ -203,20 +159,24 @@ class AlarmList_Activity : AppCompatActivity() {
         if (set) {
             //알람을 울릴 시각에 대한 정보를 Calendar를 이용해 표시한다
             val cal = Calendar.getInstance()
+
             //알람을 울릴 시각을 cal에 저장한다
             cal.set(Calendar.HOUR_OF_DAY, hr)
             cal.set(Calendar.MINUTE, min)
             cal.set(Calendar.SECOND, 0)
             cal.set(Calendar.MILLISECOND, 0)
 
-            cal.add(Calendar.HOUR_OF_DAY, -phr)
-            cal.add(Calendar.MILLISECOND, -pmin)
-
             //오늘부터 day 요일까지 남은 일 수
             val diff = (day - cal.get(Calendar.DAY_OF_WEEK) + 7) % 7
 
             //알람이 울리는 요일이 i 요일이 되도록 cal을 조정한다
             cal.add(Calendar.DATE, diff)
+
+            //지정한 미리 울리기 시간만큼 알람 시간을 앞으로 당긴다
+            cal.add(Calendar.HOUR_OF_DAY, phr)
+            cal.add(Calendar.MINUTE, pmin)
+
+            //최종적으로 맞춰진 시각이 현재보다 이전이라면 알람을 7일 뒤로 늦춘다
             if (cal.before(Calendar.getInstance())) cal.add(Calendar.DATE, 7)
 
             //알람 매니저에 알람을 설정한다
@@ -228,5 +188,31 @@ class AlarmList_Activity : AppCompatActivity() {
 
         //day 요일에 알람을 울리지 않아야 한다면 알람을 취소한다
         else alarmManager.cancel(pendingIntent)
+    }
+
+    fun makeAdapter(): AlarmListAdapter {
+        // AlarmlistAdapter의 ViewHolder
+        val adapter = AlarmListAdapter(this, alarmlist.getList(), { position ->
+            val cintent = Intent(this, MainActivity::class.java)
+            cintent.putExtra("hr", alarmlist.get(position).hr)
+            cintent.putExtra("min", alarmlist.get(position).min)
+
+            cintent.putExtra("phr", alarmlist.get(position).phr)
+            cintent.putExtra("pmin", alarmlist.get(position).pmin)
+
+            cintent.putExtra("intSwitch", alarmlist.get(position).intSwitch)
+
+            cintent.putExtra("solver", alarmlist.get(position).solver)
+
+            cintent.putExtra("position", position)
+            cintent.putExtra("isInit", false)
+
+            //알람을 수정한다
+            startActivityForResult(cintent, REQUEST_CLICK)
+        }, {
+                position -> onLongClickEvent()
+        })
+
+        return adapter
     }
 }
