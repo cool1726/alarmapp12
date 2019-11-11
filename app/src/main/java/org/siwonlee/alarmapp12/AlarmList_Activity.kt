@@ -31,6 +31,7 @@ class AlarmList_Activity : AppCompatActivity() {
         val editor = pref!!.edit()
         //editor.clear() pref에 등록된 알람 데이터 삭제용
 
+        //pref에 저장된 string타입 UserData 클래스를 decode해 alarmlist에 저장
         val strList = pref.getString("list", "")
         if(strList != "")
             alarmlist = GsonBuilder().create().fromJson(strList, UserData::class.java)
@@ -70,6 +71,8 @@ class AlarmList_Activity : AppCompatActivity() {
             val phr = data.getIntExtra("phr", -1)
             val pmin = data.getIntExtra("pmin", -1)
 
+            val category = data.getStringExtra("category")
+
             val before = data.getIntExtra("before_id", -1)
             var position = data.getIntExtra("position", -1)
             val delete = data.getBooleanExtra("delete", false)
@@ -83,7 +86,7 @@ class AlarmList_Activity : AppCompatActivity() {
             //알람을 수정 혹은 생성했다면 delete는 false이다
             if (!delete) {
                 //alarmlist에 저장할 Alarm_Data 객체
-                val data = Alarm_Data(hr, min, phr, pmin, intSwitch, solver)
+                val data = Alarm_Data(hr, min, phr, pmin, intSwitch, solver, category)
 
                 //알람을 생성했다면 position은 반드시 -1이다
                 if (position == -1) {
@@ -111,11 +114,13 @@ class AlarmList_Activity : AppCompatActivity() {
         alarm_recyclerview.adapter = makeAdapter()
     }
 
+    //로그인 등의 메뉴를 앱의 메뉴바에 표시
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.alarm_list_menu, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
+    //메뉴의 각 옵션을 선택했을 때 실행할 동작
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             R.id.signin -> {
@@ -203,6 +208,8 @@ class AlarmList_Activity : AppCompatActivity() {
             cintent.putExtra("intSwitch", alarmlist.get(position).intSwitch)
 
             cintent.putExtra("solver", alarmlist.get(position).solver)
+
+            cintent.putExtra("category", alarmlist.get(position).category)
 
             cintent.putExtra("position", position)
             cintent.putExtra("isInit", false)

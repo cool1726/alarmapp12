@@ -37,6 +37,8 @@ class MainActivity : AppCompatActivity() {
 
     var intSwitch = 0
 
+    var category = "기본"
+
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
     val cal : Calendar = Calendar.getInstance()
 
@@ -273,6 +275,8 @@ class MainActivity : AppCompatActivity() {
             returnIntent.putExtra("solver", solver)
             returnIntent.putExtra("phr", phr)
             returnIntent.putExtra("pmin", pmin)
+
+            returnIntent.putExtra("category", category)
 
             returnIntent.putExtra("before_id", before_id)
 
