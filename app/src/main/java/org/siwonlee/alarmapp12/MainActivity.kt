@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     var intSwitch = 0
 
     var category = "기본"
+    lateinit var categories: ArrayList<String>
 
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
     val cal : Calendar = Calendar.getInstance()
@@ -64,6 +65,12 @@ class MainActivity : AppCompatActivity() {
         //알람 설정 요일은 booleanArray을 Int로 압축한 값을 가져오므로
         //이를 intSwitch에 넣고 decode해야 한다
         intSwitch = intent.getIntExtra("intSwitch", 0)
+
+        if(intent.hasExtra("category"))
+            category = intent.getStringExtra("category")
+        else category = "기본"
+
+        categories = intent.getStringArrayListExtra("categories")
 
         //알람을 수정하는 것이라면 수정 이전 알람의 정보를 before_id에 담는다
         if(!isInit) {
@@ -178,6 +185,7 @@ class MainActivity : AppCompatActivity() {
             val dialogSolving = dialogView.findViewById<Spinner>(R.id.solving)
             val dialogHr = dialogView.findViewById<EditText>(R.id.preHr)
             val dialogMin = dialogView.findViewById<EditText>(R.id.preMin)
+            val categorize = dialogView.findViewById<Spinner>(R.id.categorize)
 
             if (phr != 0)
                 dialogHr.setText(phr.toString())
@@ -194,13 +202,31 @@ class MainActivity : AppCompatActivity() {
 
             dialogSolving.setOnItemSelectedListener(object :
                 AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    adapterView: AdapterView<*>,
-                    view: View,
-                    i: Int,
-                    l: Long
-                ) {
+                override fun onItemSelected( adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
                     solver = i
+                }
+
+                override fun onNothingSelected(adapterView: AdapterView<*>) {}
+            })
+
+            categorize.adapter = ArrayAdapter(
+                applicationContext,
+                android.R.layout.simple_spinner_dropdown_item,
+                categories)
+
+            categorize.setSelection(0)
+
+            for(i in 0 until categories.size) {
+                if(category == categories[i]) {
+                    categorize.setSelection(i)
+                    break
+                }
+            }
+
+            categorize.setOnItemSelectedListener(object :
+                AdapterView.OnItemSelectedListener {
+                override fun onItemSelected( adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
+                    category = categories[i]
                 }
 
                 override fun onNothingSelected(adapterView: AdapterView<*>) {}

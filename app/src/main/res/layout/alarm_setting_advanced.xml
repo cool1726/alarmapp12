@@ -1,50 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".AlarmSettingAdvanced">
+    android:layout_height="match_parent">
+
     <LinearLayout
-        android:id="@+id/linearLayout4"
+        android:id="@+id/alarmSolvingMethod"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="15dp">
+
+        app:layout_constraintBottom_toTopOf="@+id/alarmPreRinging"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            android:id="@+id/aa"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="알람 해제 방식: "
-            android:id="@+id/aa"
             android:textSize="18sp" />
 
         <Spinner
             android:id="@+id/solving"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout3"
+        android:id="@+id/alarmPreRinging"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/linearLayout4"
-        app:layout_constraintStart_toStartOf="@+id/linearLayout4"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
+
+        app:layout_constraintBottom_toTopOf="@+id/alarmCategorySetter"
+        app:layout_constraintTop_toBottomOf="@+id/alarmSolvingMethod">
 
         <TextView
+            android:id="@+id/aaa"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="미리 울리기: "
-            android:id="@+id/aaa"
             android:textSize="18sp" />
 
         <EditText
@@ -52,17 +50,17 @@
             android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:gravity="center"
-            android:hint="0"
-
             android:ems="10"
+            android:gravity="center"
+
+            android:hint="0"
             android:inputType="number" />
 
         <TextView
+            android:id="@+id/aab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:id="@+id/aab"
             android:text="시간   "
             android:textSize="18sp" />
 
@@ -71,19 +69,42 @@
             android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:gravity="center"
-            android:hint="0"
-
             android:ems="10"
+            android:gravity="center"
+
+            android:hint="0"
             android:inputType="number" />
 
         <TextView
+            android:id="@+id/aac"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:id="@+id/aac"
             android:text="분 전"
             android:textSize="18sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/alarmCategorySetter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/alarmPreRinging"
+        tools:layout_editor_absoluteX="-16dp">
+
+        <TextView
+            android:id="@+id/cat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="알람 카테고리: "
+            android:textSize="18sp" />
+
+        <Spinner
+            android:id="@+id/categorize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
