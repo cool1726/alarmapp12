@@ -23,8 +23,8 @@ import kotlinx.android.synthetic.main.alarm_list.*
 import java.util.*
 
 class AlarmList_Activity : AppCompatActivity() {
-    val REQUEST_SET : Int = 1000
-    val REQUEST_CLICK : Int = 2000
+    val ALARM_SET : Int = 1000
+
     lateinit var alarmlist: UserData
 
     private val prefStorage = "org.siwonlee.alarmapp12.prefs"
@@ -58,7 +58,7 @@ class AlarmList_Activity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             intent.putExtra("categories", alarmlist.getCategories())
             //알람을 설정한다
-            startActivityForResult(intent, REQUEST_SET)
+            startActivityForResult(intent, this.ALARM_SET)
         }
     }
 
@@ -113,7 +113,7 @@ class AlarmList_Activity : AppCompatActivity() {
                 }
             }
 
-            //data를 gson을 이용해 String타입으로 형변환한다
+            //alarmlist를 gson을 이용해 String타입으로 형변환한다
             val strList = GsonBuilder().create().toJson(alarmlist, UserData::class.java)
             //형변환한 data를 pref에 저장한다
             editor.putString("list", strList)
@@ -134,10 +134,16 @@ class AlarmList_Activity : AppCompatActivity() {
     //메뉴의 각 옵션을 선택했을 때 실행할 동작
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
-            //로그인 버튼을 눌렀을 때
+            //계정 연동 관리 버튼을 눌렀을 때
             R.id.signin -> {
-                //GoogleSignInActivity를 실행시킨다
+                //GoogleSignInActivity를 실행시킬 intent를 만든 뒤
                 val logInIntent = Intent(this, GoogleSignInActivity::class.java)
+
+                //alarmlist를 gson을 이용해 String타입으로 형변환해 logInIntent에 넣는다
+                val strList = GsonBuilder().create().toJson(alarmlist, UserData::class.java)
+                logInIntent.putExtra("list", strList)
+
+                //logInIntent.putExtra()
                 startActivity(logInIntent)
             }
 
@@ -199,16 +205,6 @@ class AlarmList_Activity : AppCompatActivity() {
                 for(i in alarmlist.getCategorySize() - 1 downTo 0) {
                     alarmlist.removeCategory(i)
                 }
-            }
-
-            //firebase에 백업하기
-            R.id.setBackup -> {
-
-            }
-
-            //firebase에서 백업 가져오기
-            R.id.getBackup -> {
-
             }
 
             /* 카테고리 강제 삭제
@@ -334,7 +330,7 @@ class AlarmList_Activity : AppCompatActivity() {
             cintent.putExtra("isInit", false)
 
             //알람을 수정한다
-            startActivityForResult(cintent, REQUEST_CLICK)
+            startActivityForResult(cintent, this.ALARM_SET)
         }, {
                 position -> onLongClickEvent()
         })

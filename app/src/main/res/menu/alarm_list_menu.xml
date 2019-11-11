@@ -15,18 +15,8 @@
                 android:title="빈 카테고리 삭제"/>
         </menu>
     </item>
+
     <item
         android:id="@+id/signin"
-        android:title="구글 계정 연동"/>
-    <item
-        android:id="@+id/backup"
-        android:title="백업"/>
-    <menu>
-        <item
-            android:id="@+id/setBackup"
-            android:title="백업하기(미구현)"/>
-        <item
-            android:id="@+id/getBackup"
-            android:title="백업 가져오기(미구현)"/>
-    </menu>
+        android:title="계정 연동 관리"/>
 </menu>

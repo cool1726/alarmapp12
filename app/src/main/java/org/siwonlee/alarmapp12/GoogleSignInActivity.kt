@@ -12,15 +12,27 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.google_sign_in_activity.*
 
 class GoogleSignInActivity : AppCompatActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
     private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseDatabase.getInstance().getReference()
+
+    val user = auth.currentUser
+    val uid = auth.uid
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.google_sign_in_activity)
+
+        val strList = intent.getStringExtra("list")
+        var data = GsonBuilder().create().fromJson(strList, UserData::class.java)
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
@@ -29,16 +41,30 @@ class GoogleSignInActivity : AppCompatActivity() {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
+        //로그인
         signinButton.setOnClickListener {
             val signInIntent = googleSignInClient.signInIntent
             startActivityForResult(signInIntent, RC_SIGN_IN)
         }
 
-        signout.setOnClickListener {
+        //로그아웃
+        signoutButton.setOnClickListener {
             googleSignInClient.signOut()
             Toast.makeText(this, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
             finish()
         }
+
+        //백업하기
+        setBackup.setOnClickListener {
+            if(uid != null)
+            {
+                db.child(uid!!).setValue(data).addOnSuccessListener {
+                    Toast.makeText(this, "백업이 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        //백업을 가져오는 코드 작성해야 함
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -69,7 +95,6 @@ class GoogleSignInActivity : AppCompatActivity() {
                     Toast.makeText(this, "앱이 구글 계정과 연동되었습니다.", Toast.LENGTH_SHORT).show()
 
                     Log.d(TAG, "signInWithCredential:success")
-                    val user = auth.currentUser
 
                     //로그인 직후에는 반드시 로그아웃을 시킨다
                     finish()
