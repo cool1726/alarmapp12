@@ -38,7 +38,6 @@
             android:focusable="true"
             android:text="일"
 
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/mon"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -52,7 +51,6 @@
             android:focusable="true"
             android:text="월"
 
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/tue"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/sun"
@@ -66,7 +64,6 @@
             android:focusable="true"
             android:text="화"
 
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/wed"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/mon"
@@ -80,7 +77,6 @@
             android:focusable="true"
             android:text="수"
 
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/thu"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/tue"
@@ -94,7 +90,6 @@
             android:focusable="true"
             android:text="목"
 
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/fri"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/wed"
@@ -108,7 +103,6 @@
             android:focusable="true"
             android:text="금"
 
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/sat"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/thu"
@@ -122,11 +116,29 @@
             android:focusable="true"
             android:text="토"
 
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/fri"
             app:layout_constraintTop_toTopOf="parent" />
+
+
+            <!-- app:layout_constraintEnd_toStartOf="@+id/date" -->
+<!--        DatePicker 사용 시 쓸 TextView
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="달력"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/sat"
+            app:layout_constraintTop_toTopOf="parent" />
+-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -136,7 +148,7 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
-        android:text="advanced setting"
+        android:text="추가 설정"
 
         app:layout_constraintBottom_toTopOf="@+id/buttons"
         app:layout_constraintEnd_toEndOf="parent"
@@ -159,7 +171,7 @@
             android:id="@+id/bt_set"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="set"
+            android:text="설정"
 
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/bt_delete"
@@ -171,7 +183,7 @@
             android:id="@+id/bt_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="DELETE"
+            android:text="삭제"
 
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

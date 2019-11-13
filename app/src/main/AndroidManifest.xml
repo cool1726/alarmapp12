@@ -16,7 +16,7 @@
         <activity android:name=".Alarm_Data" />
         <activity android:name=".MainActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".AlarmSettingAdvanced"
+        <activity android:name=".GoogleSignInActivity"
             android:screenOrientation="portrait"/>
         <activity android:name=".Alarm_Ringing"
             android:screenOrientation="portrait">
