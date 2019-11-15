@@ -19,10 +19,7 @@ import android.widget.EditText
 import android.widget.Spinner
 import kotlinx.android.synthetic.main.activity_main.*
 
-
 fun Boolean.toInt() = if (this) 1 else 0
-
-var ADVANCE_SETTING = 2019
 
 class MainActivity : AppCompatActivity() {
     //액티비티 생성 시 알람 설정 시간을 받아온다
@@ -133,13 +130,6 @@ class MainActivity : AppCompatActivity() {
 
         //------------------------------------------------------------------setOnClickListener 시작
 
-        //timePicker를 변경할 때마다
-        timePicker.setOnTimeChangedListener({_, hour, minute ->
-            //cal에 해당 시/분을 저장한다
-            hr = hour
-            min = minute
-        })
-
         //각 요일 버튼을 클릭했을 때
         //알람이 해당 요일에 울리는 것을 표시하고
         //이를 텍스트의 색으로 나타낸다
@@ -178,8 +168,8 @@ class MainActivity : AppCompatActivity() {
             sat.setTextColor(tColor[switch[7].toInt()])
         }
 
-        //알람에 대한 추가 설정이 필요하다면
-        advance.setOnClickListener({
+        //알람 추가 설정에 대한 listener를 선언
+        val advanceListener = View.OnClickListener {
             val builder = AlertDialog.Builder(this)
             val dialogView = layoutInflater.inflate(R.layout.alarm_setting_advanced, null)
             val dialogSolving = dialogView.findViewById<Spinner>(R.id.solving)
@@ -242,7 +232,9 @@ class MainActivity : AppCompatActivity() {
             }
             builder.setNegativeButton("취소") { _, _ -> /* 취소일 때 아무 액션이 없으므로 빈칸 */ }
             builder.create().show()
-        })
+        }
+        //advance 버튼을 눌렀을 때의 listener를 advanceListener로 정의
+        advance.setOnClickListener(advanceListener)
 
         // 알람 삭제 버튼 (bt_set.setOnClickListener와 유사)
         bt_delete.setOnClickListener {
@@ -275,6 +267,15 @@ class MainActivity : AppCompatActivity() {
         bt_set.setOnClickListener {
             //날짜가 바뀌는 등 오류가 발생할 수 있으므로 현재 날짜를 다시 구한다
             cal.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
+
+            //timePicker의 값이 바뀔 때마다 hr와 min을 가져오지 않고, 알람 설정 버튼을 눌렀을 때 시간을 가져온다
+            if (Build.VERSION.SDK_INT >= 23) {
+                hr = timePicker.hour
+                min = timePicker.minute
+            } else {
+                hr = timePicker.currentHour
+                min = timePicker.currentMinute
+            }
 
             //알람을 설정한 시간:분을 cal에 저장한다
             cal.set(Calendar.HOUR_OF_DAY, hr)
