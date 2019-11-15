@@ -11,30 +11,27 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.alarm_list.*
 import java.util.*
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.widget.*
-import androidx.core.view.get
-import androidx.core.view.size
-import kotlin.collections.ArrayList
-
 
 class AlarmList_Activity : AppCompatActivity() {
-    val ALARM_SET : Int = 1000
+    val ALARM_SET: Int = 1000
+    val FIREBASE_MANAGE: Int = 2000
 
     lateinit var alarmlist: UserData
 
     private val prefStorage = "org.siwonlee.alarmapp12.prefs"
-    private var currentCategory = "전체 카테고리"
-    var ct = 0
+    private var currentCategory = "기본"
+
+    private var uid: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,9 +48,11 @@ class AlarmList_Activity : AppCompatActivity() {
         else alarmlist = UserData(ArrayList())
         editor.apply()
 
+        //pref에 uid가 저장되어 있다면 이를 가져오고, 아니라면 uid에 ""를 저장한다
+        uid = pref.getString("uid", "")!!
+
         //alarmlist의 알람 카테고리가 존재하지 않으면 기본 카테고리를 추가한다
-        //if(alarmlist.getCategorySize() == 0) alarmlist.addCategory("기본")
-        if(alarmlist == null) alarmlist.addCategory("기본")
+        if(alarmlist.getCategorySize() == 0) alarmlist.addCategory("기본")
 
         val selCate = findViewById<Spinner>(R.id.sp_category)
         val categorize = alarmlist.getCategories()
@@ -63,19 +62,16 @@ class AlarmList_Activity : AppCompatActivity() {
             if (i == "전체 카테고리") {
                 cateAll = true
                 break
-            } else ct++
+            }
         }
         if (cateAll == false) categorize.add("전체 카테고리")
-
-
 
         selCate.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
             categorize)
 
-        selCate.setSelection(categorize.size - 1)       // 기본값 "전체 카테고리"
-
+        selCate.setSelection(0)       // 기본값 "전체 카테고리"
         for(i in 0 until categorize.size) {
             if(currentCategory == categorize[i]) {
                 selCate.setSelection(i)
@@ -89,7 +85,6 @@ class AlarmList_Activity : AppCompatActivity() {
                 currentCategory = alarmlist.getCategories()[i]
                 alarm_recyclerview.adapter = makeAdapter()
             }
-
             override fun onNothingSelected(adapterView: AdapterView<*>)  {
                 selCate.setSelection(0)
             }
@@ -100,8 +95,6 @@ class AlarmList_Activity : AppCompatActivity() {
         alarm_recyclerview.setHasFixedSize(true)
         alarm_recyclerview.adapter = makeAdapter()
 
-
-
         // 알람 초기 셋팅 : 알람 셋팅 화면으로 이동 (activity_main.xml로 이동)
         fab_add.setOnClickListener{
             val intent = Intent(this, MainActivity::class.java)
@@ -110,7 +103,6 @@ class AlarmList_Activity : AppCompatActivity() {
             startActivityForResult(intent, this.ALARM_SET)
         }
     }
-
 
     // item을 오래 클릭할 시 바로 알람 삭제여부를 묻는 dialog 띄우기 (나중에)
     fun onLongClickEvent() { }
@@ -123,56 +115,76 @@ class AlarmList_Activity : AppCompatActivity() {
         val editor = pref!!.edit()
 
         if (resultCode == Activity.RESULT_OK) { // MainActivity에서 RESULT_OK 사인을 보내면
-            // MainActivity에서 보낼 수 있는 모든 정보를 모은다
-            val hr = data!!.getIntExtra("hr", -1)
-            val min = data.getIntExtra("min", -1)
-            var intSwitch = data.getIntExtra("intSwitch", 0)
+            when (requestCode) {
+                //알람을 설정, 수정, 혹은 삭제했을 경우
+                ALARM_SET -> {
+                    // MainActivity에서 보낼 수 있는 모든 정보를 모은다
+                    val hr = data!!.getIntExtra("hr", -1)
+                    val min = data.getIntExtra("min", -1)
+                    var intSwitch = data.getIntExtra("intSwitch", 0)
 
-            val solver = data.getIntExtra("solver", 0)
-            val phr = data.getIntExtra("phr", -1)
-            val pmin = data.getIntExtra("pmin", -1)
+                    val solver = data.getIntExtra("solver", 0)
+                    val phr = data.getIntExtra("phr", -1)
+                    val pmin = data.getIntExtra("pmin", -1)
 
-            val category = data.getStringExtra("category")
+                    val category = data.getStringExtra("category")
 
-            val before = data.getIntExtra("before_id", -1)
-            var position = data.getIntExtra("position", -1)
-            val delete = data.getBooleanExtra("delete", false)
+                    val before = data.getIntExtra("before_id", -1)
+                    var position = data.getIntExtra("position", -1)
+                    val delete = data.getBooleanExtra("delete", false)
 
-            //알람을 수정하거나 삭제했다면 before_id는 -1이 아니다
-            if(before != -1) {
-                //알람을 삭제한 것이라면 alarmlist에서 알람을 제거한다
-                if (delete) alarmlist.pop(position)
-            }
+                    //알람을 수정하거나 삭제했다면 before_id는 -1이 아니다
+                    if(before != -1) {
+                        //알람을 삭제한 것이라면 alarmlist에서 알람을 제거한다
+                        if (delete) alarmlist.pop(position)
+                    }
 
-            //알람을 수정 혹은 생성했다면 delete는 false이다
-            if (!delete) {
-                //alarmlist에 저장할 Alarm_Data 객체
-                val data = Alarm_Data(hr, min, phr, pmin, intSwitch, solver, category)
+                    //알람을 수정 혹은 생성했다면 delete는 false이다
+                    if (!delete) {
+                        //alarmlist에 저장할 Alarm_Data 객체
+                        val data = Alarm_Data(hr, min, phr, pmin, intSwitch, solver, category)
 
-                //알람을 생성했다면 position은 반드시 -1이다
-                if (position == -1) {
-                    position = alarmlist.size()
-                    alarmlist.add(data)
+                        //알람을 생성했다면 position은 반드시 -1이다
+                        if (position == -1) {
+                            position = alarmlist.size()
+                            alarmlist.add(data)
+                        }
+                        //그렇지 않다면 기존에 존재하던 알람을 수정한다
+                        else alarmlist.set(position, data)
+
+                        //토요일부터 일요일까지 역순으로 검토하며 알람을 설정
+                        for(day in 7 downTo 1) {
+                            if(intSwitch % 2 == 1) setAlarm(day, alarmlist.get(position), true)
+                            intSwitch /= 2
+                        }
+                    }
                 }
-                //그렇지 않다면 기존에 존재하던 알람을 수정한다
-                else alarmlist.set(position, data)
 
-                for(day in 7 downTo 1) {
-                    if(intSwitch % 2 == 1) setAlarm(day, position, true)
-                    intSwitch /= 2
+                //Firebase에 접근했을 경우
+                FIREBASE_MANAGE -> {
+                    //GoogleSignUpActivity에서 반환한 list를 fetchUserData에 담아
+                    val fetchUserData = data!!.getStringExtra("list")
+
+                    //해당 데이터가 "", 즉 이상한 데이터가 아니라면 이를 복원해 alarmlist에 저장한다
+                    if(fetchUserData != "")
+                        alarmlist = GsonBuilder().create().fromJson(fetchUserData, UserData::class.java)
+
+                    uid = data.getStringExtra("uid")!!
+                    editor.putString("uid", uid)
                 }
             }
-
-            //alarmlist를 gson을 이용해 String타입으로 형변환한다
-            val strList = GsonBuilder().create().toJson(alarmlist, UserData::class.java)
-            //형변환한 data를 pref에 저장한다
-            editor.putString("list", strList)
-
-            //수정한 정보를 pref에 commit한다
-            editor.apply()
         }
+
         // 바뀐 alarmlist 때문에 adapter 갱신
         alarm_recyclerview.adapter = makeAdapter()
+
+        //alarmlist를 gson을 이용해 String타입으로 형변환한다
+        val strList = GsonBuilder().create().toJson(alarmlist, UserData::class.java)
+        //형변환한 data를 pref에 저장한다
+        editor.putString("list", strList)
+
+        //수정한 정보를 pref에 commit한다
+        editor.apply()
     }
 
     //로그인 등의 메뉴를 앱의 메뉴바에 표시
@@ -192,9 +204,10 @@ class AlarmList_Activity : AppCompatActivity() {
                 //alarmlist를 gson을 이용해 String타입으로 형변환해 logInIntent에 넣는다
                 val strList = GsonBuilder().create().toJson(alarmlist, UserData::class.java)
                 logInIntent.putExtra("list", strList)
+                logInIntent.putExtra("uid", uid)
 
                 //logInIntent.putExtra()
-                startActivity(logInIntent)
+                startActivityForResult(logInIntent, FIREBASE_MANAGE)
             }
 
             /*//카테고리를 선택할 때
@@ -202,35 +215,33 @@ class AlarmList_Activity : AppCompatActivity() {
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("카테고리를 선택해주세요")
 
+                //현재 존재하는 카테고리를 Spinner 형식으로 보여준다
                 val selCate = Spinner(this)
-                val categorize = alarmlist.getCategories()
-                categorize.add("전체 카테고리")
+                val categoriez = alarmlist.getCategories()
+                categoriez.add("전체 카테고리")
 
+                //카테고리의 adapter를 설정해준다
                 selCate.adapter = ArrayAdapter(
-                    this,
+                    applicationContext,
                     android.R.layout.simple_spinner_dropdown_item,
-                    categorize)
+                    categoriez)
+
+                //기본적으로 선택된 카테고리를 "기본", 혹은 0번 카테고리로 정한다
                 selCate.setSelection(0)
 
-                for(i in 0 until categorize.size) {
-                    if(currentCategory == categorize[i]) {
-                        selCate.setSelection(i)
-                        break
-                    }
-                }
                 selCate.setOnItemSelectedListener(object :
                     AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
                         currentCategory = alarmlist.getCategories()[i]
                     }
+
                     override fun onNothingSelected(adapterView: AdapterView<*>)  {
                         selCate.setSelection(0)
                     }
                 })
 
-                builder.setView(selCate)
                 builder.setPositiveButton("확인") { _, _ ->
-
+                    //카테고리 선택 구현해주세요
                 }
                 builder.setNegativeButton("취소") { _, _ -> /* 취소일 때 아무 액션이 없으므로 빈칸 */ }
                 builder.create().show()
@@ -242,6 +253,7 @@ class AlarmList_Activity : AppCompatActivity() {
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("추가할 카테고리 이름을 입력해주세요")
 
+                //카테고리 이름을 입력받을 EditText
                 val setName = EditText(this)
                 setName.hint = "카테고리 ${alarmlist.getCategorySize()}"
                 builder.setView(setName)
@@ -266,27 +278,20 @@ class AlarmList_Activity : AppCompatActivity() {
             R.id.removeCategory -> {
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("제거할 카테고리를 선택해주세요")
-
                 val selCate = Spinner(this)
-
                 selCate.adapter = ArrayAdapter(
                     applicationContext,
                     android.R.layout.simple_spinner_dropdown_item,
                     alarmlist.getCategories())
-
                 selCate.setSelection(alarmlist.size() - 1)
-
                 var removeCat = alarmlist.getCategories()[alarmlist.getCategorySize() - 1]
-
                 selCate.setOnItemSelectedListener(object :
                     AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
                         removeCat = alarmlist.getCategories()[i]
                     }
-
                     override fun onNothingSelected(adapterView: AdapterView<*>) {}
                 })
-
                 builder.setPositiveButton("확인") { _, _ ->
                     for(i in alarmlist.getList())
                         if(i.category == removeCat) alarmlist.getList().remove(i)
@@ -300,16 +305,16 @@ class AlarmList_Activity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun setAlarm(day: Int, position: Int, set: Boolean) {
+    private fun setAlarm(day: Int, data: Alarm_Data, set: Boolean) {
         //정보를 this에서 receiver까지 보내는 intent를 생성
         val intent = Intent(this, Alarm_Receiver::class.java)
 
         //alarmlist에서 알람 설정에 필요한 정보를 가져온다
-        val hr = alarmlist.get(position).hr
-        val min = alarmlist.get(position).min
-        val phr = alarmlist.get(position).phr * -1
-        val pmin = alarmlist.get(position).pmin * -1
-        val solver = alarmlist.get(position).solver
+        val hr = data.hr
+        val min = data.min
+        val phr = data.phr * -1
+        val pmin = data.pmin * -1
+        val solver = data.solver
 
         //알람 정보를 dHHMM로 나타내면 알람이 서로 겹치지 않는다
         val requestCode: Int = (day * 100 + hr) * 100 + min
@@ -388,7 +393,7 @@ class AlarmList_Activity : AppCompatActivity() {
             startActivityForResult(cintent, this.ALARM_SET)
         },
             { position -> onLongClickEvent()
-        })
+            })
 
         return adapter
     }
