@@ -1,5 +1,6 @@
 package org.siwonlee.alarmapp12
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -16,23 +17,28 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.google_sign_in_activity.*
 
 class GoogleSignInActivity : AppCompatActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseDatabase.getInstance().getReference()
+    private val db = FirebaseDatabase.getInstance().getReference("users")
 
-    val user = auth.currentUser
-    val uid = auth.uid
+    var uid: String = ""
+    //서버에서 UserData를 읽어와 nowData에 저장할 변수
+    var data: String? = null
+    //앱 내부 저장소에서 UserData를 받아와 서버에 저장할 변수
+    lateinit var nowData: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.google_sign_in_activity)
 
-        val strList = intent.getStringExtra("list")
-        var data = GsonBuilder().create().fromJson(strList, UserData::class.java)
+        uid = intent.getStringExtra("uid")!!
+        nowData = intent.getStringExtra("list")!!
+
+        //현재 UserData를 저장해 서버에 백업할 때 사용할 변수
+        data = nowData
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
@@ -51,20 +57,43 @@ class GoogleSignInActivity : AppCompatActivity() {
         signoutButton.setOnClickListener {
             googleSignInClient.signOut()
             Toast.makeText(this, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
-            finish()
+            uid = ""
+            endActivity()
         }
 
         //백업하기
         setBackup.setOnClickListener {
-            if(uid != null)
-            {
-                db.child(uid!!).setValue(data).addOnSuccessListener {
+            if(uid != "") {
+                db.child(uid).child("").setValue(nowData).addOnSuccessListener {
                     Toast.makeText(this, "백업이 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                    endActivity()
                 }
             }
         }
 
-        //백업을 가져오는 코드 작성해야 함
+        getBackup.setOnClickListener {
+            if(data != null) {
+                nowData = data!!
+                Toast.makeText(this, "백업을 가져왔습니다.", Toast.LENGTH_SHORT).show()
+                endActivity()
+            } else {
+                Toast.makeText(this, "백업 데이터가 망가졌습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        db.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (uid != "") {
+                    val hashMap: HashMap<String, String> = dataSnapshot.getValue() as HashMap<String, String>
+                    val mapToString = hashMap.get(uid)
+                    data = mapToString
+                    //data = dataSnapshot.getValue(String::class.java)
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+            }
+        })
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -77,6 +106,12 @@ class GoogleSignInActivity : AppCompatActivity() {
                 // Google Sign In was successful, authenticate with Firebase
                 val account = task.getResult(ApiException::class.java)
                 firebaseAuthWithGoogle(account!!)
+
+                val uidTemp = auth.uid
+                if(uidTemp != null) uid = uidTemp
+
+                //로그인 직후에는 반드시 액티비티를 종료한다
+                endActivity()
             } catch (e: ApiException) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e)
@@ -93,11 +128,6 @@ class GoogleSignInActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     Toast.makeText(this, "앱이 구글 계정과 연동되었습니다.", Toast.LENGTH_SHORT).show()
-
-                    Log.d(TAG, "signInWithCredential:success")
-
-                    //로그인 직후에는 반드시 로그아웃을 시킨다
-                    finish()
                     //updateUI(user)
                 } /*else {
                     // If sign in fails, display a message to the user.
@@ -111,5 +141,17 @@ class GoogleSignInActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "GoogleActivity"
         private const val RC_SIGN_IN = 9001
+    }
+
+    fun endActivity() {
+        val returnIntent = Intent(this, AlarmList_Activity::class.java)
+
+        //백업한 데이터, 혹은 백업된 데이터를 returnIntent에 담는다
+        returnIntent.putExtra("list", nowData)
+        returnIntent.putExtra("uid", uid)
+
+        //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
+        setResult(Activity.RESULT_OK, returnIntent)
+        finish()
     }
 }
