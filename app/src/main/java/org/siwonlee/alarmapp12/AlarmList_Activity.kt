@@ -54,10 +54,12 @@ class AlarmList_Activity : AppCompatActivity() {
         //alarmlist의 알람 카테고리가 존재하지 않으면 기본 카테고리를 추가한다
         if(alarmlist.getCategorySize() == 0) alarmlist.addCategory("기본")
 
+        //현재 존재하는 카테고리를 Spinner 형식으로 보여준다
         val selCate = findViewById<Spinner>(R.id.sp_category)
         val categorize = alarmlist.getCategories()
         var cateAll = false
 
+        // "전체 카테고리" 항목 추가 (카테고리 상관없이 모든 알람 확인용)
         for (i in categorize) {
             if (i == "전체 카테고리") {
                 cateAll = true
@@ -66,6 +68,7 @@ class AlarmList_Activity : AppCompatActivity() {
         }
         if (cateAll == false) categorize.add("전체 카테고리")
 
+        // category adapter 설정
         selCate.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
@@ -79,6 +82,7 @@ class AlarmList_Activity : AppCompatActivity() {
             }
         }
 
+        // 카테고리 선택 시, makeAdapter()를 호출해 알람뷰 새로고침
         selCate.setOnItemSelectedListener(object :
             AdapterView.OnItemSelectedListener {
             override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
@@ -371,7 +375,8 @@ class AlarmList_Activity : AppCompatActivity() {
 
     fun makeAdapter(): AlarmListAdapter {
         // AlarmlistAdapter의 ViewHolder
-        val adapter = AlarmListAdapter(this, alarmlist.getCategoryList(currentCategory), currentCategory, { position ->
+        // 선택된 category에 해당하는 alarmlist를 전달하기 위해 getCategoryList 함수 이용
+        val adapter = AlarmListAdapter(this, alarmlist.getCategoryList(currentCategory), { position ->
             val cintent = Intent(this, MainActivity::class.java)
             cintent.putExtra("hr", alarmlist.get(position).hr)
             cintent.putExtra("min", alarmlist.get(position).min)

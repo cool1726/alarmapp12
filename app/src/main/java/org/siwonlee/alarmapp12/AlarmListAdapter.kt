@@ -6,7 +6,7 @@ import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import android.view.*
 
 
-class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data>, val currentCategory: String,
+class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data>,
                        val alarmItemClick: (Int) -> Unit, val alarmItemLongClick: (Int) -> Unit)
     : RecyclerView.Adapter<AlarmListAdapter.ViewHolder>(){
 
