@@ -118,8 +118,7 @@ class GoogleSignInActivity : AppCompatActivity() {
                 while(FirebaseAuth.getInstance().currentUser == null);
 
                 //Firebasse에서 uid를 받아온다
-                val user = FirebaseAuth.getInstance().currentUser
-                if(user != null && user!!.uid != "") uid = user.uid
+                uid = FirebaseAuth.getInstance().currentUser!!.uid
 
                 //로그인 직후에는 반드시 액티비티를 종료한다
                 endActivity()
