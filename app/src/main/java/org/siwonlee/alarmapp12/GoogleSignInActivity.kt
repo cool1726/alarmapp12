@@ -114,8 +114,12 @@ class GoogleSignInActivity : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)
                 firebaseAuthWithGoogle(account!!)
 
-                val uidTemp = auth.uid
-                if(uidTemp != null || uidTemp != "") uid = uidTemp!!
+                //처리 과정이 지나치게 빠르면 Firebase에서 uid를 받아올 수 없다
+                while(FirebaseAuth.getInstance().currentUser == null);
+
+                //Firebasse에서 uid를 받아온다
+                val user = FirebaseAuth.getInstance().currentUser
+                if(user != null && user!!.uid != "") uid = user.uid
 
                 //로그인 직후에는 반드시 액티비티를 종료한다
                 endActivity()
