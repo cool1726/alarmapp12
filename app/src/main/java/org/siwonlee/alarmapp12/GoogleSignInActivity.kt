@@ -23,12 +23,6 @@ import kotlinx.android.synthetic.main.google_sign_in_activity.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import android.widget.EditText
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
 
 class GoogleSignInActivity : AppCompatActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -49,6 +43,7 @@ class GoogleSignInActivity : AppCompatActivity() {
         setContentView(R.layout.google_sign_in_activity)
 
         uid = intent.getStringExtra("uid")!!
+        uidText.setText("uid: $uid")
 
         val strList = intent.getStringExtra("list")!!
         nowData = GsonBuilder().create().fromJson(strList, UserData::class.java)
@@ -106,7 +101,7 @@ class GoogleSignInActivity : AppCompatActivity() {
 
             dialog.setPositiveButton("확인") { _, _ ->
                 uidForOthers = edit.text.toString()
-                if(uidForOthers != "" && db.child(uidForOthers) != null) {
+                if(uidForOthers != "") {
                     val intent = Intent(this, MainActivity::class.java)
                     intent.putExtra("categories", java.util.ArrayList<String>())
 
@@ -126,7 +121,7 @@ class GoogleSignInActivity : AppCompatActivity() {
 
             dialog.setPositiveButton("확인") { _, _ ->
                 uidForOthers = edit.text.toString()
-                if(uidForOthers != "" && db.child(uidForOthers) != null) {
+                if(uidForOthers != "") {
                     val dbSetter = db.child(uidForOthers).child("").child(uid)
                     dbSetter.removeValue()
                 }
@@ -141,19 +136,8 @@ class GoogleSignInActivity : AppCompatActivity() {
                     val map: HashMap<String, HashMap<String, Object>>? = dataSnapshot.getValue() as HashMap<String, HashMap<String, Object>>?
                     if(map != null) {
                         data = UserData(map!![uid]!!["list"] as ArrayList<Alarm_Data>)
-                        for(i in map!![uid]!!) if(i.key != "list") {
-                            val tempData = i.value as HashMap<String, Any>
-                            val temptempData = Alarm_Data(
-                                hr = (tempData["hr"] as Long).toInt(),
-                                min = (tempData["min"] as Long).toInt(),
-                                phr = (tempData["phr"] as Long).toInt(),
-                                pmin = (tempData["pmin"] as Long).toInt(),
-                                solver = (tempData["solver"] as Long).toInt(),
-                                category = tempData["category"] as String,
-                                switch = tempData["switch"] as MutableList<Boolean>
-                            )
-                            data!!.add(temptempData)
-                        }
+                        for(i in map!![uid]!!) if(i.key != "list")
+                            data!!.add(Alarm_Data(i.value as HashMap<String, Any>))
                     }
                 }
 
@@ -181,6 +165,7 @@ class GoogleSignInActivity : AppCompatActivity() {
 
                 //Firebasse에서 uid를 받아온다
                 uid = FirebaseAuth.getInstance().currentUser!!.uid
+                uidText.setText("uid: $uid")
 
                 //로그인 직후에는 반드시 액티비티를 종료한다
                 endActivity()
@@ -236,7 +221,7 @@ class GoogleSignInActivity : AppCompatActivity() {
         private const val RC_SIGN_IN = 9001
     }
 
-    fun endActivity() {
+    private fun endActivity() {
         val returnIntent = Intent(this, AlarmList_Activity::class.java)
 
         val strList = GsonBuilder().create().toJson(nowData, UserData::class.java)

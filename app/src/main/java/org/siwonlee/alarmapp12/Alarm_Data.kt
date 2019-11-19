@@ -10,4 +10,16 @@ class Alarm_Data(
     var category: String = "기본"
 )
 
+fun Alarm_Data(map: HashMap<String, Any>): Alarm_Data {
+    return Alarm_Data(
+        hr = (map["hr"] as Long).toInt(),
+        min = (map["min"] as Long).toInt(),
+        phr = (map["phr"] as Long).toInt(),
+        pmin = (map["pmin"] as Long).toInt(),
+        switch = map["switch"] as MutableList<Boolean>,
+        solver = (map["solver"] as Long).toInt(),
+        category = map["category"] as String
+    )
+}
+
 // data class 형식으로 알람 데이터 저장 (추가 보완이 필요함)
