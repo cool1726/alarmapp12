@@ -13,29 +13,16 @@ import android.content.Context
 import android.graphics.Color
 import android.text.TextUtils.isEmpty
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.Spinner
+import android.widget.*
+import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.activity_main.*
 
 fun Boolean.toInt() = if (this) 1 else 0
 
 class MainActivity : AppCompatActivity() {
-    //액티비티 생성 시 알람 설정 시간을 받아온다
-    var hr = 6
-    var min = 0
-    var phr = 0
-    var pmin = 0
-    var solver = 0
-    var switch = booleanArrayOf(true, false, false, false, false, false, false, false)
-
-    var before_id = -1
-
-    var intSwitch = 0
-
-    var category = "기본"
-    lateinit var categories: ArrayList<String>
+    var before_id = 0
+    var data: Alarm_Data = Alarm_Data()
+    var categories: ArrayList<String> = ArrayList()
 
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
     val cal : Calendar = Calendar.getInstance()
@@ -50,37 +37,29 @@ class MainActivity : AppCompatActivity() {
         //알람을 생성하는 것이라면 true, 수정하는 것이라면 false
         val isInit = intent.getBooleanExtra("isInit", true)
 
-        //알람 설정 시간과 분은 그대로 받아온다
-        hr = intent.getIntExtra("hr", 6)
-        min = intent.getIntExtra("min", 0)
-        phr = intent.getIntExtra("phr", 0)
-        pmin = intent.getIntExtra("pmin", 0)
+        val strData = intent.getStringExtra("data")
+        if(strData != null)
+            data = GsonBuilder().create().fromJson(strData, Alarm_Data::class.java)
 
-        //알람 해제 방식을 받아와 설정한다
-        solver = intent.getIntExtra("solver", 0)
-
-        //알람 설정 요일은 booleanArray을 Int로 압축한 값을 가져오므로
-        //이를 intSwitch에 넣고 decode해야 한다
-        intSwitch = intent.getIntExtra("intSwitch", 0)
-
-        if(intent.hasExtra("category"))
-            category = intent.getStringExtra("category")
-        else category = "기본"
-
-
-        categories = intent.getStringArrayListExtra("categories")
-
+        categories = intent.getStringArrayListExtra("categories")!!
 
         //알람을 수정하는 것이라면 수정 이전 알람의 정보를 before_id에 담는다
         if(!isInit) {
-            before_id = (intSwitch * 100 + hr) * 100 + min
+            var intSwitch = 0
+
+            for(i in 1 .. 7) {
+                intSwitch *= 2
+                intSwitch += data.switch[i].toInt()
+            }
+
+            before_id = (intSwitch * 100 + data.hr) * 100 + data.min
 
             //정보를 this에서 receiver까지 보내는 intent를 생성
             val intent = Intent(this, Alarm_Receiver::class.java)
 
             for (day in 1..7) {
                 //알람 정보를 dHHMM로 나타내면 알람이 서로 겹치지 않는다
-                val requestCode: Int = (day * 100 + hr) * 100 + min
+                val requestCode: Int = (day * 100 + data.hr) * 100 + data.min
 
                 //정해진 요일에 맞는 PendingIntent를 설정한다
                 val pendingIntent = PendingIntent.getBroadcast(
@@ -94,28 +73,22 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        //intSwitch를 decode한다
-        for(i in 7 downTo 0) {
-            switch[i] = (intSwitch % 2 == 1)
-            intSwitch /= 2
-        }
-
         //설정된 요일에 따라 텍스트 색을 다르게 바꿔준다
         //date.setTextColor(tColor[switch[0].toInt()])
-        sun.setTextColor(tColor[switch[1].toInt()])
-        mon.setTextColor(tColor[switch[2].toInt()])
-        tue.setTextColor(tColor[switch[3].toInt()])
-        wed.setTextColor(tColor[switch[4].toInt()])
-        thu.setTextColor(tColor[switch[5].toInt()])
-        fri.setTextColor(tColor[switch[6].toInt()])
-        sat.setTextColor(tColor[switch[7].toInt()])
+        sun.setTextColor(tColor[data.switch[1].toInt()])
+        mon.setTextColor(tColor[data.switch[2].toInt()])
+        tue.setTextColor(tColor[data.switch[3].toInt()])
+        wed.setTextColor(tColor[data.switch[4].toInt()])
+        thu.setTextColor(tColor[data.switch[5].toInt()])
+        fri.setTextColor(tColor[data.switch[6].toInt()])
+        sat.setTextColor(tColor[data.switch[7].toInt()])
 
         // 알람 수정 또는 삭제 시 사용됨
         val position = intent.getIntExtra("position", -1)
 
         //cal의 시간을 알람을 설정한 시간으로 바꾼다
-        cal.set(Calendar.HOUR_OF_DAY, hr)
-        cal.set(Calendar.MINUTE, min)
+        cal.set(Calendar.HOUR_OF_DAY, data.hr)
+        cal.set(Calendar.MINUTE, data.min)
 
         //알람은 항상 0초에 울린다
         cal.set(Calendar.SECOND, 0)
@@ -123,11 +96,11 @@ class MainActivity : AppCompatActivity() {
 
         //timePicker의 초기값을 hr/min으로 지정
         if (Build.VERSION.SDK_INT >= 23) {
-            timePicker.hour = hr
-            timePicker.minute = min
+            timePicker.hour = data.hr
+            timePicker.minute = data.min
         } else {
-            timePicker.setCurrentHour(hr)
-            timePicker.setCurrentMinute(min)
+            timePicker.setCurrentHour(data.hr)
+            timePicker.setCurrentMinute(data.min)
         }
 
         //------------------------------------------------------------------setOnClickListener 시작
@@ -136,38 +109,38 @@ class MainActivity : AppCompatActivity() {
         //알람이 해당 요일에 울리는 것을 표시하고
         //이를 텍스트의 색으로 나타낸다
         sun.setOnClickListener{
-            switch[1] = !switch[1]
-            switch[0] = false
-            sun.setTextColor(tColor[switch[1].toInt()])
+            data.switch[1] = !data.switch[1]
+            data.switch[0] = false
+            sun.setTextColor(tColor[data.switch[1].toInt()])
         }
         mon.setOnClickListener{
-            switch[2] = !switch[2]
-            switch[0] = false
-            mon.setTextColor(tColor[switch[2].toInt()])
+            data.switch[0] = !data.switch[2]
+            data.switch[0] = false
+            mon.setTextColor(tColor[data.switch[2].toInt()])
         }
         tue.setOnClickListener{
-            switch[3] = !switch[3]
-            switch[0] = false
-            tue.setTextColor(tColor[switch[3].toInt()])
+            data.switch[3] = !data.switch[3]
+            data.switch[0] = false
+            tue.setTextColor(tColor[data.switch[3].toInt()])
         }
         wed.setOnClickListener{
-            switch[4] = !switch[4]
-            wed.setTextColor(tColor[switch[4].toInt()])
+            data.switch[4] = !data.switch[4]
+            wed.setTextColor(tColor[data.switch[4].toInt()])
         }
         thu.setOnClickListener{
-            switch[5] = !switch[5]
-            switch[0] = false
-            thu.setTextColor(tColor[switch[5].toInt()])
+            data.switch[5] = !data.switch[5]
+            data.switch[0] = false
+            thu.setTextColor(tColor[data.switch[5].toInt()])
         }
         fri.setOnClickListener{
-            switch[6] = !switch[6]
-            switch[0] = false
-            fri.setTextColor(tColor[switch[6].toInt()])
+            data.switch[6] = !data.switch[6]
+            data.switch[0] = false
+            fri.setTextColor(tColor[data.switch[6].toInt()])
         }
         sat.setOnClickListener{
-            switch[7] = !switch[7]
-            switch[0] = false
-            sat.setTextColor(tColor[switch[7].toInt()])
+            data.switch[7] = !data.switch[7]
+            data.switch[0] = false
+            sat.setTextColor(tColor[data.switch[7].toInt()])
         }
 
         //알람 추가 설정에 대한 listener를 선언
@@ -178,11 +151,13 @@ class MainActivity : AppCompatActivity() {
             val dialogHr = dialogView.findViewById<EditText>(R.id.preHr)
             val dialogMin = dialogView.findViewById<EditText>(R.id.preMin)
             val categorize = dialogView.findViewById<Spinner>(R.id.categorize)
+            val newCat = dialogView.findViewById<EditText>(R.id.newCat)
+            val visible = dialogView.findViewById<LinearLayout>(R.id.alarmNewCategorySetter)
 
-            if (phr != 0)
-                dialogHr.setText(phr.toString())
-            if (pmin != 0)
-                dialogMin.setText(pmin.toString())
+            if (data.phr != 0)
+                dialogHr.setText(data.phr.toString())
+            if (data.pmin != 0)
+                dialogMin.setText(data.pmin.toString())
 
             dialogSolving.adapter = ArrayAdapter(
                 applicationContext,
@@ -190,26 +165,30 @@ class MainActivity : AppCompatActivity() {
                 resources.getStringArray(R.array.spinnerItem)
             )
 
-            dialogSolving.setSelection(solver)
+            dialogSolving.setSelection(data.solver)
 
             dialogSolving.setOnItemSelectedListener(object :
                 AdapterView.OnItemSelectedListener {
                 override fun onItemSelected( adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
-                    solver = i
+                    data.solver = i
                 }
 
                 override fun onNothingSelected(adapterView: AdapterView<*>) {}
             })
 
+            if(!(data.category in categories))
+                categories.add(data.category)
+
+            categories.add("새 카테고리")
+
             categorize.adapter = ArrayAdapter(
                 applicationContext,
                 android.R.layout.simple_spinner_dropdown_item,
-                categories)
-
-            categorize.setSelection(0)
+                categories
+            )
 
             for(i in 0 until categories.size) {
-                if(category == categories[i]) {
+                if(data.category == categories[i]) {
                     categorize.setSelection(i)
                     break
                 }
@@ -218,19 +197,32 @@ class MainActivity : AppCompatActivity() {
             categorize.setOnItemSelectedListener(object :
                 AdapterView.OnItemSelectedListener {
                 override fun onItemSelected( adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
-                    category = categories[i]
+                    if(i == categories.size - 1) {
+                        visible.visibility = View.VISIBLE
+                        newCat.setText("")
+                    }
+                    else {
+                        visible.visibility = View.GONE
+                        newCat.setText(categories[i])
+                    }
                 }
 
-                override fun onNothingSelected(adapterView: AdapterView<*>) {}
+                override fun onNothingSelected(adapterView: AdapterView<*>) {
+                    categorize.setSelection(0)
+                    if(categories.size == 1) visible.visibility = View.VISIBLE
+                    else visible.visibility = View.GONE
+                }
             })
 
             builder.setView(dialogView)
             builder.setPositiveButton("확인") { _, _ ->
-                if (isEmpty(dialogHr.text)) phr = 0
-                else phr = Integer.parseInt(dialogHr.text.toString())
+                if (isEmpty(dialogHr.text)) data.phr = 0
+                else data.phr = Integer.parseInt(dialogHr.text.toString())
 
-                if (isEmpty(dialogMin.text)) pmin = 0
-                else pmin = Integer.parseInt(dialogMin.text.toString())
+                if (isEmpty(dialogMin.text)) data.pmin = 0
+                else data.pmin = Integer.parseInt(dialogMin.text.toString())
+
+                data.category = newCat.text.toString()
             }
             builder.setNegativeButton("취소") { _, _ -> /* 취소일 때 아무 액션이 없으므로 빈칸 */ }
             builder.create().show()
@@ -272,23 +264,16 @@ class MainActivity : AppCompatActivity() {
 
             //timePicker의 값이 바뀔 때마다 hr와 min을 가져오지 않고, 알람 설정 버튼을 눌렀을 때 시간을 가져온다
             if (Build.VERSION.SDK_INT >= 23) {
-                hr = timePicker.hour
-                min = timePicker.minute
+                data.hr = timePicker.hour
+                data.min = timePicker.minute
             } else {
-                hr = timePicker.currentHour
-                min = timePicker.currentMinute
+                data.hr = timePicker.currentHour
+                data.min = timePicker.currentMinute
             }
 
             //알람을 설정한 시간:분을 cal에 저장한다
-            cal.set(Calendar.HOUR_OF_DAY, hr)
-            cal.set(Calendar.MINUTE, min)
-
-           //액티비티를 종료하기 전, 알람을 설정한 요일을 intSwitch에 저장한다
-            intSwitch = 0
-            for(i in 0..7) {
-                intSwitch *= 2
-                if(switch[i]) intSwitch += 1
-            }
+            cal.set(Calendar.HOUR_OF_DAY, data.hr)
+            cal.set(Calendar.MINUTE, data.min)
 
             //AlarmList_Activity에 정보를 넘길 intent
             val returnIntent = Intent()
@@ -297,30 +282,14 @@ class MainActivity : AppCompatActivity() {
             if (position != -1) returnIntent.putExtra("position", position)
 
             //설정한 알람 정보를 AlarmList_Acitivity로 넘긴다
-            returnIntent.putExtra("hr", hr)
-            returnIntent.putExtra("min", min)
-            returnIntent.putExtra("intSwitch", intSwitch)
+            val strData = GsonBuilder().create().toJson(data, Alarm_Data::class.java)
 
-            returnIntent.putExtra("solver", solver)
-            returnIntent.putExtra("phr", phr)
-            returnIntent.putExtra("pmin", pmin)
-
-            returnIntent.putExtra("category", category)
-
+            returnIntent.putExtra("data", strData)
             returnIntent.putExtra("before_id", before_id)
 
             //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
             setResult(Activity.RESULT_OK, returnIntent)
             finish()
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            solver = data!!.getIntExtra("solver", solver)
-            phr = data.getIntExtra("phr", phr)
-            pmin = data.getIntExtra("pmin", pmin)
         }
     }
 }

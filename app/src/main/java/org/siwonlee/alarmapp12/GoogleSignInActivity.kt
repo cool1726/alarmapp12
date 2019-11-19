@@ -17,7 +17,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.google_sign_in_activity.*
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class GoogleSignInActivity : AppCompatActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -26,16 +30,18 @@ class GoogleSignInActivity : AppCompatActivity() {
 
     var uid: String = ""
     //서버에서 UserData를 읽어와 nowData에 저장할 변수
-    var data: String? = null
+    var data: UserData? = null
     //앱 내부 저장소에서 UserData를 받아와 서버에 저장할 변수
-    lateinit var nowData: String
+    lateinit var nowData: UserData
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.google_sign_in_activity)
 
         uid = intent.getStringExtra("uid")!!
-        nowData = intent.getStringExtra("list")!!
+
+        val strList = intent.getStringExtra("list")!!
+        nowData = GsonBuilder().create().fromJson(strList, UserData::class.java)
 
         //현재 UserData를 저장해 서버에 백업할 때 사용할 변수
         data = nowData
@@ -84,10 +90,11 @@ class GoogleSignInActivity : AppCompatActivity() {
         db.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (uid != "") {
-                    val hashMap: HashMap<String, String> = dataSnapshot.getValue() as HashMap<String, String>
-                    val mapToString = hashMap.get(uid)
-                    data = mapToString
-                    //data = dataSnapshot.getValue(String::class.java)
+                    val map: HashMap<String, HashMap<String, Object>>? = dataSnapshot.getValue() as HashMap<String, HashMap<String, Object>>?
+                    if(map != null) {
+                        val temp = map!![uid]!!["list"] as ArrayList<Alarm_Data>
+                        data = UserData(temp)
+                    }
                 }
             }
 
@@ -108,7 +115,7 @@ class GoogleSignInActivity : AppCompatActivity() {
                 firebaseAuthWithGoogle(account!!)
 
                 val uidTemp = auth.uid
-                if(uidTemp != null) uid = uidTemp
+                if(uidTemp != null || uidTemp != "") uid = uidTemp!!
 
                 //로그인 직후에는 반드시 액티비티를 종료한다
                 endActivity()
@@ -146,8 +153,10 @@ class GoogleSignInActivity : AppCompatActivity() {
     fun endActivity() {
         val returnIntent = Intent(this, AlarmList_Activity::class.java)
 
+        val strList = GsonBuilder().create().toJson(nowData, UserData::class.java)
+
         //백업한 데이터, 혹은 백업된 데이터를 returnIntent에 담는다
-        returnIntent.putExtra("list", nowData)
+        returnIntent.putExtra("list", strList)
         returnIntent.putExtra("uid", uid)
 
         //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
