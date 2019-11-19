@@ -1,6 +1,7 @@
 package org.siwonlee.alarmapp12
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -19,9 +20,15 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.google_sign_in_activity.*
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import android.widget.EditText
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 class GoogleSignInActivity : AppCompatActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -33,6 +40,9 @@ class GoogleSignInActivity : AppCompatActivity() {
     var data: UserData? = null
     //앱 내부 저장소에서 UserData를 받아와 서버에 저장할 변수
     lateinit var nowData: UserData
+    val ALARM_SET: Int = 1000
+
+    var uidForOthers = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,15 +97,67 @@ class GoogleSignInActivity : AppCompatActivity() {
             }
         }
 
+        setOtherAlarm.setOnClickListener {
+            val dialog = AlertDialog.Builder(this)
+            dialog.setTitle("알람을 설정할 상대의 uid: ")
+
+            val edit = EditText(this)
+            dialog.setView(edit)
+
+            dialog.setPositiveButton("확인") { _, _ ->
+                uidForOthers = edit.text.toString()
+                if(uidForOthers != "" && db.child(uidForOthers) != null) {
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.putExtra("categories", java.util.ArrayList<String>())
+
+                    startActivityForResult(intent, this.ALARM_SET)
+                }
+            }
+            dialog.setNegativeButton("취소") { _, _ -> /* 취소일 때 아무 액션이 없으므로 빈칸 */ }
+            dialog.create().show()
+        }
+
+        removeOtherAlarm.setOnClickListener {
+            val dialog = AlertDialog.Builder(this)
+            dialog.setTitle("알람을 제거할 상대의 uid: ")
+
+            val edit = EditText(this)
+            dialog.setView(edit)
+
+            dialog.setPositiveButton("확인") { _, _ ->
+                uidForOthers = edit.text.toString()
+                if(uidForOthers != "" && db.child(uidForOthers) != null) {
+                    val dbSetter = db.child(uidForOthers).child("").child(uid)
+                    dbSetter.removeValue()
+                }
+            }
+            dialog.setNegativeButton("취소") { _, _ -> /* 취소일 때 아무 액션이 없으므로 빈칸 */ }
+            dialog.create().show()
+        }
+
         db.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (uid != "") {
                     val map: HashMap<String, HashMap<String, Object>>? = dataSnapshot.getValue() as HashMap<String, HashMap<String, Object>>?
                     if(map != null) {
-                        val temp = map!![uid]!!["list"] as ArrayList<Alarm_Data>
-                        data = UserData(temp)
+                        data = UserData(map!![uid]!!["list"] as ArrayList<Alarm_Data>)
+                        for(i in map!![uid]!!) if(i.key != "list") {
+                            val tempData = i.value as HashMap<String, Any>
+                            val temptempData = Alarm_Data(
+                                hr = (tempData["hr"] as Long).toInt(),
+                                min = (tempData["min"] as Long).toInt(),
+                                phr = (tempData["phr"] as Long).toInt(),
+                                pmin = (tempData["pmin"] as Long).toInt(),
+                                solver = (tempData["solver"] as Long).toInt(),
+                                category = tempData["category"] as String,
+                                switch = tempData["switch"] as MutableList<Boolean>
+                            )
+                            data!!.add(temptempData)
+                        }
                     }
                 }
+
+                Toast.makeText(this@GoogleSignInActivity, "Firebase와의 재연결에 성공하였습니다.", Toast.LENGTH_SHORT).show()
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -125,6 +187,27 @@ class GoogleSignInActivity : AppCompatActivity() {
             } catch (e: ApiException) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e)
+            }
+        }
+        if (resultCode == Activity.RESULT_OK && requestCode == ALARM_SET) {
+            val dbSetter = db.child(uidForOthers).child("")
+            val strData = data!!.getStringExtra("data")
+            val delete = data.getBooleanExtra("delete", false)
+
+            //알람을 생성했다면 delete는 false이다
+            if (!delete) {
+                //alarmlist에 저장할 Alarm_Data 객체
+                var data = Alarm_Data()
+                if(strData != null)
+                    data = GsonBuilder().create().fromJson(strData, Alarm_Data::class.java)
+
+                dbSetter.child(uid).child("hr").setValue(data.hr)
+                dbSetter.child(uid).child("min").setValue(data.min)
+                dbSetter.child(uid).child("phr").setValue(data.phr)
+                dbSetter.child(uid).child("pmin").setValue(data.pmin)
+                dbSetter.child(uid).child("switch").setValue(data.switch)
+                dbSetter.child(uid).child("solver").setValue(data.solver)
+                dbSetter.child(uid).child("category").setValue(data.category)
             }
         }
     }

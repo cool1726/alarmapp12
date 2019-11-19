@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
             sun.setTextColor(tColor[data.switch[1].toInt()])
         }
         mon.setOnClickListener{
-            data.switch[0] = !data.switch[2]
+            data.switch[2] = !data.switch[2]
             data.switch[0] = false
             mon.setTextColor(tColor[data.switch[2].toInt()])
         }
@@ -146,6 +146,8 @@ class MainActivity : AppCompatActivity() {
         //알람 추가 설정에 대한 listener를 선언
         val advanceListener = View.OnClickListener {
             val builder = AlertDialog.Builder(this)
+            builder.setTitle("알람 추가 설정")
+
             val dialogView = layoutInflater.inflate(R.layout.alarm_setting_advanced, null)
             val dialogSolving = dialogView.findViewById<Spinner>(R.id.solving)
             val dialogHr = dialogView.findViewById<EditText>(R.id.preHr)

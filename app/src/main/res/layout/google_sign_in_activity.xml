@@ -20,7 +20,7 @@
         android:id="@+id/manageBackup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/setOtherAlarm"
         app:layout_constraintTop_toBottomOf="@+id/signinButton"
         tools:layout_editor_absoluteX="0dp">
 
@@ -55,5 +55,27 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/signinButton"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/setOtherAlarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="타인에게 알람 설정"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/removeOtherAlarm"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/manageBackup" />
+
+    <Button
+        android:id="@+id/removeOtherAlarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="타인의 알람 제거"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/setOtherAlarm"
+        app:layout_constraintTop_toBottomOf="@+id/manageBackup" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
