@@ -45,8 +45,6 @@ class AlarmList_Activity : AppCompatActivity() {
         else alarmlist = UserData()
         editor.apply()
 
-        //pref에 uid가 저장되어 있다면 이를 가져오고, 아니라면 uid에 ""를 저장한다
-        uid = pref.getString("uid", "")!!
         // category adapter 설정
         makeCategory()
 
@@ -143,9 +141,6 @@ class AlarmList_Activity : AppCompatActivity() {
                         //백업한 리스트의 모든 알람을 set한다
                         for(data in alarmlist.list) for (day in 1..7) setAlarm(day, data, data.switch[day])
                     }
-
-                    uid = data.getStringExtra("uid")!!
-                    editor.putString("uid", uid)
                 }
             }
         }
@@ -180,7 +175,6 @@ class AlarmList_Activity : AppCompatActivity() {
                 //alarmlist를 gson을 이용해 String타입으로 형변환해 logInIntent에 넣는다
                 val strList = GsonBuilder().create().toJson(alarmlist, UserData::class.java)
                 logInIntent.putExtra("list", strList)
-                logInIntent.putExtra("uid", uid)
 
                 //logInIntent.putExtra()
                 startActivityForResult(logInIntent, FIREBASE_MANAGE)

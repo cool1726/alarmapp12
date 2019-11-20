@@ -60,22 +60,11 @@
         android:id="@+id/setOtherAlarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="타인에게 알람 설정"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/removeOtherAlarm"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/manageBackup" />
-
-    <Button
-        android:id="@+id/removeOtherAlarm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="타인의 알람 제거"
+        android:text="타인의 알람 관리"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/setOtherAlarm"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/manageBackup" />
 
     <TextView
@@ -83,6 +72,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="uid: "
+        android:clickable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

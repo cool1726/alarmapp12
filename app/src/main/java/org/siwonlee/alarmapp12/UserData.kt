@@ -2,7 +2,11 @@ package org.siwonlee.alarmapp12
 
 import kotlin.collections.ArrayList
 
-class UserData(val list: ArrayList<Alarm_Data> = ArrayList()) {
+class UserData(
+    var uid: String = "",
+    val list: ArrayList<Alarm_Data> = ArrayList(),
+    val uidMap: HashMap<String, String>? = HashMap()
+) {
     fun getCategoryList(currentCategory: String): ArrayList<Alarm_Data> {  // 특정 category에 속한 알람 list
         if(currentCategory == "전체 카테고리")
             return this.list

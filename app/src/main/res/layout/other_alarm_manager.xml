@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/otherUserSelector"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/otherUserInputLayout"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/aa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="알람을 관리할 사용자: "
+            android:textSize="18sp" />
+
+        <Spinner
+            android:id="@+id/selectOther"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/otherUserInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/otherUserSelector"
+        tools:layout_editor_absoluteX="16dp">
+
+        <EditText
+            android:id="@+id/otherUserName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="새 사용자 이름" />
+
+        <EditText
+            android:id="@+id/otherUserUID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="새 사용자 uid" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
