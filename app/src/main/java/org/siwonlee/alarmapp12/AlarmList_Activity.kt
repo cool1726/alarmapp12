@@ -11,10 +11,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.Spinner
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -53,6 +50,7 @@ class AlarmList_Activity : AppCompatActivity() {
 
         //alarmlist의 알람 카테고리가 존재하지 않으면 기본 카테고리를 추가한다
         if(alarmlist.getCategorySize() == 0) alarmlist.addCategory("기본")
+        alarmlist.addCategory("기본")
 
         //현재 존재하는 카테고리를 Spinner 형식으로 보여준다
         val selCate = findViewById<Spinner>(R.id.sp_category)
@@ -132,6 +130,7 @@ class AlarmList_Activity : AppCompatActivity() {
                     val pmin = data.getIntExtra("pmin", -1)
 
                     val category = data.getStringExtra("category")
+                    val sound = data.getStringExtra("sound")
 
                     val before = data.getIntExtra("before_id", -1)
                     var position = data.getIntExtra("position", -1)
@@ -140,25 +139,31 @@ class AlarmList_Activity : AppCompatActivity() {
                     //알람을 수정하거나 삭제했다면 before_id는 -1이 아니다
                     if(before != -1) {
                         //알람을 삭제한 것이라면 alarmlist에서 알람을 제거한다
+                        val size = alarmlist.size()
                         if (delete) alarmlist.pop(position)
+
+                        for(i in size downTo position+1) {
+                            alarmlist.subPosition(i)
+                        }
                     }
 
                     //알람을 수정 혹은 생성했다면 delete는 false이다
                     if (!delete) {
                         //alarmlist에 저장할 Alarm_Data 객체
-                        val data = Alarm_Data(hr, min, phr, pmin, intSwitch, solver, category)
+                        val data = Alarm_Data(position, hr, min, phr, pmin, intSwitch, solver, category, sound)
 
-                        //알람을 생성했다면 position은 반드시 -1이다
-                        if (position == -1) {
+                        //알람을 생성했다면 before는 반드시 -1이다
+                        if (before == -1) {
                             position = alarmlist.size()
+                            val data = Alarm_Data(position, hr, min, phr, pmin, intSwitch, solver, category, sound)
                             alarmlist.add(data)
                         }
                         //그렇지 않다면 기존에 존재하던 알람을 수정한다
-                        else alarmlist.set(position, data)
+                        else alarmlist.set(before, data)
 
                         //토요일부터 일요일까지 역순으로 검토하며 알람을 설정
                         for(day in 7 downTo 1) {
-                            if(intSwitch % 2 == 1) setAlarm(day, alarmlist.get(position), true)
+                            if(intSwitch % 2 == 1) setAlarm(day, alarmlist.getp(position), true)
                             intSwitch /= 2
                         }
                     }
@@ -319,6 +324,7 @@ class AlarmList_Activity : AppCompatActivity() {
         val phr = data.phr * -1
         val pmin = data.pmin * -1
         val solver = data.solver
+        val sound = data.sound
 
         //알람 정보를 dHHMM로 나타내면 알람이 서로 겹치지 않는다
         val requestCode: Int = (day * 100 + hr) * 100 + min
@@ -328,6 +334,7 @@ class AlarmList_Activity : AppCompatActivity() {
         intent.putExtra("MINUTE", min)
         intent.putExtra("requestCode", requestCode)
         intent.putExtra("solver", solver)
+        intent.putExtra("sound", sound)
 
         //정해진 요일에 맞는 PendingIntent를 설정한다
         val pendingIntent = PendingIntent.getBroadcast(
@@ -378,20 +385,22 @@ class AlarmList_Activity : AppCompatActivity() {
         // 선택된 category에 해당하는 alarmlist를 전달하기 위해 getCategoryList 함수 이용
         val adapter = AlarmListAdapter(this, alarmlist.getCategoryList(currentCategory), { position ->
             val cintent = Intent(this, MainActivity::class.java)
-            cintent.putExtra("hr", alarmlist.get(position).hr)
-            cintent.putExtra("min", alarmlist.get(position).min)
+            Toast.makeText(this, "${currentCategory}에서 ${position}번째 알람이 선택되었습니다.", Toast.LENGTH_LONG).show()
+            cintent.putExtra("position", alarmlist.getDataClicked(currentCategory, position)?.position)
+            cintent.putExtra("hr", alarmlist.getDataClicked(currentCategory, position)?.hr)
+            cintent.putExtra("min", alarmlist.getDataClicked(currentCategory, position)?.min)
 
-            cintent.putExtra("phr", alarmlist.get(position).phr)
-            cintent.putExtra("pmin", alarmlist.get(position).pmin)
+            cintent.putExtra("phr", alarmlist.getDataClicked(currentCategory, position)?.phr)
+            cintent.putExtra("pmin", alarmlist.getDataClicked(currentCategory, position)?.pmin)
 
-            cintent.putExtra("intSwitch", alarmlist.get(position).intSwitch)
+            cintent.putExtra("intSwitch", alarmlist.getDataClicked(currentCategory, position)?.intSwitch)
 
-            cintent.putExtra("solver", alarmlist.get(position).solver)
+            cintent.putExtra("solver", alarmlist.getDataClicked(currentCategory, position)?.solver)
 
-            cintent.putExtra("category", alarmlist.get(position).category)
+            cintent.putExtra("category", alarmlist.getDataClicked(currentCategory, position)?.category)
             cintent.putExtra("categories", alarmlist.getCategories())
 
-            cintent.putExtra("position", position)
+            //cintent.putExtra("position", position)
             cintent.putExtra("isInit", false)
 
             //알람을 수정한다

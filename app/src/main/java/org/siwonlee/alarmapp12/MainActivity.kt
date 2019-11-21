@@ -13,11 +13,11 @@ import android.content.Context
 import android.graphics.Color
 import android.text.TextUtils.isEmpty
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.Spinner
+import android.widget.*
+import androidx.core.view.size
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.alarm_list.*
+import kotlinx.android.synthetic.main.alarm_setting_advanced.*
 
 fun Boolean.toInt() = if (this) 1 else 0
 
@@ -36,6 +36,8 @@ class MainActivity : AppCompatActivity() {
 
     var category = "기본"
     lateinit var categories: ArrayList<String>
+
+    lateinit var alarmlist: UserData
 
     //현재 시간 등을 계산할 때 사용할 Calendar 클래스
     val cal : Calendar = Calendar.getInstance()
@@ -170,6 +172,34 @@ class MainActivity : AppCompatActivity() {
             sat.setTextColor(tColor[switch[7].toInt()])
         }
 
+        val soundArray = arrayOf("sunny", "cloudy", "rainy", "snowy") //순서대로 believer, rockabye, vivalavida, christmasday
+        var currentSound: String = ""
+        val sound = findViewById<Spinner>(R.id.soundName)
+        // sound adapter 설정
+        sound.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            soundArray)
+
+        sound.setSelection(0)       // 기본값 "전체 카테고리"
+        for(i in 0 until soundArray.size) {
+            if(currentSound == soundArray[i]) {
+                sound.setSelection(i)
+                break
+            }
+        }
+
+        // 알람벨 선택
+        sound.setOnItemSelectedListener(object :
+            AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
+                currentSound = soundArray[i]
+            }
+            override fun onNothingSelected(adapterView: AdapterView<*>)  {
+                sound.setSelection(0)
+            }
+        })
+
         //알람 추가 설정에 대한 listener를 선언
         val advanceListener = View.OnClickListener {
             val builder = AlertDialog.Builder(this)
@@ -178,6 +208,8 @@ class MainActivity : AppCompatActivity() {
             val dialogHr = dialogView.findViewById<EditText>(R.id.preHr)
             val dialogMin = dialogView.findViewById<EditText>(R.id.preMin)
             val categorize = dialogView.findViewById<Spinner>(R.id.categorize)
+            //val addc = dialogView.findViewById<Button>(R.id.add_category)
+            //val setName = dialogView.findViewById<EditText>(R.id.setName)
 
             if (phr != 0)
                 dialogHr.setText(phr.toString())
@@ -224,6 +256,10 @@ class MainActivity : AppCompatActivity() {
                 override fun onNothingSelected(adapterView: AdapterView<*>) {}
             })
 
+            /*addc.setOnClickListener {
+                //setName.visibility = View.VISIBLE
+            }*/
+
             builder.setView(dialogView)
             builder.setPositiveButton("확인") { _, _ ->
                 if (isEmpty(dialogHr.text)) phr = 0
@@ -231,6 +267,11 @@ class MainActivity : AppCompatActivity() {
 
                 if (isEmpty(dialogMin.text)) pmin = 0
                 else pmin = Integer.parseInt(dialogMin.text.toString())
+
+                // advanced_setting 화면에서 새로운 카테고리 추가하기
+                /*var addC = setName.text.toString()
+                if(addC == "") addC = "카테고리 ${alarmlist.getCategorySize()}"
+                alarmlist.addCategory(addC)*/
             }
             builder.setNegativeButton("취소") { _, _ -> /* 취소일 때 아무 액션이 없으므로 빈칸 */ }
             builder.create().show()
@@ -294,7 +335,7 @@ class MainActivity : AppCompatActivity() {
             val returnIntent = Intent()
 
             // 알람을 수정하는 경우 현재 알람의 위치를 returnIntent에 담는다
-            if (position != -1) returnIntent.putExtra("position", position)
+            //if (position != -1) returnIntent.putExtra("position", position)
 
             //설정한 알람 정보를 AlarmList_Acitivity로 넘긴다
             returnIntent.putExtra("hr", hr)
@@ -306,6 +347,7 @@ class MainActivity : AppCompatActivity() {
             returnIntent.putExtra("pmin", pmin)
 
             returnIntent.putExtra("category", category)
+            returnIntent.putExtra("sound", currentSound)
 
             returnIntent.putExtra("before_id", before_id)
 

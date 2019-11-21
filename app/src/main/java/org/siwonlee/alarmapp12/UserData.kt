@@ -30,12 +30,47 @@ class UserData (private val list: ArrayList<Alarm_Data>) {
         return this.categories.size
     }
 
-    fun get(i: Int): Alarm_Data {
-        return list[i]
+    fun get(id: Int): Alarm_Data { // id값 -> 알람데이터 찾기
+        var index  = -1
+        var data_id = -1
+        for(i in list) {
+            data_id = (i.intSwitch * 100 + i.hr) * 100 + i.min
+            if (id == data_id) index = list.indexOf(i)     // 삭제할 id에 해당하는 알람데이터 찾기
+        }
+        return list[index]
     }
 
-    fun set(i: Int, data: Alarm_Data) {
-        list[i] = data
+    fun getp(p: Int): Alarm_Data { // position값 -> 알람데이터 찾기
+        return list[p]
+    }
+
+    fun set(id: Int, data: Alarm_Data) { // id값 -> 알람데이터 수정
+        var index  = -1
+        var data_id = -1
+        for(i in list) {
+            data_id = (i.intSwitch * 100 + i.hr) * 100 + i.min
+            if (id == data_id) index = list.indexOf(i)     // 삭제할 id에 해당하는 알람데이터 찾기
+        }
+        list[index] = data
+    }
+
+    fun subPosition(position: Int) { // 알람 삭제로 position값 -1만큼 변경
+        for(i in list)
+            if(position == i.position) i.position -= 1
+    }
+
+    fun getDataClicked(category: String, position: Int): Alarm_Data? { //category별 view에서 클릭된 알람데이터 가져오기
+        var pos = -1
+        var data : Alarm_Data? = null
+        if(category == "전체 카테고리")
+            return list[position]
+        else {
+            for(i in list) {
+                if(category == i.category) pos++
+                if(pos == position) data = i
+            }
+            return data
+        }
     }
 
     fun add(data: Alarm_Data) {
@@ -68,13 +103,20 @@ class UserData (private val list: ArrayList<Alarm_Data>) {
         if(sw) categories.remove(category)
     }
 
-    fun pop(i: Int) {
-        val category = this.get(i).category
+    fun pop(p: Int) { // id : 삭제할 알람데이터의 고유 id값
+        /*var index = -1
+        for(i in list)
+            if(id == i.id) index = list.indexOf(i)    // 삭제할 id에 해당하는 알람데이터 찾기
+*/
+        val category = this.get(p).category
         var sw = true
-        list.removeAt(i)
+        list.removeAt(p)
 
         for(i in list)
             if(category == i.category) sw = false
+
+        if(category == "기본") sw = false
+        if(category == "전체 카테고리") sw = false
 
         if(sw) categories.remove(category)
     }

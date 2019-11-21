@@ -5,13 +5,15 @@ import android.app.KeyguardManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.alarm_ringing.*
 import java.util.*
 import android.view.WindowManager
-
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 fun Int.toTime(): String {
@@ -64,21 +66,25 @@ class Alarm_Ringing : AppCompatActivity() {
             v.vibrate(longArrayOf(1000, 1000, 1000, 1000), 0)
         }
 
-        //알람음을 울릴 RingtoneManager
-        val ringtone = RingtoneManager.getRingtone(
-            applicationContext,
-            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        )
+        //알람음을 울릴 MediaPlayer
+        val sound = intent.getStringExtra("sound")
+        var curSound = MediaPlayer.create(applicationContext, R.raw.believer)
+        when(sound) {
+            "sunny" -> curSound = MediaPlayer.create(applicationContext, R.raw.believer)
+            "cloudy" -> curSound = MediaPlayer.create(applicationContext, R.raw.rockabye)
+            "rainy" -> curSound = MediaPlayer.create(applicationContext, R.raw.vivalavida)
+            "snowy" -> curSound = MediaPlayer.create(applicationContext, R.raw.christmasday)
+        }
 
         // 알람 울릴 때 소리 : 기본 알람소리
-        ringtone.play()
-
+        curSound.start()
 
         //알람 해제 버튼을 눌렀을 때
         bt_alarmoff.setOnClickListener {
             //우선 알람 소리와 진동을 해제한다
             v.cancel()
-            ringtone.stop()
+            curSound.stop()    //음악정지
+            curSound.reset()   //음악초기화
 
             //알람 해제 방식을 읽어들인 뒤
             val solver = intent.extras!!.getInt("solver")
@@ -90,7 +96,6 @@ class Alarm_Ringing : AppCompatActivity() {
                     startActivity(solveIntent)
                 }
             }
-
             //알람 해제에 성공했으므로 알람 액티비티를 제거한다
             finish()
         }
@@ -116,6 +121,7 @@ class Alarm_Ringing : AppCompatActivity() {
             delayIntent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
             delayIntent.putExtra("requestCode", 0)
             delayIntent.putExtra("solver", solver)
+            delayIntent.putExtra("sound", sound)
 
             //임시 알람 정보를 담은 pendingIntent를 만든다
             val pendingIntent = PendingIntent.getBroadcast(this, 0, delayIntent, PendingIntent.FLAG_UPDATE_CURRENT)
@@ -129,7 +135,8 @@ class Alarm_Ringing : AppCompatActivity() {
 
             //알람을 5분 후로 미뤘으므로 알람 소리와 진동을 해제한 뒤 액티비티를 끝낸다
             v.cancel()
-            ringtone.stop()
+            curSound.stop()    //음악정지
+            curSound.reset()   //음악초기화
             finish()
         }
     }
