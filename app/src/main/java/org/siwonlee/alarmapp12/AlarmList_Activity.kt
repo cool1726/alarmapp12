@@ -96,34 +96,25 @@ class AlarmList_Activity : AppCompatActivity() {
                 ALARM_SET -> {
                     // MainActivity에서 보낼 수 있는 모든 정보를 모은다
                     val strData = data!!.getStringExtra("data")
-                    val before = data.getIntExtra("before_id", -1)
-                    var position = data.getIntExtra("position", -1)
-                    val delete = data.getBooleanExtra("delete", false)
+                    val before = data.getStringExtra("before")
 
                     //알람을 수정하거나 삭제했다면 before_id는 -1이 아니다
-                    if(before != -1) {
-                        //알람을 삭제한 것이라면 alarmlist에서 알람을 제거한다
-                        if (delete) alarmlist.pop(position)
+                    if(before != null) {
+                        val popData = GsonBuilder().create().fromJson(before, Alarm_Data::class.java)
+                        //alarmlist에서 알람을 제거한다
+                        alarmlist.pop(popData)
                     }
 
                     //알람을 수정 혹은 생성했다면 delete는 false이다
-                    if (!delete) {
+                    if (strData != null) {
                         //alarmlist에 저장할 Alarm_Data 객체
-                        var data = Alarm_Data()
-                        if(strData != null)
-                            data = GsonBuilder().create().fromJson(strData, Alarm_Data::class.java)
+                        val data = GsonBuilder().create().fromJson(strData, Alarm_Data::class.java)
 
-                        //알람을 생성했다면 position은 반드시 -1이다
-                        if (position == -1) {
-                            position = alarmlist.size()
-                            alarmlist.add(data)
-                        }
-                        //그렇지 않다면 기존에 존재하던 알람을 수정한다
-                        else alarmlist.set(position, data)
+                        alarmlist.add(data)
 
                         //일요일부터 토요일까지y 검토하며 알람을 설정
                         for(day in 1 .. 7)
-                            setAlarm(day, alarmlist.get(position), data.switch[day])
+                            setAlarm(day, data, data.switch[day])
                     }
                 }
 
@@ -262,14 +253,23 @@ class AlarmList_Activity : AppCompatActivity() {
 
     fun makeAdapter(): AlarmListAdapter {
         // AlarmlistAdapter의 ViewHolder
+        val smallList = alarmlist.getCategoryList(currentCategory)
         // 선택된 category에 해당하는 alarmlist를 전달하기 위해 getCategoryList 함수 이용
-        val adapter = AlarmListAdapter(this, alarmlist.getCategoryList(currentCategory), { position ->
+        val adapter = AlarmListAdapter(this, smallList, { position ->
             val cintent = Intent(this, MainActivity::class.java)
 
-            val strData = GsonBuilder().create().toJson(alarmlist.get(position), Alarm_Data::class.java)
+            var newPos = 0
+
+            for(i in 0 until alarmlist.list.size) {
+                if(isEqual(alarmlist.get(i), smallList[position])) {
+                    newPos = i
+                    break
+                }
+            }
+
+            val strData = GsonBuilder().create().toJson(alarmlist.get(newPos), Alarm_Data::class.java)
 
             cintent.putExtra("data", strData)
-            cintent.putExtra("position", position)
             cintent.putExtra("categories", alarmlist.category())
             cintent.putExtra("isInit", false)
 

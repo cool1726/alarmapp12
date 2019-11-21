@@ -42,8 +42,12 @@ class UserData(
         list.add(data)
     }
 
-    fun pop(i: Int) {
-        list.removeAt(i)
+    fun pop(data: Alarm_Data) {
+        for(i in 0 until list.size)
+            if(isEqual(list[i], data)) {
+                list.removeAt(i)
+                break
+            }
     }
 
     fun size(): Int {

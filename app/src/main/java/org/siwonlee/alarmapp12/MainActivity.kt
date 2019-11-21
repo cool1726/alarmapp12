@@ -20,7 +20,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 fun Boolean.toInt() = if (this) 1 else 0
 
 class MainActivity : AppCompatActivity() {
-    var before_id = 0
     var data: Alarm_Data = Alarm_Data()
     var categories: ArrayList<String> = ArrayList()
 
@@ -43,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
         categories = intent.getStringArrayListExtra("categories")!!
 
-        //알람을 수정하는 것이라면 수정 이전 알람의 정보를 before_id에 담는다
+        //알람을 수정하는 것이라면 수정 이전 알람을 해제한다
         if(!isInit) {
             var intSwitch = 0
 
@@ -51,8 +50,6 @@ class MainActivity : AppCompatActivity() {
                 intSwitch *= 2
                 intSwitch += data.switch[i].toInt()
             }
-
-            before_id = (intSwitch * 100 + data.hr) * 100 + data.min
 
             //정보를 this에서 receiver까지 보내는 intent를 생성
             val intent = Intent(this, Alarm_Receiver::class.java)
@@ -82,9 +79,6 @@ class MainActivity : AppCompatActivity() {
         thu.setTextColor(tColor[data.switch[5].toInt()])
         fri.setTextColor(tColor[data.switch[6].toInt()])
         sat.setTextColor(tColor[data.switch[7].toInt()])
-
-        // 알람 수정 또는 삭제 시 사용됨
-        val position = intent.getIntExtra("position", -1)
 
         //cal의 시간을 알람을 설정한 시간으로 바꾼다
         cal.set(Calendar.HOUR_OF_DAY, data.hr)
@@ -239,9 +233,7 @@ class MainActivity : AppCompatActivity() {
 
             //삭제할 알람 정보를 AlarmList_Acitivity로 넘긴다
             val returnIntent = Intent(this, AlarmList_Activity::class.java)
-            returnIntent.putExtra("position", position)
-            returnIntent.putExtra("delete", true)
-            returnIntent.putExtra("before_id", before_id)
+            returnIntent.putExtra("before", strData)
 
             //삭제할지 여부를 묻는 Dialog
             val builder = AlertDialog.Builder(this)
@@ -280,14 +272,11 @@ class MainActivity : AppCompatActivity() {
             //AlarmList_Activity에 정보를 넘길 intent
             val returnIntent = Intent()
 
-            // 알람을 수정하는 경우 현재 알람의 위치를 returnIntent에 담는다
-            if (position != -1) returnIntent.putExtra("position", position)
-
             //설정한 알람 정보를 AlarmList_Acitivity로 넘긴다
-            val strData = GsonBuilder().create().toJson(data, Alarm_Data::class.java)
+            val newData = GsonBuilder().create().toJson(data, Alarm_Data::class.java)
 
-            returnIntent.putExtra("data", strData)
-            returnIntent.putExtra("before_id", before_id)
+            returnIntent.putExtra("data", newData)
+            returnIntent.putExtra("before", strData)
 
             //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
             setResult(Activity.RESULT_OK, returnIntent)
