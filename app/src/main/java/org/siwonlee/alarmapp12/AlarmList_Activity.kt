@@ -260,7 +260,7 @@ class AlarmList_Activity : AppCompatActivity() {
 
             var newPos = 0
 
-            for(i in 0 until alarmlist.list.size) {
+            for(i in 0 until alarmlist.size()) {
                 if(isEqual(alarmlist.get(i), smallList[position])) {
                     newPos = i
                     break

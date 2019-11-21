@@ -44,13 +44,6 @@ class MainActivity : AppCompatActivity() {
 
         //알람을 수정하는 것이라면 수정 이전 알람을 해제한다
         if(!isInit) {
-            var intSwitch = 0
-
-            for(i in 1 .. 7) {
-                intSwitch *= 2
-                intSwitch += data.switch[i].toInt()
-            }
-
             //정보를 this에서 receiver까지 보내는 intent를 생성
             val intent = Intent(this, Alarm_Receiver::class.java)
 
