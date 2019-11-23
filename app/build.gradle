@@ -7,7 +7,7 @@ android {
     buildToolsVersion "29.0.0"
     defaultConfig {
         applicationId "org.siwonlee.alarmapp12"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"

@@ -5,15 +5,23 @@ import android.app.KeyguardManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.*
+import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.alarm_ringing.*
 import java.util.*
 import android.view.WindowManager
-import kotlinx.android.synthetic.main.activity_main.*
+import android.widget.Toast
+import android.media.*
+import android.media.AudioManager.STREAM_ALARM
+import android.media.AudioManager.STREAM_RING
+import androidx.core.net.toUri
+import android.media.AudioManager
+import android.media.AudioAttributes
+import android.os.Build
+
+
 
 
 fun Int.toTime(): String {
@@ -61,30 +69,47 @@ class Alarm_Ringing : AppCompatActivity() {
 
         // 알람 울릴 때 1초 진동, 1초 휴식을 반복
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            v.vibrate(VibrationEffect.createWaveform(longArrayOf(1000, 1000, 1000, 1000), 0))
+            //v.vibrate(VibrationEffect.createWaveform(longArrayOf(1000, 1000, 1000, 1000), 0))
         } else {
-            v.vibrate(longArrayOf(1000, 1000, 1000, 1000), 0)
+            //v.vibrate(longArrayOf(1000, 1000, 1000, 1000), 0)
         }
 
-        //알람음을 울릴 MediaPlayer
+
+        //string화 된 Uri값을 받아와 다시 Uri로 처리
         val sound = intent.getStringExtra("sound")
-        var curSound = MediaPlayer.create(applicationContext, R.raw.believer)
-        when(sound) {
-            "sunny" -> curSound = MediaPlayer.create(applicationContext, R.raw.believer)
-            "cloudy" -> curSound = MediaPlayer.create(applicationContext, R.raw.rockabye)
-            "rainy" -> curSound = MediaPlayer.create(applicationContext, R.raw.vivalavida)
-            "snowy" -> curSound = MediaPlayer.create(applicationContext, R.raw.christmasday)
+        var uri = Uri.parse(sound)
+
+        //알람음을 울릴 RingtoneManager
+        val ringtone : Ringtone = RingtoneManager.getRingtone(applicationContext, uri)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val aa = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)    //RingTone이 알람 볼륨으로 울리도록
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
+            ringtone.audioAttributes = aa
+        } else {
+            ringtone.streamType = AudioManager.STREAM_ALARM
         }
+
+        // 날씨 정보 받아올 경우 사용
+        /*when(sound) {
+            "sunny" -> ringtone = RingtoneManager.getRingtone(applicationContext, Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/goodmorning.mp3"))
+            "cloudy" -> curSound = Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/believer.mp3")
+            "rainy" -> curSound = Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/vivalavida.mp3")
+            "snowy" -> curSound = Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/christmasday.mp3")
+        }
+        */
+
+
+        Toast.makeText(this, "${uri} 알람소리", Toast.LENGTH_LONG).show()
 
         // 알람 울릴 때 소리 : 기본 알람소리
-        curSound.start()
+        //mediaPlayer.start()
+        ringtone.play()
 
         //알람 해제 버튼을 눌렀을 때
         bt_alarmoff.setOnClickListener {
             //우선 알람 소리와 진동을 해제한다
             v.cancel()
-            curSound.stop()    //음악정지
-            curSound.reset()   //음악초기화
+            ringtone.stop()
 
             //알람 해제 방식을 읽어들인 뒤
             val solver = intent.extras!!.getInt("solver")
@@ -135,8 +160,7 @@ class Alarm_Ringing : AppCompatActivity() {
 
             //알람을 5분 후로 미뤘으므로 알람 소리와 진동을 해제한 뒤 액티비티를 끝낸다
             v.cancel()
-            curSound.stop()    //음악정지
-            curSound.reset()   //음악초기화
+            ringtone.stop()
             finish()
         }
     }

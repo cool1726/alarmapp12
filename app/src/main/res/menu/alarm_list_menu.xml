@@ -1,19 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/set_category"
-        android:title="카테고리 설정">
-        <menu>
-
-            <item
-                android:id="@+id/addCategoty"
-                android:title="카테고리 추가"/>
-            <item
-                android:id="@+id/minCategory"
-                android:title="빈 카테고리 삭제"/>
-        </menu>
-    </item>
-
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/signin"
         android:title="계정 연동 관리"/>

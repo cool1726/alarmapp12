@@ -90,7 +90,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/alarmNewCategorySetter"
         app:layout_constraintTop_toBottomOf="@+id/alarmPreRinging"
         tools:layout_editor_absoluteX="-16dp">
 
@@ -106,6 +106,31 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/alarmNewCategorySetter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/alarmCategorySetter"
+        tools:layout_editor_absoluteX="-16dp">
+
+        <TextView
+            android:id="@+id/agds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="새 카테고리 이름: "
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/newCat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="새 카테고리 이름" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
