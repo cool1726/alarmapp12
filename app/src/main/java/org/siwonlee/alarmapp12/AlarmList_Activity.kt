@@ -21,6 +21,7 @@ import java.util.*
 class AlarmList_Activity : AppCompatActivity() {
     val ALARM_SET: Int = 1000
     val FIREBASE_MANAGE: Int = 2000
+    val WEATHER_INFO: Int = 9999
 
     lateinit var alarmlist: UserData
 
@@ -169,6 +170,13 @@ class AlarmList_Activity : AppCompatActivity() {
 
                 //logInIntent.putExtra()
                 startActivityForResult(logInIntent, FIREBASE_MANAGE)
+            }
+            //날씨 정보 버튼을 눌렀을 때
+            R.id.weather -> {
+                //GetWeatherInfo를 실행시킬 intent를 만들고
+                val weatherIntent = Intent(this, GetWeatherInfo::class.java)
+                //현재 위치정보를 intent로 전달하는 부분 필요함
+                startActivityForResult(weatherIntent, WEATHER_INFO)
             }
         }
         return super.onOptionsItemSelected(item)
