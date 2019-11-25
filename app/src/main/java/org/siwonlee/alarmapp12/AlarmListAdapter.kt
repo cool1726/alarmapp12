@@ -47,4 +47,3 @@ class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data
         }
     }
 }
-

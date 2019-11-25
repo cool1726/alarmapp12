@@ -11,9 +11,14 @@ import android.os.Build
 import java.util.*
 import android.content.Context
 import android.graphics.Color
+import android.media.Ringtone
+import android.media.RingtoneManager
+import android.net.Uri
+import android.os.Parcelable
 import android.text.TextUtils.isEmpty
 import android.view.View
 import android.widget.*
+import androidx.core.net.toUri
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -28,6 +33,11 @@ class MainActivity : AppCompatActivity() {
 
     //텍스트뷰를 터치했을 때 바꿀 색
     var tColor = arrayOf(Color.GRAY, /*Color.parseColor("#008577")*/Color.RED)
+
+    val REQ_RINGTONE = 55
+    // 앱에서 제공하는 알람벨을 soundArray로 선언했다
+    val soundArray = arrayOf("sunny", "cloudy", "rainy", "snowy") //순서대로 believer, rockabye, vivalavida, christmasday
+    var curSound = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -219,6 +229,48 @@ class MainActivity : AppCompatActivity() {
         //advance 버튼을 눌렀을 때의 listener를 advanceListener로 정의
         advance.setOnClickListener(advanceListener)
 
+
+        //(1) R.raw 파일의 앱 자체에 저장한 알람소리를 spinner로 갖고옴
+        /*
+        var currentSound: String = ""
+        val sound = findViewById<Spinner>(R.id.soundName)
+        // sound adapter 설정
+        sound.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            soundArray)
+
+        sound.setSelection(0)       // 기본값 "전체 카테고리"
+        for(i in 0 until soundArray.size) {
+            if(currentSound == soundArray[i]) {
+                sound.setSelection(i)
+                break
+            }
+        }
+
+        // 알람벨 선택
+        sound.setOnItemSelectedListener(object :
+            AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
+                //currentSound = soundArray[i]
+
+            }
+            override fun onNothingSelected(adapterView: AdapterView<*>)  {
+                sound.setSelection(0)
+            }
+        })
+        */
+
+        //(2) 시스템에 내장된 알람소리를 가져옴
+        selSound.setOnClickListener {
+            var intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
+            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "알람 벨소리를 선택하세요")
+            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)  //무음을 리스트에서 제외
+            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, true)   //기본 벨소리는 리스트에 넣는다
+            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+            startActivityForResult(intent, REQ_RINGTONE)
+        }
+
         // 알람 삭제 버튼 (bt_set.setOnClickListener와 유사)
         bt_delete.setOnClickListener {
             //pendingIntent로 alarmManager의 알람은 여기서 삭제하고
@@ -274,6 +326,20 @@ class MainActivity : AppCompatActivity() {
             //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
             setResult(Activity.RESULT_OK, returnIntent)
             finish()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+        super.onActivityResult(requestCode, resultCode, intent)
+        if(resultCode == Activity.RESULT_OK) {
+            when(requestCode) {
+                REQ_RINGTONE -> {
+                    var pickedUri = intent!!.getParcelableExtra<Uri>(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+                    //curSound = RingtoneManager.getRingtone(this, pickedUri).getTitle(this)    //toString이 안 될 경우 getTitle
+                    data.sound = pickedUri.toString()
+                    Toast.makeText(this, "${pickedUri} selected", Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 }

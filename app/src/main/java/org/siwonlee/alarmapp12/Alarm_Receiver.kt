@@ -3,6 +3,7 @@ package org.siwonlee.alarmapp12
 import android.content.Intent
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 
@@ -24,7 +25,7 @@ class Alarm_Receiver : BroadcastReceiver() {
         val min = intent.extras!!.getInt("MINUTE")
         val requestCode = intent.extras!!.getInt("requestCode")
         val solver = intent.extras!!.getInt("solver")
-        val notify = intent.extras!!.getLong("notify")
+        val sound = intent.extras!!.getString("sound")
 
         // RingtonePlayingService 서비스 intent 생성
         val serviceIntent = Intent(context, Alarm_Service::class.java)
@@ -32,7 +33,7 @@ class Alarm_Receiver : BroadcastReceiver() {
         serviceIntent.putExtra("MINUTE", min)
         serviceIntent.putExtra("requestCode", requestCode)
         serviceIntent.putExtra("solver", solver)
-        serviceIntent.putExtra("notify", notify)
+        serviceIntent.putExtra("sound", sound)
 
         //serviceIntent를 Alarm_Service로 전달한다
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)

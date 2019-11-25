@@ -3,6 +3,8 @@ package org.siwonlee.alarmapp12
 import android.app.*
 import android.content.Intent
 import android.content.Context
+import android.media.RingtoneManager
+import android.net.Uri
 import androidx.core.app.NotificationCompat
 import android.os.*
 import java.util.*
@@ -14,6 +16,7 @@ class Alarm_Service : Service() {
     var min = 0
     var requestCode = 0
     var solver = 0
+    var sound: String = ""
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -24,6 +27,7 @@ class Alarm_Service : Service() {
         min = intent.extras!!.getInt("MINUTE")
         requestCode = intent.extras!!.getInt("requestCode")
         solver = intent.extras!!.getInt("solver")
+        sound = intent.getStringExtra("sound")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             //NotificationChannel의 ID
@@ -67,6 +71,7 @@ class Alarm_Service : Service() {
         alarmIntent.putExtra("min", min)
         alarmIntent.putExtra("requestCode", requestCode)
         alarmIntent.putExtra("solver", solver)
+        alarmIntent.putExtra("sound", sound)
 
         //알람 해제 액티비티를 띄울 PendingIntent
         val p = PendingIntent.getActivity(
@@ -102,6 +107,7 @@ class Alarm_Service : Service() {
         repeatIntent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
         repeatIntent.putExtra("requestCode", requestCode)
         repeatIntent.putExtra("solver", solver)
+        repeatIntent.putExtra("sound", sound)
 
         //intent에 해당하는 pendingIntent를 생성
         val pendingIntent = PendingIntent.getBroadcast(this, requestCode, repeatIntent, PendingIntent.FLAG_UPDATE_CURRENT)

@@ -1,7 +1,11 @@
 package org.siwonlee.alarmapp12
 
 import android.app.Activity
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -17,12 +21,14 @@ import java.util.*
 class AlarmList_Activity : AppCompatActivity() {
     val ALARM_SET: Int = 1000
     val FIREBASE_MANAGE: Int = 2000
+    val WEATHER_INFO: Int = 9999
 
     lateinit var alarmlist: UserData
 
     private val prefStorage = "org.siwonlee.alarmapp12.prefs"
     private var currentCategory = "전체 카테고리"
 
+    private var uid: String = ""
     var categorize: ArrayList<String> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +44,6 @@ class AlarmList_Activity : AppCompatActivity() {
         if(strList != "")
             alarmlist = GsonBuilder().create().fromJson(strList, UserData::class.java)
         else alarmlist = UserData()
-
         editor.apply()
 
         // category adapter 설정
@@ -110,7 +115,7 @@ class AlarmList_Activity : AppCompatActivity() {
 
                         //일요일부터 토요일까지y 검토하며 알람을 설정
                         for(day in 1 .. 7)
-                            data.setAlarm(this, day, data.switch[day])
+                            setAlarm(day, data, data.switch[day])
                     }
                 }
 
@@ -122,11 +127,11 @@ class AlarmList_Activity : AppCompatActivity() {
                     //해당 데이터가 "", 즉 이상한 데이터가 아니라면
                     if(fetchUserData != "") {
                         //기존에 존재하는 모든 알람을 해제한 뒤
-                        for(data in alarmlist.list) for (day in 1..7) data.setAlarm(this, day,false)
+                        for(data in alarmlist.list) for (day in 1..7) setAlarm(day, data, false)
                         //백업한 데이터를 가져와 alarmlist에 저장하고
                         alarmlist = GsonBuilder().create().fromJson(fetchUserData, UserData::class.java)
                         //백업한 리스트의 모든 알람을 set한다
-                        for(data in alarmlist.list) for (day in 1..7) data.setAlarm(this, day,data.switch[day])
+                        for(data in alarmlist.list) for (day in 1..7) setAlarm(day, data, data.switch[day])
                     }
                 }
             }
@@ -166,13 +171,85 @@ class AlarmList_Activity : AppCompatActivity() {
                 //logInIntent.putExtra()
                 startActivityForResult(logInIntent, FIREBASE_MANAGE)
             }
-
-            R.id.activateMap -> {
+            //날씨 정보 버튼을 눌렀을 때
+            R.id.weather -> {
+                //GetWeatherInfo를 실행시킬 intent를 만들고
+                val weatherIntent = Intent(this, GetWeatherInfo::class.java)
+                //현재 위치정보를 intent로 전달하는 부분 필요함
+                startActivityForResult(weatherIntent, WEATHER_INFO)
+            }
+            R.id.mapAlarm -> {
                 val mapIntent = Intent(this, Alarm_Map::class.java)
                 startActivity(mapIntent)
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun setAlarm(day: Int, data: Alarm_Data, set: Boolean) {
+        //정보를 this에서 receiver까지 보내는 intent를 생성
+        val intent = Intent(this, Alarm_Receiver::class.java)
+
+        //alarmlist에서 알람 설정에 필요한 정보를 가져온다
+        val hr = data.hr
+        val min = data.min
+        val phr = data.phr * -1
+        val pmin = data.pmin * -1
+        val solver = data.solver
+        val sound = data.sound
+
+        //알람 정보를 dHHMM로 나타내면 알람이 서로 겹치지 않는다
+        val requestCode: Int = (day * 100 + hr) * 100 + min
+
+        //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
+        intent.putExtra("HOUR_OF_DAY", hr)
+        intent.putExtra("MINUTE", min)
+        intent.putExtra("requestCode", requestCode)
+        intent.putExtra("solver", solver)
+        intent.putExtra("sound", sound)
+
+        //정해진 요일에 맞는 PendingIntent를 설정한다
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, requestCode,
+            intent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        //알람을 설정할 AlarmManager 클래스
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        //day요일에 알람을 울려야 한다면
+        if (set) {
+            //알람을 울릴 시각에 대한 정보를 Calendar를 이용해 표시한다
+            val cal = Calendar.getInstance()
+
+            //알람을 울릴 시각을 cal에 저장한다
+            cal.set(Calendar.HOUR_OF_DAY, hr)
+            cal.set(Calendar.MINUTE, min)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+
+            //오늘부터 day 요일까지 남은 일 수
+            val diff = (day - cal.get(Calendar.DAY_OF_WEEK) + 7) % 7
+
+            //알람이 울리는 요일이 i 요일이 되도록 cal을 조정한다
+            cal.add(Calendar.DATE, diff)
+
+            //지정한 미리 울리기 시간만큼 알람 시간을 앞으로 당긴다
+            cal.add(Calendar.HOUR_OF_DAY, phr)
+            cal.add(Calendar.MINUTE, pmin)
+
+            //최종적으로 맞춰진 시각이 현재보다 이전이라면 알람을 7일 뒤로 늦춘다
+            if (cal.before(Calendar.getInstance())) cal.add(Calendar.DATE, 7)
+
+            //알람 매니저에 알람을 설정한다
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+            else
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, pendingIntent)
+        }
+
+        //day 요일에 알람을 울리지 않아야 한다면 알람을 취소한다
+        else alarmManager.cancel(pendingIntent)
     }
 
     fun makeCategory() {

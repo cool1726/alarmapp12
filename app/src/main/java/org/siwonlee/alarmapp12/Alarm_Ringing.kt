@@ -5,14 +5,21 @@ import android.app.KeyguardManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.RingtoneManager
+import android.net.Uri
 import android.os.*
+import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.alarm_ringing.*
 import java.util.*
 import android.view.WindowManager
-
-
+import android.widget.Toast
+import android.media.*
+import android.media.AudioManager.STREAM_ALARM
+import android.media.AudioManager.STREAM_RING
+import androidx.core.net.toUri
+import android.media.AudioManager
+import android.media.AudioAttributes
+import android.os.Build
 
 fun Int.toTime(): String {
     var ret = ""
@@ -59,20 +66,41 @@ class Alarm_Ringing : AppCompatActivity() {
 
         // 알람 울릴 때 1초 진동, 1초 휴식을 반복
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            v.vibrate(VibrationEffect.createWaveform(longArrayOf(1000, 1000, 1000, 1000), 0))
+            //v.vibrate(VibrationEffect.createWaveform(longArrayOf(1000, 1000, 1000, 1000), 0))
         } else {
-            v.vibrate(longArrayOf(1000, 1000, 1000, 1000), 0)
+            //v.vibrate(longArrayOf(1000, 1000, 1000, 1000), 0)
         }
 
+
+        //string화 된 Uri값을 받아와 다시 Uri로 처리
+        val sound = intent.getStringExtra("sound")
+        var uri = Uri.parse(sound)
+
         //알람음을 울릴 RingtoneManager
-        val ringtone = RingtoneManager.getRingtone(
-            applicationContext,
-            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        )
+        val ringtone : Ringtone = RingtoneManager.getRingtone(applicationContext, uri)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val aa = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)    //RingTone이 알람 볼륨으로 울리도록
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
+            ringtone.audioAttributes = aa
+        } else {
+            ringtone.streamType = AudioManager.STREAM_ALARM
+        }
+
+        // 날씨 정보 받아올 경우 사용
+        /*when(sound) {
+            "sunny" -> ringtone = RingtoneManager.getRingtone(applicationContext, Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/goodmorning.mp3"))
+            "cloudy" -> curSound = Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/believer.mp3")
+            "rainy" -> curSound = Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/vivalavida.mp3")
+            "snowy" -> curSound = Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/christmasday.mp3")
+        }
+        */
+
+
+        Toast.makeText(this, "${uri} 알람소리", Toast.LENGTH_LONG).show()
 
         // 알람 울릴 때 소리 : 기본 알람소리
+        //mediaPlayer.start()
         ringtone.play()
-
 
         //알람 해제 버튼을 눌렀을 때
         bt_alarmoff.setOnClickListener {
@@ -90,7 +118,6 @@ class Alarm_Ringing : AppCompatActivity() {
                     startActivity(solveIntent)
                 }
             }
-
             //알람 해제에 성공했으므로 알람 액티비티를 제거한다
             finish()
         }
@@ -116,6 +143,7 @@ class Alarm_Ringing : AppCompatActivity() {
             delayIntent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
             delayIntent.putExtra("requestCode", 0)
             delayIntent.putExtra("solver", solver)
+            delayIntent.putExtra("sound", sound)
 
             //임시 알람 정보를 담은 pendingIntent를 만든다
             val pendingIntent = PendingIntent.getBroadcast(this, 0, delayIntent, PendingIntent.FLAG_UPDATE_CURRENT)
