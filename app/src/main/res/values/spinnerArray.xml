@@ -4,5 +4,6 @@
         <item>버튼 누르기</item>
         <item>산수문제 풀기</item>
         <item>흔들기</item>
+        <item>바코드 스캔</item>
     </string-array>
 </resources>

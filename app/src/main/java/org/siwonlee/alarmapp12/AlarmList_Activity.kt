@@ -192,6 +192,7 @@ class AlarmList_Activity : AppCompatActivity() {
         val phr = data.phr * -1
         val pmin = data.pmin * -1
         val solver = data.solver
+        val qr = data.qr
         val sound = data.sound
 
         //알람 정보를 dHHMM로 나타내면 알람이 서로 겹치지 않는다
@@ -203,6 +204,7 @@ class AlarmList_Activity : AppCompatActivity() {
         intent.putExtra("requestCode", requestCode)
         intent.putExtra("solver", solver)
         intent.putExtra("sound", sound)
+        intent.putExtra("qr", qr)
 
         //정해진 요일에 맞는 PendingIntent를 설정한다
         val pendingIntent = PendingIntent.getBroadcast(

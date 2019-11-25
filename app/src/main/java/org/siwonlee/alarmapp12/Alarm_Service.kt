@@ -16,6 +16,7 @@ class Alarm_Service : Service() {
     var min = 0
     var requestCode = 0
     var solver = 0
+    var qr: String? = ""
     var sound: String = ""
 
     override fun onBind(intent: Intent): IBinder? {
@@ -27,6 +28,7 @@ class Alarm_Service : Service() {
         min = intent.extras!!.getInt("MINUTE")
         requestCode = intent.extras!!.getInt("requestCode")
         solver = intent.extras!!.getInt("solver")
+        qr = intent.extras!!.getString("qr")
         sound = intent.getStringExtra("sound")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -71,6 +73,7 @@ class Alarm_Service : Service() {
         alarmIntent.putExtra("min", min)
         alarmIntent.putExtra("requestCode", requestCode)
         alarmIntent.putExtra("solver", solver)
+        alarmIntent.putExtra("qr", qr)
         alarmIntent.putExtra("sound", sound)
 
         //알람 해제 액티비티를 띄울 PendingIntent
@@ -107,6 +110,7 @@ class Alarm_Service : Service() {
         repeatIntent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
         repeatIntent.putExtra("requestCode", requestCode)
         repeatIntent.putExtra("solver", solver)
+        repeatIntent.putExtra("qr", qr)
         repeatIntent.putExtra("sound", sound)
 
         //intent에 해당하는 pendingIntent를 생성

@@ -25,6 +25,7 @@ class Alarm_Receiver : BroadcastReceiver() {
         val min = intent.extras!!.getInt("MINUTE")
         val requestCode = intent.extras!!.getInt("requestCode")
         val solver = intent.extras!!.getInt("solver")
+        val qr = intent.extras!!.getString("qr")
         val notify = intent.extras!!.getLong("notify")
         val sound = intent.extras!!.getString("sound")
 
@@ -34,6 +35,7 @@ class Alarm_Receiver : BroadcastReceiver() {
         serviceIntent.putExtra("MINUTE", min)
         serviceIntent.putExtra("requestCode", requestCode)
         serviceIntent.putExtra("solver", solver)
+        serviceIntent.putExtra("qr", qr)
         serviceIntent.putExtra("notify", notify)
         serviceIntent.putExtra("sound", sound)
 

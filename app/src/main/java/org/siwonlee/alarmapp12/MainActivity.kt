@@ -11,14 +11,11 @@ import android.os.Build
 import java.util.*
 import android.content.Context
 import android.graphics.Color
-import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
-import android.os.Parcelable
 import android.text.TextUtils.isEmpty
 import android.view.View
 import android.widget.*
-import androidx.core.net.toUri
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -34,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     //텍스트뷰를 터치했을 때 바꿀 색
     var tColor = arrayOf(Color.GRAY, /*Color.parseColor("#008577")*/Color.RED)
 
+    val SOL_QR = 44
     val REQ_RINGTONE = 55
     // 앱에서 제공하는 알람벨을 soundArray로 선언했다
     val soundArray = arrayOf("sunny", "cloudy", "rainy", "snowy") //순서대로 believer, rockabye, vivalavida, christmasday
@@ -170,6 +168,8 @@ class MainActivity : AppCompatActivity() {
                 AdapterView.OnItemSelectedListener {
                 override fun onItemSelected( adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
                     data.solver = i
+
+
                 }
 
                 override fun onNothingSelected(adapterView: AdapterView<*>) {}
@@ -222,6 +222,13 @@ class MainActivity : AppCompatActivity() {
                 else data.pmin = Integer.parseInt(dialogMin.text.toString())
 
                 data.category = newCat.text.toString()
+
+                if (data.solver == 3) {
+                    val intent = Intent(applicationContext, AlarmSolving3::class.java)
+                    intent.putExtra("solving", data.solver)
+
+                    startActivityForResult(intent, SOL_QR)
+                }
             }
             builder.setNegativeButton("취소") { _, _ -> /* 취소일 때 아무 액션이 없으므로 빈칸 */ }
             builder.create().show()
@@ -339,6 +346,12 @@ class MainActivity : AppCompatActivity() {
                     //curSound = RingtoneManager.getRingtone(this, pickedUri).getTitle(this)    //toString이 안 될 경우 getTitle
                     data.sound = pickedUri.toString()
                     Toast.makeText(this, "${pickedUri} selected", Toast.LENGTH_LONG).show()
+                }
+
+                SOL_QR -> {
+                    var qr = intent!!.extras!!.get("qr").toString()
+                    Toast.makeText(this, "${qr} is saved.", Toast.LENGTH_LONG).show()
+                    data.qr = qr
                 }
             }
         }

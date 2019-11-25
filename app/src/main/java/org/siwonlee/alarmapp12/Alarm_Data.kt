@@ -7,6 +7,7 @@ data class Alarm_Data(
     var pmin: Int = 0,
     var switch: MutableList<Boolean> = mutableListOf(true, false, false, false, false, false, false, false),
     var solver: Int = 0,
+    var qr: String = "",
     var category: String = "기본",
     var sound: String = ""
 )
@@ -19,6 +20,7 @@ fun Alarm_Data(map: HashMap<String, Any>): Alarm_Data {
         pmin = (map["pmin"] as Long).toInt(),
         switch = map["switch"] as MutableList<Boolean>,
         solver = (map["solver"] as Long).toInt(),
+        qr = map["qr"] as String,
         category = map["category"] as String,
         sound = (map["sound"] as String)
     )
@@ -31,6 +33,7 @@ fun isEqual(a: Alarm_Data, b: Alarm_Data): Boolean {
             a.pmin == b.pmin &&
             a.switch == b.switch &&
             a.solver == b.solver &&
+            a.qr == b.qr &&
             a.category == b.category &&
             a.sound == b.sound)
 }
