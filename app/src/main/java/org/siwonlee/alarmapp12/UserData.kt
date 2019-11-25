@@ -44,7 +44,7 @@ class UserData(
 
     fun pop(data: Alarm_Data) {
         for(i in 0 until list.size)
-            if(isEqual(list[i], data)) {
+            if(list[i].isEqual(data)) {
                 list.removeAt(i)
                 break
             }

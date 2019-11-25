@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.siwonlee.alarmapp12" >
+    package="org.siwonlee.alarmapp12">
 
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the 'MyLocation' functionality.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -13,34 +19,52 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Alarm_Data" />
-        <activity android:name=".MainActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".GoogleSignInActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".Alarm_Ringing"
+
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDJND1P55BYjKNCCUphFcqaUABfXJUsVMY" />
+
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".GoogleSignInActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Alarm_Ringing"
             android:screenOrientation="portrait">
             <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".AlarmList_Activity"
+        <activity
+            android:name=".AlarmList_Activity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".AlarmSolving1"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Alarm_Map"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".AlarmSolving1"
-            android:screenOrientation="portrait"/>
+        <receiver android:name=".Alarm_Receiver" />
 
-        <receiver android:name=".Alarm_Receiver"/>
         <service
             android:name=".Alarm_Service"
-            android:enabled="true">
-        </service>
+            android:enabled="true"></service>
     </application>
 
 </manifest>
