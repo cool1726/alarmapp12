@@ -1,12 +1,12 @@
 package org.siwonlee.alarmapp12
 
 import android.Manifest
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
@@ -34,8 +34,6 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
     lateinit var pref: SharedPreferences
 
     var myPos: Marker? = null
-
-    private val temp = "org.siwonlee.alarmapp12.prefs.maps"
     val REQUEST_ACCESS_FINE_LOCATION = 1
 
     lateinit var mFusedLocationClient: FusedLocationProviderClient
@@ -44,8 +42,7 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.alarm_map)
 
-        pref = this.getSharedPreferences(temp, MODE_PRIVATE)
-        val strSet = pref.getString("set", "")
+        val strSet = intent.getStringExtra("set")
         if(strSet != "")
             markerSet = GsonBuilder().create().fromJson(strSet, Marker_Set::class.java)
 
@@ -183,5 +180,18 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
     fun saveSet() {
         val strSet = GsonBuilder().create().toJson(markerSet, Marker_Set::class.java)
         pref.edit().putString("set", strSet).apply()
+    }
+
+    override fun onBackPressed() {
+        //AlarmList_Activity에 정보를 넘길 intent
+        val returnIntent = Intent()
+
+        //설정한 알람 정보를 AlarmList_Acitivity로 넘긴다
+        val strSet = GsonBuilder().create().toJson(markerSet, Marker_Set::class.java)
+        returnIntent.putExtra("set", strSet)
+
+        //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
+        setResult(Activity.RESULT_OK, returnIntent)
+        finish()
     }
 }
