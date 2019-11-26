@@ -202,8 +202,8 @@ class GoogleSignInActivity : AppCompatActivity() {
 
         db.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                //로그인이 되어있다면
-                if (nowData.uid != "") {
+                //로그인이 되어있고 백업을 했다면
+                if (nowData.uid != "" && dataSnapshot.getValue() != null) {
                     //dataSnapshot을 이용해 db에서 자신의 정보를 HashMap으로 읽어온 뒤
                     val map: HashMap<String, Any>? =
                         (dataSnapshot.getValue() as HashMap<String, HashMap<String, Any>>)[nowData.uid]
@@ -316,6 +316,11 @@ class GoogleSignInActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "GoogleActivity"
         private const val RC_SIGN_IN = 9001
+    }
+
+    override fun onBackPressed() {
+        endActivity()
+        super.onBackPressed()
     }
 
     private fun endActivity() {

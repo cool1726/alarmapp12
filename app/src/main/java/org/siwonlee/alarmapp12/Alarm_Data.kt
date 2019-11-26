@@ -82,7 +82,7 @@ fun Alarm_Data.setAlarm(context: Context, set: Int) {
         )
 
         //알람을 설정하고자 한다면 알람을 설정한다
-        if(set == ALARM_ACTIVATE) {
+        if(set == ALARM_ACTIVATE && !cal.before(Calendar.getInstance())) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, dateIntent)
             else

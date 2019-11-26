@@ -71,20 +71,20 @@ class Alarm_Service : Service() {
         alarmIntent.putExtra("solver", solver)
         alarmIntent.putExtra("sound", sound)
 
-        //알람 해제 액티비티를 띄울 PendingIntent
-        val p = PendingIntent.getActivity(
-            context,
-            1,
-            alarmIntent,
-            PendingIntent.FLAG_ONE_SHOT
-        )
+         //알람 해제 액티비티를 띄울 PendingIntent
+         val p = PendingIntent.getActivity(
+             context,
+             requestCode,
+             alarmIntent,
+             PendingIntent.FLAG_ONE_SHOT
+         )
 
-        //try catch문으로 알람 해제 액티비티를 띄운다
-        try {
-            p.send()
-        } catch (e: PendingIntent.CanceledException) {
-            e.printStackTrace()
-        }
+         //try catch문으로 알람 해제 액티비티를 띄운다
+         try {
+             p.send()
+         } catch (e: PendingIntent.CanceledException) {
+             e.printStackTrace()
+         }
     }
 
     private fun alarmReassign() {

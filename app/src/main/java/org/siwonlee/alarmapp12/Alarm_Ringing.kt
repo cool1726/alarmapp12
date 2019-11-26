@@ -92,7 +92,6 @@ class Alarm_Ringing : AppCompatActivity() {
         }
         */
 
-
         Toast.makeText(this, "${uri} 알람소리", Toast.LENGTH_LONG).show()
 
         // 알람 울릴 때 소리 : 기본 알람소리
@@ -107,7 +106,7 @@ class Alarm_Ringing : AppCompatActivity() {
 
             //알람 해제 방식을 읽어들인 뒤
             val solver = intent.extras!!.getInt("solver")
-            when(solver) {
+            when (solver) {
                 //1번 방식을 택한다면 알람 해제 시 산수 계산을 해야 한다
                 1 -> {
                     //산수 계산 액티비티를 띄운다

@@ -121,29 +121,34 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
                 intent, PendingIntent.FLAG_UPDATE_CURRENT
             )
 
-            val dialog = AlertDialog.Builder(this).setTitle("알람 이름을 입력하세요")
+            val dialog = AlertDialog.Builder(this).setTitle("알람 정보를 입력하세요")
 
-            val name = EditText(this)
-            name.hint = "새 장소 알람"
+            val dialogView = layoutInflater.inflate(R.layout.map_alarm_setting, null)
+            val name = dialogView.findViewById<EditText>(R.id.mapSettingName)
+            val range = dialogView.findViewById<EditText>(R.id.mapSettingRange)
 
             dialog.setPositiveButton("설정") { _, _ ->
                 val markerOptions: MarkerOptions = MarkerOptions().position(latLng).title(name.text.toString())
                 if(markerOptions.title == "") markerOptions.title("새 장소 알람")
 
-                mMap.addMarker(markerOptions)
-                markerSet.add(mMap.addMarker(markerOptions))
-                saveSet()
+                var mapRange = 10
+                if(range.text.toString() != "")
+                    mapRange = range.text.toString().toInt()
 
                 try {
-                    loc.addProximityAlert(latLng.latitude, latLng.longitude, 10.toFloat(), -1, pIntent)
+                    loc.addProximityAlert(latLng.latitude, latLng.longitude, mapRange.toFloat(), -1, pIntent)
                     Toast.makeText(this, "위치 알람을 설정했습니다.", Toast.LENGTH_SHORT).show()
                 } catch(e: SecurityException) {
                     Toast.makeText(this, "권한 에러: 위치 사용 권한을 취득하지 못했습니다.", Toast.LENGTH_SHORT).show()
                 }
+
+                markerSet.add(mMap.addMarker(markerOptions))
             }
             dialog.setNegativeButton("취소") { _, _ ->  }
-            dialog.setView(name)
+            dialog.setView(dialogView)
             dialog.create().show()
+
+            if(myPos != null) myPos!!.showInfoWindow()
         }
 
         mMap.setOnMarkerClickListener {
@@ -167,9 +172,8 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
 
             markerSet.pop(it)
             it.remove()
-            it.remove()
 
-            saveSet()
+            if(myPos != null) myPos!!.showInfoWindow()
 
             Toast.makeText(this, "위치 알람을 제거했습니다.", Toast.LENGTH_SHORT).show()
         } catch(e: SecurityException) {
@@ -177,10 +181,6 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    fun saveSet() {
-        val strSet = GsonBuilder().create().toJson(markerSet, Marker_Set::class.java)
-        pref.edit().putString("set", strSet).apply()
-    }
 
     override fun onBackPressed() {
         //AlarmList_Activity에 정보를 넘길 intent
@@ -193,5 +193,11 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
         //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
         setResult(Activity.RESULT_OK, returnIntent)
         finish()
+        super.onBackPressed()
+    }
+
+    override fun onDestroy() {
+        onBackPressed()
+        super.onDestroy()
     }
 }
