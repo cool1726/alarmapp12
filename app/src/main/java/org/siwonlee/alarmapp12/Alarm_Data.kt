@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -41,6 +42,7 @@ fun Alarm_Data.isEqual(other: Alarm_Data): Boolean {
 }
 
 fun Alarm_Data.setAlarm(context: Context, set: Int) {
+    Log.d("TAG", "setAlarm")
     val ALARM_ACTIVATE = 1
     val ALARM_DEACTIVATE = -1
     //알람을 설정할 AlarmManager 클래스
@@ -70,7 +72,7 @@ fun Alarm_Data.setAlarm(context: Context, set: Int) {
 
         val intent = Intent(context, Alarm_Receiver::class.java)
         //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
-        intent.putExtra("timeInMillis", timeInMillis)
+        intent.putExtra("timeInMillis", cal.timeInMillis)
         intent.putExtra("requestCode", requestCode)
         intent.putExtra("solver", solver)
         intent.putExtra("sound", sound)
@@ -113,7 +115,7 @@ fun Alarm_Data.setAlarm(context: Context, set: Int) {
         //정보를 this에서 receiver까지 보내는 intent를 생성
         val intent = Intent(context, Alarm_Receiver::class.java)
         //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
-        intent.putExtra("timeInMillis", timeInMillis)
+        intent.putExtra("timeInMillis", cal.timeInMillis)
         intent.putExtra("requestCode", requestCode)
         intent.putExtra("solver", solver)
         intent.putExtra("sound", sound)
@@ -127,9 +129,9 @@ fun Alarm_Data.setAlarm(context: Context, set: Int) {
         //알람을 설정하고자 한다면 알람 매니저에 알람을 설정한다
         if (set == ALARM_ACTIVATE) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, dayIntent)
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, dayIntent)
             else
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, dayIntent)
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, dayIntent)
         }
 
         //알람을 제거하고자 한다면 alarmManager에서 알람을 취소한다

@@ -1,6 +1,7 @@
 package org.siwonlee.alarmapp12
 
 import android.content.Context
+import android.util.Log
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -107,7 +108,9 @@ class UserData(
 
     fun set(context: Context) {
         this.unset(context)
-        for(data in list)
+        for(data in list) {
             data.setAlarm(context, ALARM_ACTIVATE)
+            Log.d("TAG", "set")
+        }
     }
 }

@@ -6,6 +6,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
+import android.util.Log
 
 class Alarm_Receiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -37,6 +38,8 @@ class Alarm_Receiver : BroadcastReceiver() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             context.startForegroundService(serviceIntent)
         else context.startService(serviceIntent)
+
+        Log.d("TAG", "receiver")
 
         //acquire한 wakeLock을 release한다
         if (wakeLock != null) {
