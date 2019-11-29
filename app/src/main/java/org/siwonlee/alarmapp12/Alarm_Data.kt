@@ -26,16 +26,16 @@ fun Alarm_Data(map: HashMap<String, Any>): Alarm_Data {
     )
 }
 
-fun isEqual(a: Alarm_Data, b: Alarm_Data): Boolean {
-    return (a.hr == b.hr &&
-            a.min == b.min &&
-            a.phr == b.phr &&
-            a.pmin == b.pmin &&
-            a.switch == b.switch &&
-            a.solver == b.solver &&
-            a.qr == b.qr &&
-            a.category == b.category &&
-            a.sound == b.sound)
+fun Alarm_Data.isEqual(other: Alarm_Data): Boolean {
+    return (this.hr == other.hr &&
+            this.min == other.min &&
+            this.phr == other.phr &&
+            this.pmin == other.pmin &&
+            this.switch == other.switch &&
+            this.solver == other.solver &&
+            this.qr == other.qr &&
+            this.category == other.category &&
+            this.sound == other.sound)
 }
 
 // data class 형식으로 알람 데이터 저장 (추가 보완이 필요함)

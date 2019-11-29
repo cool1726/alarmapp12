@@ -26,7 +26,6 @@ class Alarm_Receiver : BroadcastReceiver() {
         val requestCode = intent.extras!!.getInt("requestCode")
         val solver = intent.extras!!.getInt("solver")
         val qr = intent.extras!!.getString("qr")
-        val notify = intent.extras!!.getLong("notify")
         val sound = intent.extras!!.getString("sound")
 
         // RingtonePlayingService 서비스 intent 생성
@@ -36,7 +35,6 @@ class Alarm_Receiver : BroadcastReceiver() {
         serviceIntent.putExtra("requestCode", requestCode)
         serviceIntent.putExtra("solver", solver)
         serviceIntent.putExtra("qr", qr)
-        serviceIntent.putExtra("notify", notify)
         serviceIntent.putExtra("sound", sound)
 
         //serviceIntent를 Alarm_Service로 전달한다

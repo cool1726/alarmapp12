@@ -178,6 +178,10 @@ class AlarmList_Activity : AppCompatActivity() {
                 //현재 위치정보를 intent로 전달하는 부분 필요함
                 startActivityForResult(weatherIntent, WEATHER_INFO)
             }
+            R.id.mapAlarm -> {
+                val mapIntent = Intent(this, Alarm_Map::class.java)
+                startActivity(mapIntent)
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -273,7 +277,7 @@ class AlarmList_Activity : AppCompatActivity() {
             var newPos = 0
 
             for(i in 0 until alarmlist.size()) {
-                if(isEqual(alarmlist.get(i), smallList[position])) {
+                if(alarmlist.get(i).isEqual(smallList[position])) {
                     newPos = i
                     break
                 }

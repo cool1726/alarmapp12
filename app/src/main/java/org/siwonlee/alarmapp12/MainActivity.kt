@@ -334,7 +334,6 @@ class MainActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK, returnIntent)
             finish()
         }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -355,6 +354,5 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
     }
 }
