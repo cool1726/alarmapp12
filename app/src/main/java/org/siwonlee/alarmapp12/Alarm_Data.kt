@@ -43,6 +43,7 @@ fun Alarm_Data.isEqual(other: Alarm_Data): Boolean {
 
 fun Alarm_Data.setAlarm(context: Context, set: Int) {
     Log.d("TAG", "setAlarm")
+
     val ALARM_ACTIVATE = 1
     val ALARM_DEACTIVATE = -1
     //알람을 설정할 AlarmManager 클래스
@@ -137,6 +138,8 @@ fun Alarm_Data.setAlarm(context: Context, set: Int) {
         //알람을 제거하고자 한다면 alarmManager에서 알람을 취소한다
         else if (set == ALARM_DEACTIVATE) alarmManager.cancel(dayIntent)
     }
+
+    var i = 1
 }
 
 // data class 형식으로 알람 데이터 저장 (추가 보완이 필요함)

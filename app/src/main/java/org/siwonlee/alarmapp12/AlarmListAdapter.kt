@@ -38,9 +38,9 @@ class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data
             if(ringDate == "") {
                 val yy = cal.get(Calendar.YEAR)
                 val MM = cal.get(Calendar.MONTH)
-                val dd = cal.get(Calendar.DATE)
+                val dd = cal.get(Calendar.DAY_OF_MONTH)
 
-                ringDate = "${yy}년 ${MM}월 ${dd}일"
+                ringDate = "${yy}년 ${MM + 1}월 ${dd}일"
             }
 
             val hr = cal.get(Calendar.HOUR_OF_DAY)

@@ -63,13 +63,17 @@ class UserData(
     }
 
     fun unset(context: Context) {
-        for(data in list)
+        for(data in list) {
             data.setAlarm(context,ALARM_DEACTIVATE)
+            Log.d("TAG", "unset")
+        }
     }
 
     fun set(context: Context) {
-        for(data in list)
+        for(data in list) {
             data.setAlarm(context, ALARM_ACTIVATE)
+            Log.d("TAG", "set")
+        }
     }
 
     fun sort() {
