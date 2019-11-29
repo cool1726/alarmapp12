@@ -13,6 +13,7 @@ data class Alarm_Data(
     var phr: Int = 0,
     var pmin: Int = 0,
     var switch: MutableList<Boolean> = mutableListOf(false, false, false, false, false, false, false, false),
+    var name: String = "",
     var solver: Int = 0,
     var qr: String = "",
     var category: String = "기본",
@@ -25,6 +26,7 @@ fun Alarm_Data(map: HashMap<String, Any>): Alarm_Data {
         phr = (map["phr"] as Long).toInt(),
         pmin = (map["pmin"] as Long).toInt(),
         switch = map["switch"] as MutableList<Boolean>,
+        name = map["name"] as String,
         solver = (map["solver"] as Long).toInt(),
         qr = map["qr"] as String,
         category = map["category"] as String,
@@ -37,6 +39,7 @@ fun Alarm_Data.isEqual(other: Alarm_Data): Boolean {
             this.phr == other.phr &&
             this.pmin == other.pmin &&
             this.switch == other.switch &&
+            this.name == other.name &&
             this.solver == other.solver &&
             this.qr == other.qr &&
             this.category == other.category &&

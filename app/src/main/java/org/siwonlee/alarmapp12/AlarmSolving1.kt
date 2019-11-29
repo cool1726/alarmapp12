@@ -28,7 +28,7 @@ class AlarmSolving1 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.alarm_solving_1)
-
+/*
         //액티비티를 넘어가면 알람 진동과 알람음이 제거되므로
         // //모든 알람 해제 액티비티에 알람음과 알람 진동을 추가한다
         val v = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
@@ -41,7 +41,7 @@ class AlarmSolving1 : AppCompatActivity() {
             applicationContext,
             RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
         )
-        ringtone.play()
+        ringtone.play()*/
 
         //amount개의 랜덤 정수를 생성해 내림차순으로 정렬한다
         var nums = Array(amount, {getRandomNumber(2)}).sortedDescending()
@@ -62,8 +62,8 @@ class AlarmSolving1 : AppCompatActivity() {
         //알람 해제 버튼을 눌렀을 때 EditText에 정답을 입력했다면 액티비티를 종료한다
         bt_alarmoff.setOnClickListener {
             if(Integer.parseInt(nswr.text.toString()) == answer) {
-                v.cancel()
-                ringtone.stop()
+                //v.cancel()
+                //ringtone.stop()
                 finish()
             }
         }

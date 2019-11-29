@@ -51,6 +51,8 @@ class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data
             itemView.time_in_list.text = "${hr.toTime()}:${min.toTime()}"
             itemView.date_in_list.text = ringDate
 
+            itemView.alarm_name.text = data.name
+
             // ViewHolder내에서 setOnClickListener 아이템 클릭 event
             // adapterPosition으로 클릭한 아이템의 인덱스값 전달
             itemView.setOnClickListener {

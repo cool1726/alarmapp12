@@ -164,12 +164,16 @@ class MainActivity : AppCompatActivity() {
 
             //alarm_setting_advanced 파일에 정의된 레이아웃과 그 레이아웃에 속한 뷰
             val dialogView = layoutInflater.inflate(R.layout.alarm_setting_advanced, null)
+            val dialogName = dialogView.findViewById<EditText>(R.id.alarmName)
             val dialogSolving = dialogView.findViewById<Spinner>(R.id.solving)
             val dialogHr = dialogView.findViewById<EditText>(R.id.preHr)
             val dialogMin = dialogView.findViewById<EditText>(R.id.preMin)
             val categorize = dialogView.findViewById<Spinner>(R.id.categorize)
             val newCat = dialogView.findViewById<EditText>(R.id.newCat)
             val visible = dialogView.findViewById<LinearLayout>(R.id.alarmNewCategorySetter)
+
+            if (data.name != "")
+                dialogName.setText(data.name)
 
             if (data.phr != 0)
                 dialogHr.setText(data.phr.toString())
@@ -233,6 +237,9 @@ class MainActivity : AppCompatActivity() {
 
             builder.setView(dialogView)
             builder.setPositiveButton("확인") { _, _ ->
+                if(isEmpty(dialogName.text)) data.name = ""
+                else data.name = dialogName.text.toString()
+
                 if (isEmpty(dialogHr.text)) data.phr = 0
                 else data.phr = Integer.parseInt(dialogHr.text.toString())
 

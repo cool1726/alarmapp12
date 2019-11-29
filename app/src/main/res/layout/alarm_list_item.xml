@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <LinearLayout
@@ -15,46 +15,60 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="20dp"
-            android:layout_weight="1.5"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/gap_in_list"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="0H 0M before" />
+            android:layout_weight="0"
+            android:orientation="vertical"
+            android:paddingLeft="20dp">
 
             <TextView
                 android:id="@+id/time_in_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
                 android:layout_weight="1"
+                android:includeFontPadding="false"
+                android:lineSpacingExtra="0dp"
                 android:text="07:10"
-                android:textSize="36dp" />
+                android:textSize="38dp" />
 
             <TextView
                 android:id="@+id/date_in_list"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:includeFontPadding="false"
+                android:lineSpacingExtra="0dp"
                 android:text="요일"
                 android:textSize="16dp" />
 
         </LinearLayout>
 
+        <Space
+            android:id="@+id/space"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/alarm_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="0dp"
+            android:text="" />
+
         <Switch
             android:id="@+id/switch1"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginLeft="0dp"
-            android:layout_weight="1"
-            android:padding="20dp"
+            android:track="@drawable/switch_selector"
+            android:thumb="@drawable/switch_thumb"
+            android:textOff=""
+            android:textOn=""
+            android:thumbTextPadding="15dp"
+            android:layout_weight="0"
             android:checked="true"
             android:gravity="center"
-            android:scaleX="1"
-            android:scaleY="1" />
+            android:padding="20dp"/>
 
 
     </LinearLayout>
