@@ -21,8 +21,7 @@ class Alarm_Receiver : BroadcastReceiver() {
         wakeLock.acquire(60 * 1000)
 
         //intent로부터 전달받은 인자를 그대로 전달해준다
-        val hr = intent.extras!!.getInt("HOUR_OF_DAY")
-        val min = intent.extras!!.getInt("MINUTE")
+        val timeInMillis = intent.extras!!.getLong("timeInMillis")
         val requestCode = intent.extras!!.getInt("requestCode")
         val solver = intent.extras!!.getInt("solver")
         val qr = intent.extras!!.getString("qr")
@@ -30,8 +29,7 @@ class Alarm_Receiver : BroadcastReceiver() {
 
         // RingtonePlayingService 서비스 intent 생성
         val serviceIntent = Intent(context, Alarm_Service::class.java)
-        serviceIntent.putExtra("HOUR_OF_DAY", hr)
-        serviceIntent.putExtra("MINUTE", min)
+        serviceIntent.putExtra("timeInMillis", timeInMillis)
         serviceIntent.putExtra("requestCode", requestCode)
         serviceIntent.putExtra("solver", solver)
         serviceIntent.putExtra("qr", qr)

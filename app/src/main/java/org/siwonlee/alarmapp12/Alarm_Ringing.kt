@@ -7,16 +7,19 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.*
+import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.alarm_ringing.*
 import java.util.*
 import android.view.WindowManager
 import android.widget.Toast
 import android.media.*
+import android.media.AudioManager.STREAM_ALARM
+import android.media.AudioManager.STREAM_RING
+import androidx.core.net.toUri
 import android.media.AudioManager
 import android.media.AudioAttributes
 import android.os.Build
-
 
 fun Int.toTime(): String {
     var ret = ""
@@ -68,10 +71,6 @@ class Alarm_Ringing : AppCompatActivity() {
             //v.vibrate(longArrayOf(1000, 1000, 1000, 1000), 0)
         }
 
-        /*val soundIntent = Intent(this, Sound_Service::class.java)
-        soundIntent.putExtra(Sound_Service.MESSAGE_KEY, true)
-
-        startService(soundIntent)*/
 
         //string화 된 Uri값을 받아와 다시 Uri로 처리
         val sound = intent.getStringExtra("sound")
@@ -105,6 +104,9 @@ class Alarm_Ringing : AppCompatActivity() {
 
         //알람 해제 버튼을 눌렀을 때
         bt_alarmoff.setOnClickListener {
+            //우선 알람 소리와 진동을 해제한다
+            v.cancel()
+            ringtone.stop()
 
             //알람 해제 방식을 읽어들인 뒤
             val solver = intent.extras!!.getInt("solver")
@@ -124,17 +126,12 @@ class Alarm_Ringing : AppCompatActivity() {
                 }
             }
             //알람 해제에 성공했으므로 알람 액티비티를 제거한다
-            //알람 소리와 진동을 해제한다
-            v.cancel()
-            ringtone.stop()
             finish()
         }
 
         //딜레이 버튼을 눌렀을 때
         bt_delay.setOnClickListener {
             //알람 생성에 필요한 정보를 가져온다
-            val hr = intent.extras!!.getInt("hr")
-            val min = intent.extras!!.getInt("min")
             val solver = intent.extras!!.getInt("solver")
             val qr = intent.extras!!.getInt("qr")
 
@@ -148,8 +145,7 @@ class Alarm_Ringing : AppCompatActivity() {
 
             //알람을 설정할 intent를 만든다
             val delayIntent = Intent(this, Alarm_Receiver::class.java)
-            delayIntent.putExtra("HOUR_OF_DAY", cal.get(Calendar.HOUR_OF_DAY))
-            delayIntent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
+            delayIntent.putExtra("timeInMillis", cal.timeInMillis)
             delayIntent.putExtra("requestCode", 0)
             delayIntent.putExtra("solver", solver)
             delayIntent.putExtra("qr", qr)

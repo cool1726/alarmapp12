@@ -85,7 +85,7 @@ class GoogleSignInActivity : AppCompatActivity() {
         //백업하기
         setBackup.setOnClickListener {
             if(nowData.uid != "") {
-                db.child(nowData.uid).child("").setValue(nowData).addOnSuccessListener {
+                db.child(nowData.uid).child("").child("UserData").setValue(nowData).addOnSuccessListener {
                     Toast.makeText(this, "백업이 완료되었습니다.", Toast.LENGTH_SHORT).show()
                     endActivity()
                 }
@@ -202,30 +202,38 @@ class GoogleSignInActivity : AppCompatActivity() {
 
         db.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                //로그인이 되어있다면
-                if (nowData.uid != "") {
+                //로그인이 되어있고 백업을 했다면
+                if (nowData.uid != "" && dataSnapshot.getValue() != null) {
                     //dataSnapshot을 이용해 db에서 자신의 정보를 HashMap으로 읽어온 뒤
                     val map: HashMap<String, Any>? =
                         (dataSnapshot.getValue() as HashMap<String, HashMap<String, Any>>)[nowData.uid]
                     //이렇게 긁어온 값이 null이 아니라면, 즉 이미 백업을 한 적이 있다면
                     if(map != null) {
-                        //빈 HashMap을 만든 뒤
-                        var mat = HashMap<String, String>()
-                        //map에 uidMap이 저장되어 있다면 그 값을 mat에 저장한다
-                        if(map["uidMap"] != null) mat = map["uidMap"]!! as HashMap<String, String>
-                        //백업한 데이터를 data에 저장한 뒤
+                        //map의 UserData 항목을 가져와 해당 항목의 list, uidmap, markerSet을 가져온 뒤
+                        val mapmap = map["UserData"] as HashMap<String, Any>
+                        var list = mapmap["list"] as ArrayList<Alarm_Data>?
+                        var uidMap = mapmap["uidMap"] as HashMap<String, String>?
+                        var markerSet = mapmap["uidMap"] as Marker_Set?
+
+                        //null 체크를 하고
+                        if(list == null) list = ArrayList()
+                        if(uidMap == null) uidMap = HashMap()
+                        if(markerSet == null) markerSet = Marker_Set()
+
+                        //data를 새로 할당한다
                         data = UserData(
                             uid = nowData.uid,
-                            list = map["list"] as ArrayList<Alarm_Data>,
-                            uidMap = mat
+                            list = list,
+                            uidMap = uidMap,
+                            markerSet = markerSet
                         )
+
                         //타인이 설정한 알람을 받아와 data와 nowData에 저장한다
-                        for(i in map)
-                            if(i.key != "list" && i.key != "uidMap" && i.key != "uid") {
-                                val addData = Alarm_Data(i.value as HashMap<String, Any>)
-                                data!!.add(addData)
-                                nowData.add(addData)
-                            }
+                        for(i in map) if(i.key != "UserData") {
+                            val addData = Alarm_Data(i.value as HashMap<String, Any>)
+                            data!!.add(addData)
+                            nowData.add(addData)
+                        }
                     }
 
                     //로그인이 되어있다면 Firebase와의 연결에 성공했으므로 토스트를 띄워 안전함을 알린다
@@ -276,8 +284,7 @@ class GoogleSignInActivity : AppCompatActivity() {
                     data = GsonBuilder().create().fromJson(strData, Alarm_Data::class.java)
 
                 //알람을 그대로 저장하는 것이 아니라, 알람의 개별 성분을 전부 뜯어내 Firebase에 저장한다
-                dbSetter.child(nowData.uid).child("hr").setValue(data.hr)
-                dbSetter.child(nowData.uid).child("min").setValue(data.min)
+                dbSetter.child(nowData.uid).child("timeInMillis").setValue(data.timeInMillis)
                 dbSetter.child(nowData.uid).child("phr").setValue(data.phr)
                 dbSetter.child(nowData.uid).child("pmin").setValue(data.pmin)
                 dbSetter.child(nowData.uid).child("switch").setValue(data.switch)
@@ -309,6 +316,11 @@ class GoogleSignInActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "GoogleActivity"
         private const val RC_SIGN_IN = 9001
+    }
+
+    override fun onBackPressed() {
+        endActivity()
+        super.onBackPressed()
     }
 
     private fun endActivity() {

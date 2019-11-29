@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import android.view.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data>,
                        val alarmItemClick: (Int) -> Unit, val alarmItemLongClick: (Int) -> Unit)
@@ -30,9 +32,23 @@ class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data
             val days = arrayOf("일 ", "월 ", "화 ", "수 ", "목 ", "금 ", "토 ")
             for (i in 1..7) if (data.switch[i]) ringDate = "${ringDate}${days[i - 1]}"
 
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = data.timeInMillis
+
+            if(ringDate == "") {
+                val yy = cal.get(Calendar.YEAR)
+                val MM = cal.get(Calendar.MONTH)
+                val dd = cal.get(Calendar.DATE)
+
+                ringDate = "${yy}년 ${MM}월 ${dd}일"
+            }
+
+            val hr = cal.get(Calendar.HOUR_OF_DAY)
+            val min = cal.get(Calendar.MINUTE)
+
             // 전달받은 Alarm_Data 형식의 data에서 시간과 요일(날짜)을 불러온다
             // itemView의 list 구성 요소에 text로 전달한다
-            itemView.time_in_list.text = "${data.hr.toTime()}:${data.min.toTime()}"
+            itemView.time_in_list.text = "${hr.toTime()}:${min.toTime()}"
             itemView.date_in_list.text = ringDate
 
             // ViewHolder내에서 setOnClickListener 아이템 클릭 event

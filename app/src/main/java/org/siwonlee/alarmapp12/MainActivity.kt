@@ -1,9 +1,7 @@
 package org.siwonlee.alarmapp12
 
-import android.app.Activity
-import android.app.AlarmManager
-import android.app.AlertDialog
-import android.app.PendingIntent
+import android.app.*
+import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -11,6 +9,7 @@ import android.os.Build
 import java.util.*
 import android.content.Context
 import android.graphics.Color
+import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
 import android.text.TextUtils.isEmpty
@@ -18,6 +17,7 @@ import android.view.View
 import android.widget.*
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 fun Boolean.toInt() = if (this) 1 else 0
 
@@ -44,35 +44,26 @@ class MainActivity : AppCompatActivity() {
         //알람을 생성하는 것이라면 true, 수정하는 것이라면 false
         val isInit = intent.getBooleanExtra("isInit", true)
 
+        //기존에 설정한 알람이 존재한다면 그 알람을 베이스로 설정한다
         val strData = intent.getStringExtra("data")
         if(strData != null)
             data = GsonBuilder().create().fromJson(strData, Alarm_Data::class.java)
 
-        categories = intent.getStringArrayListExtra("categories")!!
+        //알람을 data와 연동시킨 뒤
+        cal.timeInMillis = data.timeInMillis
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
 
-        //알람을 수정하는 것이라면 수정 이전 알람을 해제한다
-        if(!isInit) {
-            //정보를 this에서 receiver까지 보내는 intent를 생성
-            val intent = Intent(this, Alarm_Receiver::class.java)
-
-            for (day in 1..7) {
-                //알람 정보를 dHHMM로 나타내면 알람이 서로 겹치지 않는다
-                val requestCode: Int = (day * 100 + data.hr) * 100 + data.min
-
-                //정해진 요일에 맞는 PendingIntent를 설정한다
-                val pendingIntent = PendingIntent.getBroadcast(
-                    this, requestCode,
-                    intent, PendingIntent.FLAG_UPDATE_CURRENT
-                )
-                //알람을 설정할 AlarmManager 클래스
-                val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-                alarmManager.cancel(pendingIntent)
-            }
+        //알람이 처음 시작된 경우 시간을 6시 0분으로 맞춘다
+        if(isInit) {
+            cal.set(Calendar.HOUR_OF_DAY, 6)
+            cal.set(Calendar.MINUTE, 0)
         }
 
+        categories = intent.getStringArrayListExtra("categories")!!
+
         //설정된 요일에 따라 텍스트 색을 다르게 바꿔준다
-        //date.setTextColor(tColor[switch[0].toInt()])
+        date.setTextColor(tColor[data.switch[0].toInt()])
         sun.setTextColor(tColor[data.switch[1].toInt()])
         mon.setTextColor(tColor[data.switch[2].toInt()])
         tue.setTextColor(tColor[data.switch[3].toInt()])
@@ -81,60 +72,88 @@ class MainActivity : AppCompatActivity() {
         fri.setTextColor(tColor[data.switch[6].toInt()])
         sat.setTextColor(tColor[data.switch[7].toInt()])
 
-        //cal의 시간을 알람을 설정한 시간으로 바꾼다
-        cal.set(Calendar.HOUR_OF_DAY, data.hr)
-        cal.set(Calendar.MINUTE, data.min)
-
-        //알람은 항상 0초에 울린다
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
-
         //timePicker의 초기값을 hr/min으로 지정
         if (Build.VERSION.SDK_INT >= 23) {
-            timePicker.hour = data.hr
-            timePicker.minute = data.min
+            timePicker.hour = cal.get(Calendar.HOUR_OF_DAY)
+            timePicker.minute = cal.get(Calendar.MINUTE)
         } else {
-            timePicker.setCurrentHour(data.hr)
-            timePicker.setCurrentMinute(data.min)
+            timePicker.setCurrentHour(cal.get(Calendar.HOUR_OF_DAY))
+            timePicker.setCurrentMinute(cal.get(Calendar.MINUTE))
         }
 
         //------------------------------------------------------------------setOnClickListener 시작
+
+        //달력 버튼을 누른 경우 어느 한 날의 지정된 시간에 알람을 울리게끔 설정한다
+        date.setOnClickListener {
+            //listener를 먼저 정의해준 뒤
+            val listener =
+                DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
+                    cal.set(Calendar.YEAR, year)
+                    cal.set(Calendar.MONTH, monthOfYear)
+                    cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                }
+            //DatePicker를 Dialog로 띄운다
+            val datePicker = DatePickerDialog(this, listener, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH))
+            datePicker.show()
+
+            //알람이 울릴 날짜를 선택했으므로 알람 요일 선택을 달력으로 바꿔준 뒤
+            //일요일부터 월요일까지 설정된 알람을 전부 해제한다
+            data.switch[0] = true
+            for(i in 1..7) data.switch[i] = false
+
+            date.setTextColor(tColor[data.switch[0].toInt()])
+            sun.setTextColor(tColor[data.switch[1].toInt()])
+            mon.setTextColor(tColor[data.switch[2].toInt()])
+            tue.setTextColor(tColor[data.switch[3].toInt()])
+            wed.setTextColor(tColor[data.switch[4].toInt()])
+            thu.setTextColor(tColor[data.switch[5].toInt()])
+            fri.setTextColor(tColor[data.switch[6].toInt()])
+            sat.setTextColor(tColor[data.switch[7].toInt()])
+        }
 
         //각 요일 버튼을 클릭했을 때
         //알람이 해당 요일에 울리는 것을 표시하고
         //이를 텍스트의 색으로 나타낸다
         sun.setOnClickListener{
-            data.switch[1] = !data.switch[1]
             data.switch[0] = false
+            data.switch[1] = !data.switch[1]
+            date.setTextColor(tColor[data.switch[0].toInt()])
             sun.setTextColor(tColor[data.switch[1].toInt()])
         }
         mon.setOnClickListener{
-            data.switch[2] = !data.switch[2]
             data.switch[0] = false
+            data.switch[2] = !data.switch[2]
+            date.setTextColor(tColor[data.switch[0].toInt()])
             mon.setTextColor(tColor[data.switch[2].toInt()])
         }
         tue.setOnClickListener{
-            data.switch[3] = !data.switch[3]
             data.switch[0] = false
+            data.switch[3] = !data.switch[3]
+            date.setTextColor(tColor[data.switch[0].toInt()])
             tue.setTextColor(tColor[data.switch[3].toInt()])
         }
         wed.setOnClickListener{
+            data.switch[0] = false
             data.switch[4] = !data.switch[4]
+            date.setTextColor(tColor[data.switch[0].toInt()])
             wed.setTextColor(tColor[data.switch[4].toInt()])
         }
         thu.setOnClickListener{
-            data.switch[5] = !data.switch[5]
             data.switch[0] = false
+            data.switch[5] = !data.switch[5]
+            date.setTextColor(tColor[data.switch[0].toInt()])
             thu.setTextColor(tColor[data.switch[5].toInt()])
         }
         fri.setOnClickListener{
-            data.switch[6] = !data.switch[6]
             data.switch[0] = false
+            data.switch[6] = !data.switch[6]
+            date.setTextColor(tColor[data.switch[0].toInt()])
             fri.setTextColor(tColor[data.switch[6].toInt()])
         }
         sat.setOnClickListener{
-            data.switch[7] = !data.switch[7]
             data.switch[0] = false
+            data.switch[7] = !data.switch[7]
+            date.setTextColor(tColor[data.switch[0].toInt()])
             sat.setTextColor(tColor[data.switch[7].toInt()])
         }
 
@@ -143,6 +162,7 @@ class MainActivity : AppCompatActivity() {
             val builder = AlertDialog.Builder(this)
             builder.setTitle("알람 추가 설정")
 
+            //alarm_setting_advanced 파일에 정의된 레이아웃과 그 레이아웃에 속한 뷰
             val dialogView = layoutInflater.inflate(R.layout.alarm_setting_advanced, null)
             val dialogSolving = dialogView.findViewById<Spinner>(R.id.solving)
             val dialogHr = dialogView.findViewById<EditText>(R.id.preHr)
@@ -168,8 +188,6 @@ class MainActivity : AppCompatActivity() {
                 AdapterView.OnItemSelectedListener {
                 override fun onItemSelected( adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
                     data.solver = i
-
-
                 }
 
                 override fun onNothingSelected(adapterView: AdapterView<*>) {}
@@ -305,21 +323,22 @@ class MainActivity : AppCompatActivity() {
 
         // 알람 저장 버튼
         bt_set.setOnClickListener {
+            //만일 알람 설정을 날짜로 하지 않았다면
+            if(data.switch[0])
             //날짜가 바뀌는 등 오류가 발생할 수 있으므로 현재 날짜를 다시 구한다
-            cal.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
+                cal.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
 
             //timePicker의 값이 바뀔 때마다 hr와 min을 가져오지 않고, 알람 설정 버튼을 눌렀을 때 시간을 가져온다
             if (Build.VERSION.SDK_INT >= 23) {
-                data.hr = timePicker.hour
-                data.min = timePicker.minute
+                cal.set(Calendar.HOUR_OF_DAY, timePicker.hour)
+                cal.set(Calendar.MINUTE, timePicker.minute)
             } else {
-                data.hr = timePicker.currentHour
-                data.min = timePicker.currentMinute
+                cal.set(Calendar.HOUR_OF_DAY, timePicker.currentHour)
+                cal.set(Calendar.MINUTE, timePicker.currentMinute)
             }
 
-            //알람을 설정한 시간:분을 cal에 저장한다
-            cal.set(Calendar.HOUR_OF_DAY, data.hr)
-            cal.set(Calendar.MINUTE, data.min)
+            //알람을 설정한 시간을 data에 저장한다
+            data.timeInMillis = cal.timeInMillis
 
             //AlarmList_Activity에 정보를 넘길 intent
             val returnIntent = Intent()
@@ -345,12 +364,6 @@ class MainActivity : AppCompatActivity() {
                     //curSound = RingtoneManager.getRingtone(this, pickedUri).getTitle(this)    //toString이 안 될 경우 getTitle
                     data.sound = pickedUri.toString()
                     Toast.makeText(this, "${pickedUri} selected", Toast.LENGTH_LONG).show()
-                }
-
-                SOL_QR -> {
-                    var qr = intent!!.extras!!.get("qr").toString()
-                    Toast.makeText(this, "${qr} is saved.", Toast.LENGTH_LONG).show()
-                    data.qr = qr
                 }
             }
         }

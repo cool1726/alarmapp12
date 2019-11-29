@@ -12,8 +12,7 @@ import java.util.*
 class Alarm_Service : Service() {
     private val context = this
 
-    var hr = 0
-    var min = 0
+    var timeInMillis: Long = 0
     var requestCode = 0
     var solver = 0
     var qr: String? = ""
@@ -24,8 +23,7 @@ class Alarm_Service : Service() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        hr = intent.extras!!.getInt("HOUR_OF_DAY")
-        min = intent.extras!!.getInt("MINUTE")
+        timeInMillis = intent.extras!!.getLong("timeInMillis")
         requestCode = intent.extras!!.getInt("requestCode")
         solver = intent.extras!!.getInt("solver")
         qr = intent.extras!!.getString("qr")
@@ -55,9 +53,11 @@ class Alarm_Service : Service() {
         }
 
         //알람을 울리게 만들 액티비티를 실행한다
-        alarmService(intent)
+        alarmService()
         //0번 requestCode에는 알람을 5분 뒤에 울리게 만드는 임시 알람을 배정한다
-        if(requestCode != 0) alarmReassign(intent)
+        //requestCode가 8만보다 크거나 같다면, 즉 요일 반복으로 설정한 것이 아니라면 알람을 재등록하지 않는다
+        if(requestCode != 0 && (requestCode < 80000))
+            alarmReassign()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             stopForeground(true)
@@ -65,49 +65,43 @@ class Alarm_Service : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun alarmService(intent: Intent) {
-
+    private fun alarmService() {
         //pendingIntent 설정을 위한 intent
         val alarmIntent = Intent(context, Alarm_Ringing::class.java)
-        alarmIntent.putExtra("hr", hr)
-        alarmIntent.putExtra("min", min)
+        alarmIntent.putExtra("timeInMillis", timeInMillis)
         alarmIntent.putExtra("requestCode", requestCode)
         alarmIntent.putExtra("solver", solver)
         alarmIntent.putExtra("qr", qr)
         alarmIntent.putExtra("sound", sound)
 
-        //알람 해제 액티비티를 띄울 PendingIntent
-        val p = PendingIntent.getActivity(
-            context,
-            1,
-            alarmIntent,
-            PendingIntent.FLAG_ONE_SHOT
-        )
+         //알람 해제 액티비티를 띄울 PendingIntent
+         val p = PendingIntent.getActivity(
+             context,
+             requestCode,
+             alarmIntent,
+             PendingIntent.FLAG_ONE_SHOT
+         )
 
-        //try catch문으로 알람 해제 액티비티를 띄운다
-        try {
-            p.send()
-        } catch (e: PendingIntent.CanceledException) {
-            e.printStackTrace()
-        }
+         //try catch문으로 알람 해제 액티비티를 띄운다
+         try {
+             p.send()
+         } catch (e: PendingIntent.CanceledException) {
+             e.printStackTrace()
+         }
     }
 
-    private fun alarmReassign(intent: Intent) {
+    private fun alarmReassign() {
         //이 함수가 불리는 날짜는 알람이 울려야 하는 요일일 것이므로
         //알람이 울리는 날에서 7일 뒤에 다시 알람을 울리도록 설정
         val cal : Calendar = Calendar.getInstance()
-        cal.set(Calendar.HOUR_OF_DAY, hr)
-        cal.set(Calendar.MINUTE, min)
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
+        cal.timeInMillis = timeInMillis
         cal.add(Calendar.DATE, 7)
 
         //정보를 this에서 receiver까지 보내는 intent를 생성
         val repeatIntent = Intent(this, Alarm_Receiver::class.java)
 
         //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
-        repeatIntent.putExtra("HOUR_OF_DAY", cal.get(Calendar.HOUR_OF_DAY))
-        repeatIntent.putExtra("MINUTE", cal.get(Calendar.MINUTE))
+        repeatIntent.putExtra("timeInMillis", cal.timeInMillis)
         repeatIntent.putExtra("requestCode", requestCode)
         repeatIntent.putExtra("solver", solver)
         repeatIntent.putExtra("qr", qr)
