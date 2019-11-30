@@ -102,6 +102,7 @@ class AlarmList_Activity : AppCompatActivity() {
                     //알람을 수정하거나 삭제했다면 before_id는 -1이 아니다
                     if(before != null) {
                         val popData = GsonBuilder().create().fromJson(before, Alarm_Data::class.java)
+                        alarmlist.unset(this)
                         //alarmlist에서 알람을 제거한다
                         alarmlist.pop(popData)
                     }
@@ -110,12 +111,13 @@ class AlarmList_Activity : AppCompatActivity() {
                     if (strData != null) {
                         //alarmlist에 저장할 Alarm_Data 객체
                         val data = GsonBuilder().create().fromJson(strData, Alarm_Data::class.java)
-
                         //alarmlist에 data를 추가한 뒤 알람을 갱신한다
                         alarmlist.add(data)
+                        alarmlist.set(this)
                     }
 
-                    alarmlist.set(this)
+                    //리스트에 변경이 있었으므로 알람을 정렬한다
+                    alarmlist.sort()
                 }
 
                 //Firebase에 접근했을 경우
@@ -129,8 +131,9 @@ class AlarmList_Activity : AppCompatActivity() {
                         alarmlist.unset(this)
                         //백업한 데이터를 가져와 alarmlist에 저장하고
                         alarmlist = GsonBuilder().create().fromJson(fetchUserData, UserData::class.java)
-                        //백업한 리스트의 모든 알람을 set한다
+                        //백업한 리스트의 모든 알람을 set한 다음 정렬한다
                         alarmlist.set(this)
+                        alarmlist.sort()
                     }
                 }
 

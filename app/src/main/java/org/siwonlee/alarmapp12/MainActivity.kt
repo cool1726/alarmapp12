@@ -13,6 +13,7 @@ import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
 import android.text.TextUtils.isEmpty
+import android.util.Log
 import android.view.View
 import android.widget.*
 import com.google.gson.GsonBuilder
@@ -331,9 +332,12 @@ class MainActivity : AppCompatActivity() {
         // 알람 저장 버튼
         bt_set.setOnClickListener {
             //만일 알람 설정을 날짜로 하지 않았다면
-            if(data.switch[0])
-            //날짜가 바뀌는 등 오류가 발생할 수 있으므로 현재 날짜를 다시 구한다
+            if(!data.switch[0]) {
+                //날짜가 바뀌는 등 오류가 발생할 수 있으므로 현재 날짜를 다시 구한다
+                cal.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR))
+                cal.set(Calendar.MONTH, Calendar.getInstance().get(Calendar.MONTH))
                 cal.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
+            }
 
             //timePicker의 값이 바뀔 때마다 hr와 min을 가져오지 않고, 알람 설정 버튼을 눌렀을 때 시간을 가져온다
             if (Build.VERSION.SDK_INT >= 23) {
@@ -358,6 +362,13 @@ class MainActivity : AppCompatActivity() {
 
             //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
             setResult(Activity.RESULT_OK, returnIntent)
+
+            Log.d("TAG", "year: ${cal.get(Calendar.YEAR)}")
+            Log.d("TAG", "month: ${cal.get(Calendar.MONTH)}")
+            Log.d("TAG", "date: ${cal.get(Calendar.DAY_OF_MONTH)}")
+            Log.d("TAG", "hr: ${cal.get(Calendar.HOUR)}")
+            Log.d("TAG", "month: ${cal.get(Calendar.MINUTE)}")
+
             finish()
         }
     }

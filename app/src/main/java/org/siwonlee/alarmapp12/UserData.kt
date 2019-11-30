@@ -1,6 +1,7 @@
 package org.siwonlee.alarmapp12
 
 import android.content.Context
+import android.util.Log
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -62,10 +63,20 @@ class UserData(
     }
 
     fun unset(context: Context) {
-        for(data in list)
+        for(data in list) {
             data.setAlarm(context,ALARM_DEACTIVATE)
+            Log.d("TAG", "unset")
+        }
+    }
 
-        //unset은 UserData가 변경된 경우 반드시 호출된다
+    fun set(context: Context) {
+        for(data in list) {
+            data.setAlarm(context, ALARM_ACTIVATE)
+            Log.d("TAG", "set")
+        }
+    }
+
+    fun sort() {
         Collections.sort(list, kotlin.Comparator {a: Alarm_Data, b: Alarm_Data ->
             //a와 b의 시간을 알아볼 수 있게 하기 위한 Calendar 변수
             val aa = Calendar.getInstance()
@@ -103,11 +114,5 @@ class UserData(
 
             aaa.compareTo(bbb)
         })
-    }
-
-    fun set(context: Context) {
-        this.unset(context)
-        for(data in list)
-            data.setAlarm(context, ALARM_ACTIVATE)
     }
 }
