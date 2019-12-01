@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -49,6 +50,7 @@ fun Alarm_Data.isEqual(other: Alarm_Data): Boolean {
 
 fun Alarm_Data.setAlarm(context: Context, set: Int) {
     Log.d("TAG", "setAlarm")
+    Log.d("Data Sound", sound)
 
     val ALARM_ACTIVATE = 1
     val ALARM_DEACTIVATE = -1
@@ -83,6 +85,8 @@ fun Alarm_Data.setAlarm(context: Context, set: Int) {
         intent.putExtra("requestCode", requestCode)
         intent.putExtra("solver", solver)
         intent.putExtra("sound", sound)
+
+        Toast.makeText(context, "${solver}  ${sound}", Toast.LENGTH_LONG).show()
 
         //주어진 날짜로 설정된 PendingIntent를 생성한다
         val dateIntent = PendingIntent.getBroadcast(

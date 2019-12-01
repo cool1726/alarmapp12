@@ -3,10 +3,9 @@ package org.siwonlee.alarmapp12
 import android.app.*
 import android.content.Intent
 import android.content.Context
-import android.media.RingtoneManager
-import android.net.Uri
 import androidx.core.app.NotificationCompat
 import android.os.*
+import android.util.Log
 import java.util.*
 
 class Alarm_Service : Service() {
@@ -16,7 +15,7 @@ class Alarm_Service : Service() {
     var requestCode = 0
     var solver = 0
     var qr: String? = ""
-    var sound: String = ""
+    var sound: String? = ""
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -27,7 +26,10 @@ class Alarm_Service : Service() {
         requestCode = intent.extras!!.getInt("requestCode")
         solver = intent.extras!!.getInt("solver")
         qr = intent.extras!!.getString("qr")
-        sound = intent.getStringExtra("sound")
+        sound = intent.extras!!.getString("sound")
+
+        Log.d("servicesound", sound)
+        Log.d("servicesolver", "${solver}")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             //NotificationChannel의 ID
@@ -66,28 +68,56 @@ class Alarm_Service : Service() {
     }
 
     private fun alarmService() {
-        //pendingIntent 설정을 위한 intent
-        val alarmIntent = Intent(context, Alarm_Ringing::class.java)
-        alarmIntent.putExtra("timeInMillis", timeInMillis)
-        alarmIntent.putExtra("requestCode", requestCode)
-        alarmIntent.putExtra("solver", solver)
-        alarmIntent.putExtra("qr", qr)
-        alarmIntent.putExtra("sound", sound)
+        var alarmIntent = Intent(context, AlarmSolving1::class.java)
+        if(solver == 0) {   //(1) 버튼 눌러 해제하는 방법
+            //pendingIntent 설정을 위한 intent
+            alarmIntent = Intent(context, AlarmSolving1::class.java)
+            alarmIntent.putExtra("timeInMillis", timeInMillis)
+            alarmIntent.putExtra("requestCode", requestCode)
+            alarmIntent.putExtra("solver", solver)
+            alarmIntent.putExtra("qr", qr)
+            alarmIntent.putExtra("sound", sound)
+        }
+        else if (solver == 1) {   //(2) 수학문제 풀어 해제하는 방법
+            alarmIntent = Intent(context, AlarmSolving2::class.java)
+            alarmIntent.putExtra("timeInMillis", timeInMillis)
+            alarmIntent.putExtra("requestCode", requestCode)
+            alarmIntent.putExtra("solver", solver)
+            alarmIntent.putExtra("qr", qr)
+            alarmIntent.putExtra("sound", sound)
+        }
+        else if (solver == 2) {
+            alarmIntent = Intent(context, AlarmSolving1::class.java)    //흔들기 부분 수정 필요
+            alarmIntent.putExtra("timeInMillis", timeInMillis)
+            alarmIntent.putExtra("requestCode", requestCode)
+            alarmIntent.putExtra("solver", solver)
+            alarmIntent.putExtra("qr", qr)
+            alarmIntent.putExtra("sound", sound)
+        }
+        else {    //(4) 바코드 찍어 해제하는 방법
+            alarmIntent = Intent(context, AlarmSolving4::class.java)
+            alarmIntent.putExtra("timeInMillis", timeInMillis)
+            alarmIntent.putExtra("requestCode", requestCode)
+            alarmIntent.putExtra("solver", solver)
+            alarmIntent.putExtra("qr", qr)
+            alarmIntent.putExtra("sound", sound)
+        }
 
-         //알람 해제 액티비티를 띄울 PendingIntent
-         val p = PendingIntent.getActivity(
-             context,
-             requestCode,
-             alarmIntent,
-             PendingIntent.FLAG_ONE_SHOT
-         )
+        //알람 해제 액티비티를 띄울 PendingIntent
+        val p = PendingIntent.getActivity(
+            context,
+            requestCode,
+            alarmIntent,
+            PendingIntent.FLAG_ONE_SHOT
+        )
 
-         //try catch문으로 알람 해제 액티비티를 띄운다
-         try {
-             p.send()
-         } catch (e: PendingIntent.CanceledException) {
-             e.printStackTrace()
-         }
+        //try catch문으로 알람 해제 액티비티를 띄운다
+        try {
+            p.send()
+            Log.d("service", "pendingIntent delivered")
+        } catch (e: PendingIntent.CanceledException) {
+            e.printStackTrace()
+        }
     }
 
     private fun alarmReassign() {

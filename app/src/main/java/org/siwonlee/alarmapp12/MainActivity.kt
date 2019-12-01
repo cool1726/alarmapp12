@@ -1,15 +1,12 @@
 package org.siwonlee.alarmapp12
 
 import android.app.*
-import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Build
 import java.util.*
-import android.content.Context
 import android.graphics.Color
-import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
 import android.text.TextUtils.isEmpty
@@ -18,7 +15,6 @@ import android.view.View
 import android.widget.*
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
 
 fun Boolean.toInt() = if (this) 1 else 0
 
@@ -250,7 +246,7 @@ class MainActivity : AppCompatActivity() {
                 data.category = newCat.text.toString()
 
                 if (data.solver == 3) {
-                    val intent = Intent(applicationContext, AlarmSolving3::class.java)
+                    val intent = Intent(applicationContext, AlarmSolving4::class.java)
                     intent.putExtra("solving", data.solver)
 
                     startActivityForResult(intent, SOL_QR)
@@ -378,10 +374,10 @@ class MainActivity : AppCompatActivity() {
         if(resultCode == Activity.RESULT_OK) {
             when(requestCode) {
                 REQ_RINGTONE -> {
-                    var pickedUri = intent!!.getParcelableExtra<Uri>(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
-                    //curSound = RingtoneManager.getRingtone(this, pickedUri).getTitle(this)    //toString이 안 될 경우 getTitle
+                    var pickedUri = intent!!.getParcelableExtra<Uri>(RingtoneManager.EXTRA_RINGTONE_PICKED_URI) //노래 경로
+                    //data.sound = RingtoneManager.getRingtone(this, pickedUri).getTitle(this)    //노래 제목
                     data.sound = pickedUri.toString()
-                    Toast.makeText(this, "${pickedUri} selected", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "${data.sound} selected", Toast.LENGTH_LONG).show()
                 }
             }
         }

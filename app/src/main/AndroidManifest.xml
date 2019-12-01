@@ -34,7 +34,7 @@
             android:name=".GoogleSignInActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Alarm_Ringing" />
+            android:name=".AlarmSolving1" />
         <service
             android:name=".Sound_Service"
             android:enabled="true"
@@ -42,7 +42,7 @@
 
         <activity android:name=".Alarm_Data" />
         <activity
-            android:name=".AlarmSolving3"
+            android:name=".AlarmSolving4"
             android:screenOrientation="fullSensor"
             tools:replace="screenOrientation" />
         <activity
@@ -55,7 +55,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AlarmSolving1"
+            android:name=".AlarmSolving2"
             android:screenOrientation="portrait" />
         <activity
             android:name=".Alarm_Map"

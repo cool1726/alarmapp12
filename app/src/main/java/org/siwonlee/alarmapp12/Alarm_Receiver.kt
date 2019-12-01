@@ -28,6 +28,8 @@ class Alarm_Receiver : BroadcastReceiver() {
         val qr = intent.extras!!.getString("qr")
         val sound = intent.extras!!.getString("sound")
 
+        Log.d("receiversound", sound)
+
         // RingtonePlayingService 서비스 intent 생성
         val serviceIntent = Intent(context, Alarm_Service::class.java)
         serviceIntent.putExtra("timeInMillis", timeInMillis)

@@ -5,39 +5,46 @@ import android.app.KeyguardManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.Ringtone
+import android.media.RingtoneManager
 import android.net.Uri
-import android.os.*
-import android.provider.MediaStore
-import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.alarm_ringing.*
-import java.util.*
+import android.os.Build
+import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.WindowManager
 import android.widget.Toast
-import android.media.*
-import android.media.AudioManager.STREAM_ALARM
-import android.media.AudioManager.STREAM_RING
-import androidx.core.net.toUri
-import android.media.AudioManager
-import android.media.AudioAttributes
-import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.alarm_ringing.*
+import kotlinx.android.synthetic.main.alarm_solving_1.*
+import java.util.*
 
-fun Int.toTime(): String {
-    var ret = ""
-    if (this < 10) ret = "0"
+val random = Random()
 
-    return ret + this.toString()
+//size자리 랜덤 정수를 만드는 함수
+fun getRandomNumber(size: Int): Int {
+    var ret = 0
+    for(i in 1..size) ret = ret * 10 + random.nextInt(9) + 1
+    return ret
 }
 
-class Alarm_Ringing : AppCompatActivity() {
+class AlarmSolving2 : AppCompatActivity() {
+    //amount개의 정수와 +, -기호를 이용한 수식을 만든다
+    var amount = 3
+    //+, -를 배열에 저장한다
+    val op = arrayOf("+", "-")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.alarm_ringing)
+        setContentView(R.layout.alarm_solving_1)
 
         //잠금화면 위에서 액티비티를 띄울 수 있게 해준다
         //API 제한 없이 사용할 수 있는 코드들을 사용한다
         this.window.addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-            or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                    or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
 
         //API 27부터 사용 불가능한 LayoutParams를 다른 기능으로 대체한다
@@ -47,9 +54,10 @@ class Alarm_Ringing : AppCompatActivity() {
             val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
             keyguardManager.requestDismissKeyguard(this, null)
         } else {
-            this.window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+            this.window.addFlags(
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
         }
 
         //알람이 울리는 시간을 Calendar로 알아낸다
@@ -58,17 +66,15 @@ class Alarm_Ringing : AppCompatActivity() {
 
         if(hr == 0) hr = 12
 
-        time_now.text = "${hr.toTime()}:${min.toTime()}"
-
 
         //알람 진동을 울리게 할 Vibrator
         val v = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
         // 알람 울릴 때 1초 진동, 1초 휴식을 반복
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            //v.vibrate(VibrationEffect.createWaveform(longArrayOf(1000, 1000, 1000, 1000), 0))
+            v.vibrate(VibrationEffect.createWaveform(longArrayOf(1000, 1000, 1000, 1000), 0))
         } else {
-            //v.vibrate(longArrayOf(1000, 1000, 1000, 1000), 0)
+            v.vibrate(longArrayOf(1000, 1000, 1000, 1000), 0)
         }
 
 
@@ -86,51 +92,42 @@ class Alarm_Ringing : AppCompatActivity() {
             ringtone.streamType = AudioManager.STREAM_ALARM
         }
 
-        // 날씨 정보 받아올 경우 사용
-        /*when(sound) {
-            "sunny" -> ringtone = RingtoneManager.getRingtone(applicationContext, Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/goodmorning.mp3"))
-            "cloudy" -> curSound = Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/believer.mp3")
-            "rainy" -> curSound = Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/vivalavida.mp3")
-            "snowy" -> curSound = Uri.parse("android.resource://org.siwonlee.alarmapp12/raw/christmasday.mp3")
-        }
-        */
-
-
         Toast.makeText(this, "${uri} 알람소리", Toast.LENGTH_LONG).show()
 
         // 알람 울릴 때 소리 : 기본 알람소리
-        //mediaPlayer.start()
         ringtone.play()
 
-        //알람 해제 버튼을 눌렀을 때
-        bt_alarmoff.setOnClickListener {
-            //우선 알람 소리와 진동을 해제한다
-            v.cancel()
-            ringtone.stop()
+        //amount개의 랜덤 정수를 생성해 내림차순으로 정렬한다
+        var nums = Array(amount, {getRandomNumber(2)}).sortedDescending()
+        //가장 큰 수부터 차례로 사용하여 수식을 만든다
+        qstn.text = "${nums[0]}"
 
-            //알람 해제 방식을 읽어들인 뒤
-            val solver = intent.extras!!.getInt("solver")
-            val qr = intent.extras!!.getString("qr")
-            when(solver) {
-                //1번 방식을 택한다면 알람 해제 시 산수 계산을 해야 한다
-                1 -> {
-                    //산수 계산 액티비티를 띄운다
-                    val solveIntent = Intent(this, AlarmSolving1::class.java)
-                    startActivity(solveIntent)
-                }
-                3 -> {
-                    //바코드 스캔 액티비티를 띄운다
-                    val qrIntent = Intent(this, AlarmSolving3::class.java)
-                    qrIntent.putExtra("qr", qr)
-                    startActivity(qrIntent)
-                }
+        //만들어진 수식의 답을 따로 저장한다
+        var answer = nums[0]
+
+        //nums의 1번 항부터 차례로
+        for(i in 1 until amount) {
+            //각 항 사이의 연산자는 차례로 -, +, -, +, ... 순서로 진행한다
+            qstn.text = "${qstn.text} ${op[i % 2]} ${nums[i]}"
+            //i가 홀수라면 nums[i]를 answer에서 빼고, 아니라면 더한다
+            answer += nums[i] * (1 - 2 * (i % 2))
+        }
+
+        //알람 해제 버튼을 눌렀을 때
+        bt_alarmoff2.setOnClickListener {
+            if(Integer.parseInt(nswr.text.toString()) == answer) {
+                v.cancel()
+                ringtone.stop()
+                finish()
             }
-            //알람 해제에 성공했으므로 알람 액티비티를 제거한다
-            finish()
+            else {
+                Toast.makeText(this, "틀렸습니다. 다시 입력하세요.", Toast.LENGTH_LONG).show()
+                qstn.text= ""
+            }
         }
 
         //딜레이 버튼을 눌렀을 때
-        bt_delay.setOnClickListener {
+        bt_delay2.setOnClickListener {
             //알람 생성에 필요한 정보를 가져온다
             val solver = intent.extras!!.getInt("solver")
             val qr = intent.extras!!.getInt("qr")
@@ -170,6 +167,4 @@ class Alarm_Ringing : AppCompatActivity() {
 
     //뒤로가기로 알람 해제를 막기 위한 빈 함수
     override fun onBackPressed() { }
-    //홈버튼으로 알람 해제를 막기 위한 빈 함수
-    //eoverride fun onMenuOpened(featureId: Int, menu: Menu): Boolean { return false }
 }
