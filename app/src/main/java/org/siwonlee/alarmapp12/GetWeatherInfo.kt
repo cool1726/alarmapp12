@@ -6,24 +6,22 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import org.w3c.dom.Text
 import java.text.SimpleDateFormat
 import java.util.*
-import android.os.AsyncTask.execute
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
-import java.lang.reflect.Array.getLength
 import android.widget.Toast
 import android.os.AsyncTask
 import android.util.Log
 import android.widget.ImageView
 import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.xml.sax.InputSource
@@ -47,13 +45,11 @@ class GetWeatherInfo : AppCompatActivity() {
     var weather_url = ""
 
     // 현재 내 위치
-    var locationManager : LocationManager? = null
+    var lm : LocationManager? = null
     private val REQUEST_CODE_LOCATION : Int = 2
     var currentLocation : String = ""
-    var dlatitude : Double = 60.0
-    var dlongitude : Double = 127.0
-    var latitude = 0
-    var longitude = 0
+    var dlatitude : Double = 0.0
+    var dlongitude : Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,49 +68,61 @@ class GetWeatherInfo : AppCompatActivity() {
         else if (ntime < 2310) weatherTime = "2000"
         else if (ntime < 2400) weatherTime = "2300"
 
+        lateinit var mFusedLocationClient: FusedLocationProviderClient
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         //locationManager 이용한 현재 내 위치 찾기
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager?
-        var userLocation: Location = getLatLng()
-        if (userLocation != null) {
-            dlatitude = userLocation.latitude
-            dlongitude = userLocation.longitude
+        lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager?
 
-            latitude = dlatitude.toInt()
-            longitude = dlongitude.toInt()
-            Log.d("CheckCurrentLocation", "현재 내 위치 값: ${dlatitude}, ${dlongitude}")
+        mFusedLocationClient.lastLocation.addOnSuccessListener {
+            if(it != null) {
+                val myLocation = LatLng(it.latitude, it.longitude)
+                Log.d("myLocation", "myLocation : ${myLocation}")
+                dlatitude = it.latitude
+                dlongitude = it.longitude
 
-            var mGeocoder = Geocoder(applicationContext, Locale.KOREAN)
-            var mResultList: List<Address>? = null
-            try {
-                mResultList = mGeocoder.getFromLocation(
-                    dlatitude, dlongitude, 1
-                )
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            if (mResultList != null) {
-                Log.d("CheckCurrentLocation", mResultList[0].getAddressLine(0))
-                currentLocation = mResultList[0].getAddressLine(0)
-                currentLocation = currentLocation.substring(5)  //'대한민국' 글자 빼기 위함
+                Log.d("CheckCurrentLocation", "현재 내 위치 값: ${dlatitude}, ${dlongitude}")
             }
         }
+
+        /*val mGeocoder = Geocoder(applicationContext, Locale.KOREAN)
+        var mResultList: List<Address>? = null
+        try {
+            mResultList = mGeocoder.getFromLocation(
+                dlatitude, dlongitude, 1
+            )
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        if (mResultList != null) {
+            //Log.d("CheckCurrentLocation", mResultList[0].getAddressLine(0))
+            //currentLocation = mResultList[0].getAddressLine(0)
+            //currentLocation = currentLocation.substring(5)  //'대한민국' 글자 빼기 위함
+
+        }*/
+
+        val tmp = convertGRID_GPS(dlatitude, dlongitude)
+        Log.d("위경도 -> 격자", "x = " + tmp.x + ", y = " + tmp.y)
+
+        val strLocate = findViewById<TextView>(R.id.location)
+        strLocate.setText("${tmp.x.toInt()}, ${tmp.y.toInt()}")
+
 
         weather_url = "http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastSpaceData?serviceKey=" +
                 "4N926ah8IlK9Xzvu1O%2FlEZEbWJHqRQI0VgrqT6vR54oG0ADd%2B8MyeYhQGIvGvGLXc%2F%2F%2BzWpoWAuyKP8PLh87xw%3D%3D" +
                 "&base_date=" + weatherDate + "&base_time=" + weatherTime +
-                "00&nx=" + latitude + "&ny=" + longitude + "&numOfRows=10&pageNo=1&_type=xml"
+                "00&nx=" + tmp.x.toInt() + "&ny=" + tmp.y.toInt() + "&numOfRows=10&pageNo=1&_type=xml"
 
         GetXMLTask().execute()
         Toast.makeText(this, "${weatherTime}", Toast.LENGTH_LONG).show()
     }
 
     private inner class GetXMLTask() : AsyncTask<String, Void, Document>() {
-        //var txtweather: TextView = findViewById(R.id.txt_weather)
+        var txt_weather: TextView = findViewById(R.id.txt_weather)
         var weatherImage = findViewById<ImageView>(R.id.weatherImage)
         var rainAmount = findViewById<TextView>(R.id.rainamount)
         var temperature = findViewById<TextView>(R.id.temperature)
         var updateT = findViewById<TextView>(R.id.updateTime)
-        var strLocate = findViewById<TextView>(R.id.location)
 
         override fun doInBackground(vararg urls: String): Document? {
             val url: URL
@@ -134,10 +142,8 @@ class GetWeatherInfo : AppCompatActivity() {
             var s = ""
             val nodeList = doc.getElementsByTagName("item")
 
-            s += "현재 위치 : nx=60, ny=127 " + " \n"
+            s += "위치 : x : ${dlatitude}, y : ${dlongitude}" + "\n"
             s += "시간 : ${weatherDate} ${weatherTime}" + " \n"
-
-            strLocate.setText("${currentLocation}")
             updateT.setText("${weatherTime.substring(0, 2)}시 ${weatherTime.substring(2, 4)}분 발표")
 
             for (i in 0 until nodeList.getLength()) {
@@ -206,6 +212,7 @@ class GetWeatherInfo : AppCompatActivity() {
                 if (feature.equals("T3H")) {
                     s += "온도 = " + item + "℃ \n"
                     temperature.setText(item)
+                    Log.d("temperature", "temperature : ${item}")
                 }
 
                 // 구름상태 SKY : 맑음(1),  구름많음(3),  흐림(4)
@@ -220,7 +227,7 @@ class GetWeatherInfo : AppCompatActivity() {
                     else if (cloud_num == 3) s += "하늘상태 = 구름 많음\n"
                     else if (cloud_num == 4) s += "하늘상태 = 흐림\n"
                 }
-                //txtweather.setText(s)
+                txt_weather.setText(s)
 
                 super.onPostExecute(doc)
             }
@@ -229,16 +236,56 @@ class GetWeatherInfo : AppCompatActivity() {
 
     }
 
-    private fun getLatLng() : Location {
-        var currentLatLng: Location? = null
-        if (ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            && ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), this.REQUEST_CODE_LOCATION)
-            getLatLng()
-        } else {
-            val locationProvider = LocationManager.GPS_PROVIDER
-            currentLatLng = locationManager?.getLastKnownLocation(locationProvider)
-        }
-        return currentLatLng!!
+    private fun convertGRID_GPS(lat_X: Double, lng_Y: Double): LatXLngY {
+        val re = 6371.00877 // 지구 반경(km)
+        val grid = 5.0 // 격자 간격(km)
+        val slat1 = 30.0 // 투영 위도1(degree)
+        val slat2 = 60.0 // 투영 위도2(degree)
+        val olon = 126.0 // 기준점 경도(degree)
+        val olat = 38.0 // 기준점 위도(degree)
+        val xo = 43.0 // 기준점 X좌표(GRID)
+        val yo = 136.0 // 기준점 Y좌표(GRID)
+
+        // LCC DFS 좌표변환 (lat_X:위도,  lng_Y:경도)
+
+        val degrad = Math.PI / 180.0
+
+        val re_grid = re / grid
+        val slat1_degrad = slat1 * degrad
+        val slat2_degrad = slat2 * degrad
+        val olon_degrad = olon * degrad
+        val olat_degrad = olat * degrad
+
+        var sn = Math.tan(Math.PI * 0.25 + slat2_degrad * 0.5) / Math.tan(Math.PI * 0.25 + slat1_degrad * 0.5)
+        sn = Math.log(Math.cos(slat1_degrad) / Math.cos(slat2_degrad)) / Math.log(sn)
+        var sf = Math.tan(Math.PI * 0.25 + slat1_degrad * 0.5)
+        sf = Math.pow(sf, sn) * Math.cos(slat1_degrad) / sn
+        var ro = Math.tan(Math.PI * 0.25 + olat_degrad * 0.5)
+        ro = re_grid * sf / Math.pow(ro, sn)
+        val rs = LatXLngY()
+
+
+        rs.lat = lat_X
+        rs.lng = lng_Y
+        var ra = Math.tan(Math.PI * 0.25 + lat_X * degrad * 0.5)
+        ra = re_grid * sf / Math.pow(ra, sn)
+        var theta = lng_Y * degrad - olon_degrad
+        if (theta > Math.PI) theta -= 2.0 * Math.PI
+        if (theta < -Math.PI) theta += 2.0 * Math.PI
+        theta *= sn
+        rs.x = Math.floor(ra * Math.sin(theta) + xo + 0.5)
+        rs.y = Math.floor(ro - ra * Math.cos(theta) + yo + 0.5)
+
+        return rs
     }
+
+
+    internal inner class LatXLngY {
+        var lat: Double = 0.toDouble()
+        var lng: Double = 0.toDouble()
+
+        var x: Double = 0.toDouble()
+        var y: Double = 0.toDouble()
+    }
+
 }
