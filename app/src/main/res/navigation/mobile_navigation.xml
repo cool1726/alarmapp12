@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_alarm">
+
+    <fragment
+        android:id="@+id/navigation_friends"
+        android:name="org.siwonlee.alarmapp12.friends.GoogleSignInActivity"
+        android:label="title_friends"
+        tools:layout="@layout/google_sign_in_activity" />
+
+    <fragment
+        android:id="@+id/navigation_alarm"
+        android:name="org.siwonlee.alarmapp12.alarm.AlarmList_Activity"
+        android:label="@string/title_alarm"
+        tools:layout="@layout/alarm_list" />
+
+    <fragment
+        android:id="@+id/navigation_information"
+        android:name="org.siwonlee.alarmapp12.information.GetWeatherInfo"
+        android:label="@string/title_info"
+        tools:layout="@layout/weather_after_ringing" />
+</navigation>

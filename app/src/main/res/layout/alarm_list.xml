@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:src="@drawable/round_add_white"
-        app:backgroundTint="@color/secondaryColor"
+        app:backgroundTint="@color/secondaryDarkColor"
         app:fabSize="auto"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -1,4 +1,4 @@
-package org.siwonlee.alarmapp12
+package org.siwonlee.alarmapp12.alarm
 
 import android.app.*
 import android.content.Intent
@@ -6,6 +6,9 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import android.os.*
 import android.util.Log
+import org.siwonlee.alarmapp12.solving.AlarmSolving1
+import org.siwonlee.alarmapp12.solving.AlarmSolving2
+import org.siwonlee.alarmapp12.solving.AlarmSolving4
 import java.util.*
 
 class Alarm_Service : Service() {

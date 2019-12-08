@@ -1,24 +1,16 @@
-package org.siwonlee.alarmapp12
+package org.siwonlee.alarmapp12.alarm
 
-import android.app.Activity
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.GsonBuilder
-import kotlinx.android.synthetic.main.alarm_list.*
 import java.util.*
+import android.view.*
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
+import org.siwonlee.alarmapp12.R
+import org.siwonlee.alarmapp12.UserData
 
-class AlarmList_Activity : AppCompatActivity() {
+
+class AlarmList_Activity : Fragment() {
     val ALARM_SET: Int = 1000
     val FIREBASE_MANAGE: Int = 2000
     val MAP_ALARM: Int = 3000
@@ -31,7 +23,18 @@ class AlarmList_Activity : AppCompatActivity() {
 
     var categorize: ArrayList<String> = ArrayList()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private lateinit var alarmViewModel: AlarmViewModel
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        alarmViewModel = ViewModelProviders.of(this).get(AlarmViewModel::class.java)
+        val root = inflater.inflate(R.layout.alarm_list, container, false)
+        return root
+    }
+
+   // override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+       // inflater.inflate(R.layout.google_sign_in_activity, container, false)
+
+    /*override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.alarm_list)
 
@@ -239,4 +242,6 @@ class AlarmList_Activity : AppCompatActivity() {
 
         return adapter
     }
+
+*/
 }

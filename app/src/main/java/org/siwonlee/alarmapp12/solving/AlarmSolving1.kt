@@ -1,4 +1,4 @@
-package org.siwonlee.alarmapp12
+package org.siwonlee.alarmapp12.solving
 
 import android.app.AlarmManager
 import android.app.KeyguardManager
@@ -17,6 +17,8 @@ import android.media.AudioManager
 import android.media.AudioAttributes
 import android.os.Build
 import android.util.Log
+import org.siwonlee.alarmapp12.R
+import org.siwonlee.alarmapp12.alarm.Alarm_Receiver
 
 fun Int.toTime(): String {
     var ret = ""

@@ -6,11 +6,11 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -22,31 +22,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBuXtpo2S4JjCmK9Cy5L8vkxrmJ87AfApw" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".alarm.Alarm_Set"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".GoogleSignInActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".AlarmSolving1" />
-        <service
-            android:name=".Sound_Service"
-            android:enabled="true"
-            android:exported="true"></service>
-
+        <activity android:name=".solving.AlarmSolving1" />
         <activity android:name=".Alarm_Data" />
         <activity
-            android:name=".AlarmSolving4"
+            android:name=".solving.AlarmSolving4"
             android:screenOrientation="fullSensor"
             tools:replace="screenOrientation" />
         <activity
-            android:name=".AlarmList_Activity"
+            android:name=".MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,19 +45,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AlarmSolving2"
+            android:name=".solving.AlarmSolving2"
             android:screenOrientation="portrait" />
         <activity
             android:name=".Alarm_Map"
             android:screenOrientation="portrait" />
-        <activity android:name=".GetWeatherInfo"
-            android:screenOrientation="portrait" />
-
-        <receiver android:name=".Alarm_Receiver" />
-
+        <receiver android:name=".alarm.Alarm_Receiver" />
         <service
-            android:name=".Alarm_Service"
-            android:enabled="true"></service>
+            android:name=".alarm.Alarm_Service"
+            android:enabled="true" />
     </application>
 
 </manifest>

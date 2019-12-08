@@ -1,36 +1,17 @@
-package org.siwonlee.alarmapp12
+package org.siwonlee.alarmapp12.information
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.*
-import android.location.Address
-import android.location.Geocoder
-import android.location.Location
 import android.location.LocationManager
-import android.widget.Toast
-import android.os.AsyncTask
-import android.util.Log
-import android.widget.ImageView
-import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import org.w3c.dom.Document
-import org.w3c.dom.Element
-import org.xml.sax.InputSource
-import java.io.IOException
-import java.net.URL
-import javax.xml.parsers.DocumentBuilderFactory
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import org.siwonlee.alarmapp12.R
 
 
-class GetWeatherInfo : AppCompatActivity() {
+class GetWeatherInfo : Fragment() {
 
     var formatter = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
     var date = Date()
@@ -50,6 +31,14 @@ class GetWeatherInfo : AppCompatActivity() {
     var currentLocation : String = ""
     var dlatitude : Double = 0.0
     var dlongitude : Double = 0.0
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.weather_after_ringing, container, false)
+/*
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -286,6 +275,6 @@ class GetWeatherInfo : AppCompatActivity() {
 
         var x: Double = 0.toDouble()
         var y: Double = 0.toDouble()
-    }
+    }*/
 
 }

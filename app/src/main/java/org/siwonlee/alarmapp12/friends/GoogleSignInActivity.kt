@@ -1,33 +1,17 @@
-package org.siwonlee.alarmapp12
+package org.siwonlee.alarmapp12.friends
 
-import android.app.Activity
-import android.app.AlertDialog
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import com.google.gson.GsonBuilder
-import kotlinx.android.synthetic.main.google_sign_in_activity.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+import org.siwonlee.alarmapp12.R
+import org.siwonlee.alarmapp12.UserData
 
-class GoogleSignInActivity : AppCompatActivity() {
+class GoogleSignInActivity : Fragment() {
     private lateinit var googleSignInClient: GoogleSignInClient
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseDatabase.getInstance().getReference("users")
@@ -40,6 +24,9 @@ class GoogleSignInActivity : AppCompatActivity() {
 
     var uidForOthers = ""
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.google_sign_in_activity, container, false)
+    /*
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.google_sign_in_activity)
@@ -334,5 +321,5 @@ class GoogleSignInActivity : AppCompatActivity() {
         //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
         setResult(Activity.RESULT_OK, returnIntent)
         finish()
-    }
+    }*/
 }

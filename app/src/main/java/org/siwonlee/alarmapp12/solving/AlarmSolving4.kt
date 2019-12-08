@@ -1,4 +1,4 @@
-package org.siwonlee.alarmapp12
+package org.siwonlee.alarmapp12.solving
 
 import android.app.Activity
 import android.app.KeyguardManager
@@ -17,8 +17,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.VibrationEffect
 import android.view.WindowManager
-import kotlinx.android.synthetic.main.alarm_ringing.*
-import java.util.*
+import org.siwonlee.alarmapp12.MainActivity
+import org.siwonlee.alarmapp12.R
 
 
 class AlarmSolving4 : AppCompatActivity() {

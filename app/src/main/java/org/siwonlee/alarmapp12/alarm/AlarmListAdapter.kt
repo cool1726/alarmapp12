@@ -1,9 +1,12 @@
-package org.siwonlee.alarmapp12
+package org.siwonlee.alarmapp12.alarm
 
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import android.view.*
+import org.siwonlee.alarmapp12.Alarm_Data
+import org.siwonlee.alarmapp12.R
+import org.siwonlee.alarmapp12.solving.toTime
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -13,13 +16,13 @@ class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data
 
     override fun getItemCount(): Int = alarmlist.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlarmListAdapter.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         // LayoutInflater.from으로 view 생성
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(R.layout.alarm_list_item, parent, false))
     }
 
-    override fun onBindViewHolder(holder: AlarmListAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         // OnCreateViewHolder로 생성된 holder의 view에 데이터가 (반복적으로) 나타나도록 설정한다
         holder.bindItems(alarmlist[position])
     }

@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
@@ -27,6 +26,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.GsonBuilder
+import org.siwonlee.alarmapp12.alarm.Alarm_Receiver
 
 class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
     lateinit var mMap: GoogleMap

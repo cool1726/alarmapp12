@@ -1,9 +1,8 @@
-package org.siwonlee.alarmapp12
+package org.siwonlee.alarmapp12.alarm
 
 import android.content.Intent
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.util.Log

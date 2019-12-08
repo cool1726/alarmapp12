@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import org.siwonlee.alarmapp12.alarm.Alarm_Receiver
 import java.util.*
 import kotlin.collections.HashMap
 

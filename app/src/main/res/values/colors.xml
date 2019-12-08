@@ -5,8 +5,11 @@
     <color name="primaryDarkColor">#494949</color>
     <color name="secondaryColor">#fbc02d</color>
     <color name="secondaryLightColor">#fff263</color>
-    <color name="secondaryDarkColor">#c49000</color>
+    <color name="secondaryDarkColor">#A87C01</color>
+    <color name="secondaryDarkerColor">#5E460A</color>
     <color name="primaryTextColor">#ffffff</color>
     <color name="secondaryTextColor">#000000</color>
+    <color name="specialColor">#CF5858</color>
+
     <color name="transparent">#00000000</color>
 </resources>

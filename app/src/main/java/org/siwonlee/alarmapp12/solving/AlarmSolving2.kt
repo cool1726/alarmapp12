@@ -1,4 +1,4 @@
-package org.siwonlee.alarmapp12
+package org.siwonlee.alarmapp12.solving
 
 import android.app.AlarmManager
 import android.app.KeyguardManager
@@ -17,8 +17,9 @@ import android.os.Vibrator
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.alarm_ringing.*
 import kotlinx.android.synthetic.main.alarm_solving_1.*
+import org.siwonlee.alarmapp12.R
+import org.siwonlee.alarmapp12.alarm.Alarm_Receiver
 import java.util.*
 
 val random = Random()
@@ -98,7 +99,7 @@ class AlarmSolving2 : AppCompatActivity() {
         ringtone.play()
 
         //amount개의 랜덤 정수를 생성해 내림차순으로 정렬한다
-        var nums = Array(amount, {getRandomNumber(2)}).sortedDescending()
+        var nums = Array(amount, { getRandomNumber(2) }).sortedDescending()
         //가장 큰 수부터 차례로 사용하여 수식을 만든다
         qstn.text = "${nums[0]}"
 
