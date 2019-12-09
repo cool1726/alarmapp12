@@ -9,6 +9,7 @@ import android.util.Log
 import org.siwonlee.alarmapp12.solving.AlarmSolving1
 import org.siwonlee.alarmapp12.solving.AlarmSolving2
 import org.siwonlee.alarmapp12.solving.AlarmSolving4
+import org.siwonlee.alarmapp12.solving.AlarmSolvingShake
 import java.util.*
 
 class Alarm_Service : Service() {
@@ -90,7 +91,7 @@ class Alarm_Service : Service() {
             alarmIntent.putExtra("sound", sound)
         }
         else if (solver == 2) {
-            alarmIntent = Intent(context, AlarmSolving1::class.java)    //흔들기 부분 수정 필요
+            alarmIntent = Intent(context, AlarmSolvingShake::class.java)    //흔들기 부분 수정 필요
             alarmIntent.putExtra("timeInMillis", timeInMillis)
             alarmIntent.putExtra("requestCode", requestCode)
             alarmIntent.putExtra("solver", solver)
@@ -98,6 +99,7 @@ class Alarm_Service : Service() {
             alarmIntent.putExtra("sound", sound)
         }
         else {    //(4) 바코드 찍어 해제하는 방법
+            //alarmIntent = Intent(context, AlarmSolving4::class.java)
             alarmIntent = Intent(context, AlarmSolving4::class.java)
             alarmIntent.putExtra("timeInMillis", timeInMillis)
             alarmIntent.putExtra("requestCode", requestCode)

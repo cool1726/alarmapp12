@@ -5,6 +5,10 @@ import android.app.KeyguardManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.Ringtone
@@ -18,28 +22,33 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.alarm_solving_1.*
+import kotlinx.android.synthetic.main.alarm_solving_shake.*
 import org.siwonlee.alarmapp12.R
 import org.siwonlee.alarmapp12.alarm.Alarm_Receiver
 import java.util.*
 
-//size자리 랜덤 정수를 만드는 함수
-fun getRandomNumber(size: Int): Int {
-    val random = Random()
+class AlarmSolvingShake : AppCompatActivity(), SensorEventListener {
+    private var mShakeCount: Int = 0
+    private var mShakeTime: Long = System.currentTimeMillis()
+    var mustShakeTime = Random().nextInt(11) + 10
+    private val SHAKE_SKIP_TIME = 500
+    private val SHAKE_THRESHOLD_GRAVITY = 2.7F
 
-    var ret = 0
-    for(i in 1..size) ret = ret * 10 + random.nextInt(9) + 1
-    return ret
-}
-
-class AlarmSolving2 : AppCompatActivity() {
-    //amount개의 정수와 +, -기호를 이용한 수식을 만든다
-    var amount = 3
-    //+, -를 배열에 저장한다
-    val op = arrayOf("+", "-")
+    lateinit var mSensorManager : SensorManager
+    lateinit var mAccelerometer : Sensor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.alarm_solving_1)
+        setContentView(R.layout.alarm_solving_shake)
+
+        mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+        shake_time.text = mustShakeTime.toString()
+
+
+
+
 
         //잠금화면 위에서 액티비티를 띄울 수 있게 해준다
         //API 제한 없이 사용할 수 있는 코드들을 사용한다
@@ -91,39 +100,7 @@ class AlarmSolving2 : AppCompatActivity() {
         // 알람 울릴 때 소리 : 기본 알람소리
         ringtone.play()
 
-        //amount개의 랜덤 정수를 생성해 내림차순으로 정렬한다
-        var nums = Array(amount, { getRandomNumber(2) }).sortedDescending()
-        //가장 큰 수부터 차례로 사용하여 수식을 만든다
-        qstn.text = "${nums[0]}"
 
-        //만들어진 수식의 답을 따로 저장한다
-        var answer: Int = nums[0]
-
-        //nums의 1번 항부터 차례로
-        for(i in 1 until amount) {
-            //각 항 사이의 연산자는 차례로 -, +, -, +, ... 순서로 진행한다
-            qstn.text = "${qstn.text} ${op[i % 2]} ${nums[i]}"
-            //i가 홀수라면 nums[i]를 answer에서 빼고, 아니라면 더한다
-            answer += nums[i] * (1 - 2 * (i % 2))
-        }
-
-        //알람 해제 버튼을 눌렀을 때
-        bt_alarmoff2.setOnClickListener {
-            val nswrnswr = nswr.text.toString()
-            var answ = 0
-
-            if(nswrnswr != "") answ = Integer.parseInt(nswrnswr)
-
-            if(answ == answer) {
-                v.cancel()
-                ringtone.stop()
-                finish()
-            }
-            else {
-                Toast.makeText(this, "틀렸습니다. 다시 입력하세요.", Toast.LENGTH_LONG).show()
-                qstn.text= ""
-            }
-        }
 
         //딜레이 버튼을 눌렀을 때
         bt_delay2.setOnClickListener {
@@ -163,6 +140,46 @@ class AlarmSolving2 : AppCompatActivity() {
         }
     }
 
-    //뒤로가기로 알람 해제를 막기 위한 빈 함수
-    override fun onBackPressed() { }
+    override fun onResume() {
+        super.onResume()
+        mSensorManager.registerListener(
+            this, mAccelerometer,
+            SensorManager.SENSOR_DELAY_NORMAL
+            )
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mSensorManager.unregisterListener(this)
+    }
+
+    override fun onSensorChanged(p0: SensorEvent?) {
+        if(p0 == null) return
+        if(p0.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+            val gravityX: Float = p0.values[0] / SensorManager.GRAVITY_EARTH
+            val gravityY: Float = p0.values[1] / SensorManager.GRAVITY_EARTH
+            val gravityZ: Float = p0.values[2] / SensorManager.GRAVITY_EARTH
+
+            val f: Float = (gravityX * gravityX) + (gravityY * gravityY) + (gravityZ * gravityZ)
+            val gForce = Math.sqrt(f.toDouble()).toFloat()
+
+            if (gForce > SHAKE_THRESHOLD_GRAVITY) {
+                val currentTime = System.currentTimeMillis()
+                if(mShakeTime + SHAKE_SKIP_TIME > currentTime) return
+
+                mShakeTime = currentTime
+                mShakeCount++
+                Toast.makeText(this, "흔들기 감지", Toast.LENGTH_SHORT).show()
+
+                val shakeToStop: Int = mustShakeTime - mShakeCount
+                if(shakeToStop <= 0) finish()
+                shake_time.text = shakeToStop.toString()
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+        Toast.makeText(this, "onAccuracyChanged 호출됨", Toast.LENGTH_SHORT).show()
+    }
 }
+
