@@ -1,6 +1,8 @@
 package org.siwonlee.alarmapp12.information
 
 import android.content.Context
+import android.location.Address
+import android.location.Geocoder
 import android.os.Bundle
 import java.text.SimpleDateFormat
 import java.util.*
@@ -22,6 +24,7 @@ import org.siwonlee.alarmapp12.R
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.xml.sax.InputSource
+import java.io.IOException
 import java.net.URL
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -43,7 +46,7 @@ class GetWeatherInfo : Fragment() {
     // 현재 내 위치
     var lm : LocationManager? = null
     private val REQUEST_CODE_LOCATION : Int = 2
-    var currentLocation : String = ""
+    var strAddress : String = ""
     var dlatitude : Double = 0.0
     var dlongitude : Double = 0.0
 
@@ -79,6 +82,7 @@ class GetWeatherInfo : Fragment() {
                 dlongitude = myLocation.longitude
                 Log.d("myLocation", "myLocation : ${dlatitude}, ${dlongitude}")
 
+                //위경도 -> 좌표로 변환
                 val tmp = convertGRID_GPS(dlatitude, dlongitude)
                 Log.d("위경도 -> 격자", "x = " + tmp.x + ", y = " + tmp.y)
 
@@ -93,28 +97,24 @@ class GetWeatherInfo : Fragment() {
 
                 GetXMLTask().execute()
                 Toast.makeText(context, "${weatherTime}", Toast.LENGTH_LONG).show()
+
+                //위경도 -> 주소로 변환
+                val mGeocoder = Geocoder(activity, Locale.KOREAN)
+                var mResultList: List<Address>? = null
+                try {
+                    mResultList = mGeocoder.getFromLocation(dlatitude, dlongitude, 1)
+                    var location: TextView = view!!.findViewById(R.id.location)
+                    strAddress = mResultList[0].getAddressLine(0).substring(5)  //'대한민국' 글자 빼기 위해 substring
+                    location.setText(strAddress)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
             }
         }
-
-        /*val mGeocoder = Geocoder(applicationContext, Locale.KOREAN)
-        var mResultList: List<Address>? = null
-        try {
-            mResultList = mGeocoder.getFromLocation(
-                dlatitude, dlongitude, 1
-            )
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        if (mResultList != null) {
-            //Log.d("CheckCurrentLocation", mResultList[0].getAddressLine(0))
-            //currentLocation = mResultList[0].getAddressLine(0)
-            //currentLocation = currentLocation.substring(5)  //'대한민국' 글자 빼기 위함
-
-        }*/
     }
 
     private inner class GetXMLTask() : AsyncTask<String, Void, Document>() {
-        var txt_weather: TextView = view!!.findViewById(R.id.txt_weather)
+        //var txt_weather: TextView = view!!.findViewById(R.id.txt_weather)
         var weatherImage = view!!.findViewById<ImageView>(R.id.weatherImage)
         var rainAmount = view!!.findViewById<TextView>(R.id.rainamount)
         var temperature = view!!.findViewById<TextView>(R.id.temperature)
@@ -223,7 +223,7 @@ class GetWeatherInfo : Fragment() {
                     else if (cloud_num == 3) s += "하늘상태 = 구름 많음\n"
                     else if (cloud_num == 4) s += "하늘상태 = 흐림\n"
                 }
-                txt_weather.setText(s)
+                //txt_weather.setText(s)
 
                 super.onPostExecute(doc)
             }
@@ -232,6 +232,7 @@ class GetWeatherInfo : Fragment() {
 
     }
 
+    //GPS(latitude, longitude) -> GRID(x, y)로 바꿔주는 함수
     private fun convertGRID_GPS(lat_X: Double, lng_Y: Double): LatXLngY {
         val re = 6371.00877 // 지구 반경(km)
         val grid = 5.0 // 격자 간격(km)
