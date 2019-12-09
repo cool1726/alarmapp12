@@ -121,7 +121,7 @@ class AlarmSolving2 : AppCompatActivity() {
             }
             else {
                 Toast.makeText(this, "틀렸습니다. 다시 입력하세요.", Toast.LENGTH_LONG).show()
-                qstn.text= ""
+                nswr.setText("")
             }
         }
 
