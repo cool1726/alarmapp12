@@ -33,38 +33,6 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-
-        navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
-    }
-
-    val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { menuItem ->
-        when (menuItem.itemId) {
-            R.id.navigation_friends -> {
-                val fragment = GoogleSignInActivity()
-                supportFragmentManager.beginTransaction().replace(R.id.container, fragment, fragment.javaClass.getSimpleName())
-                    .commit()
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_alarm -> {
-                val fragment = AlarmList_Activity()
-                supportFragmentManager.beginTransaction().replace(R.id.container, fragment, fragment.javaClass.getSimpleName())
-                    .commit()
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_map -> {
-                val fragment = Alarm_Map()
-                supportFragmentManager.beginTransaction().replace(R.id.container, fragment, fragment.javaClass.getSimpleName())
-                    .commit()
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_information -> {
-                val fragment = GetWeatherInfo()
-                supportFragmentManager.beginTransaction().replace(R.id.container, fragment, fragment.javaClass.getSimpleName())
-                    .commit()
-                return@OnNavigationItemSelectedListener true
-            }
-        }
-        false
     }
 
 }

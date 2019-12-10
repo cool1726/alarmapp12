@@ -60,7 +60,8 @@ class Alarm_Map : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-       // val strSet = {"markerList":[]}
+        // val strSet = {"markerList":[]}
+        //val strSet = activity!!.intent.getStringExtra("set")
         val pref = activity!!.getSharedPreferences(prefStorage, Context.MODE_PRIVATE)
         val strList = pref.getString("list", "")
         if(strList != "")
@@ -68,7 +69,7 @@ class Alarm_Map : Fragment(), OnMapReadyCallback {
         else alarmlist = UserData()
 
         val strSet : String = GsonBuilder().create().toJson(alarmlist.markerSet, Marker_Set::class.java)
-        //val strSet = activity!!.intent.getStringExtra("set")
+
 
         Log.d("strSet", strSet)
         if(strSet != "")

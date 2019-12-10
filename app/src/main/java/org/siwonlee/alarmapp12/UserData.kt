@@ -40,6 +40,11 @@ class UserData(
         return ret
     }
 
+    fun onoff(i: Int) : Boolean {
+        list[i].onoff = !(list[i].onoff)
+        return list[i].onoff
+    }
+
     fun get(i: Int): Alarm_Data {
         return list[i]
     }
@@ -66,9 +71,13 @@ class UserData(
 
     fun unset(context: Context) {
         for(data in list) {
-            data.setAlarm(context,ALARM_DEACTIVATE)
+            data.setAlarm(context, ALARM_DEACTIVATE)
             Log.d("TAG", "unset")
         }
+    }
+
+    fun unset1(context: Context, i: Int) {
+        list[i].setAlarm(context, ALARM_DEACTIVATE)
     }
 
     fun set(context: Context) {
@@ -76,6 +85,10 @@ class UserData(
             data.setAlarm(context, ALARM_ACTIVATE)
             Log.d("TAG", "set")
         }
+    }
+
+    fun set1(context: Context, i: Int) {
+        list[i].setAlarm(context, ALARM_ACTIVATE)
     }
 
     fun sort() {

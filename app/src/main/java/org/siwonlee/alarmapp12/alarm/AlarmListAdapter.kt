@@ -1,9 +1,12 @@
 package org.siwonlee.alarmapp12.alarm
 
 import android.content.Context
+import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import android.view.*
+import android.widget.Switch
+import android.widget.Toast
 import org.siwonlee.alarmapp12.Alarm_Data
 import org.siwonlee.alarmapp12.R
 import org.siwonlee.alarmapp12.solving.toTime
@@ -11,7 +14,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data>,
-                       val alarmItemClick: (Int) -> Unit, val alarmItemLongClick: (Int) -> Unit)
+                       val alarmItemClick: (Int) -> Unit, val alarmSwitchClick: (Int) -> Unit)
     : RecyclerView.Adapter<AlarmListAdapter.ViewHolder>(){
 
     override fun getItemCount(): Int = alarmlist.size
@@ -26,7 +29,6 @@ class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data
         // OnCreateViewHolder로 생성된 holder의 view에 데이터가 (반복적으로) 나타나도록 설정한다
         holder.bindItems(alarmlist[position])
     }
-
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder (itemView) { // View 재사용 위한 ViewHolder
 
@@ -49,6 +51,13 @@ class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data
             val hr = cal.get(Calendar.HOUR_OF_DAY)
             val min = cal.get(Calendar.MINUTE)
 
+            var switchBtn = itemView.findViewById<Switch>(R.id.switch1)
+            //Log.d("switchButton toggle?", "${data}, ${data.onoff}")
+            if(data.onoff) {
+                switchBtn.isChecked = true
+            }
+
+
             // 전달받은 Alarm_Data 형식의 data에서 시간과 요일(날짜)을 불러온다
             // itemView의 list 구성 요소에 text로 전달한다
             itemView.time_in_list.text = "${hr.toTime()}:${min.toTime()}"
@@ -61,10 +70,10 @@ class AlarmListAdapter(val context: Context, val alarmlist: ArrayList<Alarm_Data
             itemView.setOnClickListener {
                 alarmItemClick(adapterPosition)
             }
-            itemView.setOnLongClickListener {
-                alarmItemLongClick(adapterPosition)
-                true
-            }
+
+            switchBtn.setOnCheckedChangeListener { switchclicked, onoff ->
+                alarmSwitchClick(adapterPosition) }
         }
+
     }
 }

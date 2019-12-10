@@ -254,7 +254,28 @@ class AlarmList_Activity : Fragment() {
             //알람을 수정한다
             startActivityForResult(cintent, this.ALARM_SET)
         },
-            { position -> onLongClickEvent() })
+            { position ->
+                if( alarmlist.onoff(position) ) {
+                    alarmlist.set1(activity!!.applicationContext, position)
+                    //Log.d("switch onoff", "${position} switch on" )
+                }
+                else {
+                    alarmlist.unset1(activity!!.applicationContext, position)
+                    //Log.d("switch onoff", "${position} switch off" )
+                }
+                alarmlist.sort()
+
+                val pref = activity?.getSharedPreferences(prefStorage, MODE_PRIVATE)
+                val editor = pref!!.edit()
+                //alarmlist를 gson을 이용해 String타입으로 형변환한다
+                val strList = GsonBuilder().create().toJson(alarmlist, UserData::class.java)
+                //형변환한 data를 pref에 저장한다
+                editor.putString("list", strList)
+
+                //수정한 정보를 pref에 commit한다
+                editor.apply()
+
+            })
 
         return adapter
     }

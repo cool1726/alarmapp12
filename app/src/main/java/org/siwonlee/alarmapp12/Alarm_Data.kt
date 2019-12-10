@@ -20,7 +20,8 @@ data class Alarm_Data(
     var solver: Int = 0,
     var qr: String = "",
     var category: String = "기본",
-    var sound: String = ""
+    var sound: String = "",
+    var onoff: Boolean = true
 )
 
 fun Alarm_Data(map: HashMap<String, Any>): Alarm_Data {
@@ -33,7 +34,8 @@ fun Alarm_Data(map: HashMap<String, Any>): Alarm_Data {
         solver = (map["solver"] as Long).toInt(),
         qr = map["qr"] as String,
         category = map["category"] as String,
-        sound = (map["sound"] as String)
+        sound = map["sound"] as String,
+        onoff = map["onoff"] as Boolean
     )
 }
 
@@ -46,7 +48,8 @@ fun Alarm_Data.isEqual(other: Alarm_Data): Boolean {
             this.solver == other.solver &&
             this.qr == other.qr &&
             this.category == other.category &&
-            this.sound == other.sound)
+            this.sound == other.sound &&
+            this.onoff == other.onoff)
 }
 
 fun Alarm_Data.setAlarm(context: Context, set: Int) {
