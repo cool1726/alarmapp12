@@ -4,21 +4,22 @@ import android.app.Activity
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import java.util.*
 import android.view.*
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonArray
 import kotlinx.android.synthetic.main.alarm_list.*
-import kotlinx.android.synthetic.main.fragment_main.*
 import org.siwonlee.alarmapp12.*
 import org.siwonlee.alarmapp12.friends.GoogleSignInActivity
 import org.siwonlee.alarmapp12.information.GetWeatherInfo
+import org.siwonlee.alarmapp12.map.Alarm_Map
+import org.siwonlee.alarmapp12.map.Marker_Set
 
 class AlarmList_Activity : Fragment() {
     val ALARM_SET: Int = 1000
@@ -79,8 +80,14 @@ class AlarmList_Activity : Fragment() {
             }
         }
 
-        // LinearLayoutManager : alarm_list.xml의 alarm_recyclerview에 세로형태로 아이템을 배치한다
+        val mapIntent = Intent(activity, Alarm_Map::class.java)
+        val strSet : String = GsonBuilder().create().toJson(alarmlist.markerSet, Marker_Set::class.java)
+        mapIntent.putExtra("set", strSet)
+        if(mapIntent != null) {
+            Log.d("mapintent", strSet)
+        }
 
+        // LinearLayoutManager : alarm_list.xml의 alarm_recyclerview에 세로형태로 아이템을 배치한다
         recyclerView.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         recyclerView.setHasFixedSize(true)
         recyclerView.adapter = makeAdapter()

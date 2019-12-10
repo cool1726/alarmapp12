@@ -1,4 +1,4 @@
-package org.siwonlee.alarmapp12
+package org.siwonlee.alarmapp12.map
 
 import android.Manifest
 import android.app.Activity
@@ -10,12 +10,19 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.checkSelfPermission
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.fragment.app.Fragment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -26,44 +33,64 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonArray
+import org.siwonlee.alarmapp12.R
+import org.siwonlee.alarmapp12.UserData
 import org.siwonlee.alarmapp12.alarm.Alarm_Receiver
 
-class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
+class Alarm_Map : Fragment(), OnMapReadyCallback {
     lateinit var mMap: GoogleMap
     var markerSet = Marker_Set()
     lateinit var loc: LocationManager
-    lateinit var pref: SharedPreferences
+
+    private val prefStorage = "org.siwonlee.alarmapp12.prefs"
 
     var myPos: Marker? = null
     val REQUEST_ACCESS_FINE_LOCATION = 1
 
+    lateinit var alarmlist: UserData
+
     lateinit var mFusedLocationClient: FusedLocationProviderClient
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.alarm_map)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.alarm_map, container, false)
+        return view
+    }
 
-        val strSet = intent.getStringExtra("set")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+       // val strSet = {"markerList":[]}
+        val pref = activity!!.getSharedPreferences(prefStorage, Context.MODE_PRIVATE)
+        val strList = pref.getString("list", "")
+        if(strList != "")
+            alarmlist = GsonBuilder().create().fromJson(strList, UserData::class.java)
+        else alarmlist = UserData()
+
+        val strSet : String = GsonBuilder().create().toJson(alarmlist.markerSet, Marker_Set::class.java)
+        //val strSet = activity!!.intent.getStringExtra("set")
+
+        Log.d("strSet", strSet)
         if(strSet != "")
             markerSet = GsonBuilder().create().fromJson(strSet, Marker_Set::class.java)
 
         // OS가 Marshmallow 이상일 경우 권한체크를 해야 합니다.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            val permissionCheck = activity!!.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 
             // 권한 없음
             if (permissionCheck == PackageManager.PERMISSION_DENIED) {
-                ActivityCompat.requestPermissions(
-                    this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                requestPermissions(
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     REQUEST_ACCESS_FINE_LOCATION
                 )
             }
         }
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        val mapFragment = activity!!.supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
     }
 
 
@@ -76,7 +103,7 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
         // grantResults[0] 거부 -> -1
         // grantResults[0] 허용 -> 0 (PackageManager.PERMISSION_GRANTED)
         if (grantResults[0] != PackageManager.PERMISSION_GRANTED) { // ACCESS_FINE_LOCATION 에 대한 권한 거부.
-            finish()
+            activity!!.finish()
         }
     }
 
@@ -85,7 +112,7 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
         //mMap에 googleMap을 할당한 뒤
         mMap = googleMap
         //LocationManager를 정의한다
-        loc = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        loc = activity?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         //기존에 저장된 좌표에 대해 마커를 표시해준 뒤
         for(coord in markerSet.markerList) {
@@ -111,18 +138,18 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
         mMap.setOnMapClickListener{ latLng ->
             val requestCode = (latLng.latitude * 10).toInt() * 1000 + (latLng.longitude * 10).toInt()
 
-            val intent = Intent(this, Alarm_Receiver::class.java)
+            val intent = Intent(activity, Alarm_Receiver::class.java)
             intent.putExtra("hr", 0)
             intent.putExtra("min", 0)
             intent.putExtra("requestCode", 0)
             intent.putExtra("solver", 0)
             intent.putExtra("sound", "")
             val pIntent = PendingIntent.getBroadcast(
-                this, requestCode,
+                activity, requestCode,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT
             )
 
-            val dialog = AlertDialog.Builder(this).setTitle("알람 정보를 입력하세요")
+            val dialog = AlertDialog.Builder(activity!!).setTitle("알람 정보를 입력하세요")
 
             val dialogView = layoutInflater.inflate(R.layout.map_alarm_setting, null)
             val name = dialogView.findViewById<EditText>(R.id.mapSettingName)
@@ -138,9 +165,9 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
 
                 try {
                     loc.addProximityAlert(latLng.latitude, latLng.longitude, mapRange.toFloat(), -1, pIntent)
-                    Toast.makeText(this, "위치 알람을 설정했습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(activity, "위치 알람을 설정했습니다.", Toast.LENGTH_SHORT).show()
                 } catch(e: SecurityException) {
-                    Toast.makeText(this, "권한 에러: 위치 사용 권한을 취득하지 못했습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(activity, "권한 에러: 위치 사용 권한을 취득하지 못했습니다.", Toast.LENGTH_SHORT).show()
                 }
 
                 markerSet.add(mMap.addMarker(markerOptions))
@@ -162,9 +189,9 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
     fun onMarkerClick(it: Marker) {
         val requestCode = (it.position.latitude * 10).toInt() * 1000 + (it.position.longitude * 10).toInt()
 
-        val intent = Intent(this, Alarm_Receiver::class.java)
+        val intent = Intent(activity, Alarm_Receiver::class.java)
         val pIntent = PendingIntent.getBroadcast(
-            this, requestCode,
+            activity, requestCode,
             intent, PendingIntent.FLAG_UPDATE_CURRENT
         )
 
@@ -176,14 +203,14 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
 
             if(myPos != null) myPos!!.showInfoWindow()
 
-            Toast.makeText(this, "위치 알람을 제거했습니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "위치 알람을 제거했습니다.", Toast.LENGTH_SHORT).show()
         } catch(e: SecurityException) {
-            Toast.makeText(this, "권한 에러: 위치 사용 권한을 취득하지 못했습니다.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "권한 에러: 위치 사용 권한을 취득하지 못했습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
 
-    override fun onBackPressed() {
+    /*override fun onBackPressed() {
         //AlarmList_Activity에 정보를 넘길 intent
         val returnIntent = Intent()
 
@@ -195,10 +222,10 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
         setResult(Activity.RESULT_OK, returnIntent)
         finish()
         super.onBackPressed()
-    }
+    }*/
 
     override fun onDestroy() {
-        onBackPressed()
+        //onBackPressed()
         super.onDestroy()
     }
 }

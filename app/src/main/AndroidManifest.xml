@@ -47,9 +47,6 @@
         <activity
             android:name=".solving.AlarmSolving2"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".Alarm_Map"
-            android:screenOrientation="portrait" />
         <receiver android:name=".alarm.Alarm_Receiver" />
         <service
             android:name=".alarm.Alarm_Service"

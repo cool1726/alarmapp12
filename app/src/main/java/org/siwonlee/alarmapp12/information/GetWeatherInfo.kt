@@ -169,7 +169,9 @@ class GetWeatherInfo : Fragment() {
                 if (feature.equals("PTY")) {
                     val rain = Integer.parseInt(item)
                     when(rain) {
-                        0 -> {s += "강수상태 = 비 안 옴" + " \n"}
+                        0 -> {
+                            s += "강수상태 = 비 안 옴" + " \n"
+                            weatherImage.setImageResource(R.drawable.sunny)}
                         1 -> {
                             s += "강수상태 = 비" + " \n"
                             weatherImage.setImageResource(R.drawable.rainy) }
@@ -220,10 +222,17 @@ class GetWeatherInfo : Fragment() {
                         s += "하늘상태 = 맑음\n"
                         weatherImage.setImageResource(R.drawable.sunny)
                     }
-                    else if (cloud_num == 3) s += "하늘상태 = 구름 많음\n"
-                    else if (cloud_num == 4) s += "하늘상태 = 흐림\n"
+                    else if (cloud_num == 3) {
+                        s += "하늘상태 = 구름 많음\n"
+                        weatherImage.setImageResource(R.drawable.sunny)
+                    }
+                    else if (cloud_num == 4) {
+                        s += "하늘상태 = 흐림\n"
+                        weatherImage.setImageResource(R.drawable.cloudy)
+                    }
                 }
                 //txt_weather.setText(s)
+                Log.d("weather", s)
 
                 super.onPostExecute(doc)
             }

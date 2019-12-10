@@ -18,6 +18,12 @@
         tools:layout="@layout/alarm_list" />
 
     <fragment
+        android:id="@+id/navigation_map"
+        android:name="org.siwonlee.alarmapp12.map.Alarm_Map"
+        android:label="@string/title_map"
+        tools:layout="@layout/alarm_map" />
+
+    <fragment
         android:id="@+id/navigation_information"
         android:name="org.siwonlee.alarmapp12.information.GetWeatherInfo"
         android:label="@string/title_info"

@@ -10,8 +10,11 @@
         android:icon="@drawable/alarm"
         android:title="@string/title_alarm" />
     <item
+        android:id="@+id/navigation_map"
+        android:icon="@drawable/map"
+        android:title="@string/title_map" />
+    <item
         android:id="@+id/navigation_information"
         android:icon="@drawable/weather"
         android:title="@string/title_info" />
-
 </menu>
