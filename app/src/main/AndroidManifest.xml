@@ -29,7 +29,6 @@
         <activity
             android:name=".alarm.Alarm_Set"
             android:screenOrientation="portrait" />
-        <activity android:name=".solving.AlarmSolving1" />
         <activity android:name=".Alarm_Data" />
         <activity
             android:name=".solving.AlarmSolving4"
@@ -44,8 +43,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".solving.AlarmSolvingBasic"/>
         <activity
-            android:name=".solving.AlarmSolving2"
+            android:name=".solving.AlarmSolvingButton"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".solving.AlarmSolvingMath"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".solving.AlarmSolvingShake"
             android:screenOrientation="portrait" />
         <receiver android:name=".alarm.Alarm_Receiver" />
         <service
