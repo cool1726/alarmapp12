@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="80dp"
-        app:layout_constraintBottom_toTopOf="@+id/bt_alarmoff2"
+        app:layout_constraintBottom_toTopOf="@+id/math_stop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -70,7 +70,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button
-        android:id="@+id/bt_alarmoff2"
+        android:id="@+id/math_stop"
         android:layout_width="200dp"
         android:layout_height="60dp"
         android:layout_marginBottom="20dp"
@@ -78,13 +78,13 @@
         android:text="Stop"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/bt_delay2"
+        app:layout_constraintBottom_toTopOf="@+id/math_delay"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/bt_delay2"
+        android:id="@+id/math_delay"
         android:layout_width="200dp"
         android:layout_height="60dp"
         android:layout_marginBottom="104dp"

@@ -6,10 +6,7 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import android.os.*
 import android.util.Log
-import org.siwonlee.alarmapp12.solving.AlarmSolving1
-import org.siwonlee.alarmapp12.solving.AlarmSolving2
-import org.siwonlee.alarmapp12.solving.AlarmSolving4
-import org.siwonlee.alarmapp12.solving.AlarmSolvingShake
+import org.siwonlee.alarmapp12.solving.*
 import java.util.*
 
 class Alarm_Service : Service() {
@@ -72,18 +69,19 @@ class Alarm_Service : Service() {
     }
 
     private fun alarmService() {
-        var alarmIntent = Intent(context, AlarmSolving1::class.java)
+        var alarmIntent = Intent(context, AlarmSolvingButton::class.java)
         if(solver == 0) {   //(1) 버튼 눌러 해제하는 방법
             //pendingIntent 설정을 위한 intent
-            alarmIntent = Intent(context, AlarmSolving1::class.java)
+            alarmIntent = Intent(context, AlarmSolvingButton::class.java)
             alarmIntent.putExtra("timeInMillis", timeInMillis)
             alarmIntent.putExtra("requestCode", requestCode)
             alarmIntent.putExtra("solver", solver)
             alarmIntent.putExtra("qr", qr)
             alarmIntent.putExtra("sound", sound)
+
         }
         else if (solver == 1) {   //(2) 수학문제 풀어 해제하는 방법
-            alarmIntent = Intent(context, AlarmSolving2::class.java)
+            alarmIntent = Intent(context, AlarmSolvingMath::class.java)
             alarmIntent.putExtra("timeInMillis", timeInMillis)
             alarmIntent.putExtra("requestCode", requestCode)
             alarmIntent.putExtra("solver", solver)

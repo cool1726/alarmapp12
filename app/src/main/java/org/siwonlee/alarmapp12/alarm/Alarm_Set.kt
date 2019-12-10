@@ -349,7 +349,6 @@ class Alarm_Set : AppCompatActivity() {
 
             //알람을 설정한 시간을 data에 저장한다
             data.timeInMillis = cal.timeInMillis
-
             //AlarmList_Activity에 정보를 넘길 intent
             val returnIntent = Intent()
 
@@ -366,7 +365,7 @@ class Alarm_Set : AppCompatActivity() {
             Log.d("TAG", "month: ${cal.get(Calendar.MONTH)}")
             Log.d("TAG", "date: ${cal.get(Calendar.DAY_OF_MONTH)}")
             Log.d("TAG", "hr: ${cal.get(Calendar.HOUR)}")
-            Log.d("TAG", "month: ${cal.get(Calendar.MINUTE)}")
+            Log.d("TAG", "minute: ${cal.get(Calendar.MINUTE)}")
 
             finish()
         }

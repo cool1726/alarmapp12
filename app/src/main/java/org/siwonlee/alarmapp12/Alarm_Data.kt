@@ -61,6 +61,8 @@ fun Alarm_Data.setAlarm(context: Context, set: Int) {
     //Alarm_Data의 timeInMillis를 Calendar 객체를 이용해 해석 가능하게 바꾼다
     val cal = Calendar.getInstance()
     cal.timeInMillis = this.timeInMillis
+    cal.set(Calendar.SECOND, 0)
+    cal.set(Calendar.MILLISECOND, 0)
 
     //시간과 분은 자주 쓰이므로 변수로 정의한다
     val hr = cal.get(Calendar.HOUR_OF_DAY)
@@ -106,51 +108,51 @@ fun Alarm_Data.setAlarm(context: Context, set: Int) {
         else if (set == ALARM_DEACTIVATE) alarmManager.cancel(dateIntent)
     }
 
-    //cal이 울리는 년/월/일은 미지수이므로 이를 오늘로 고정한다
-    cal.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR))
-    cal.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
-
     //일요일부터 토요일까지 알람을 설정한 요일이 있다면
-    for(day in 1..7) if (this.switch[day]){
-        //알람이 울리는 요일이 다음 day 요일이 되도록 cal을 조정한다
-        cal.add(
-            Calendar.DATE,
-            (day - cal.get(Calendar.DAY_OF_WEEK))
-        )
+    for(day in 1..7) {
+        //cal이 울리는 년/월/일은 미지수이므로 이를 오늘로 고정한다
+        cal.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR))
+        cal.set(Calendar.MONTH, Calendar.getInstance().get(Calendar.MONTH))
+        cal.set(Calendar.DATE, Calendar.getInstance().get(Calendar.DATE))
 
-        //최종적으로 맞춰진 시각이 현재보다 이전이라면 알람을 7일 뒤로 늦춘다
-        if (cal.before(Calendar.getInstance())) cal.add(Calendar.DATE, 7)
+        if (this.switch[day]){
+            val temp = (day - cal.get(Calendar.DAY_OF_WEEK))
+            //알람이 울리는 요일이 다음 day 요일이 되도록 cal을 조정한다
+            cal.add(Calendar.DATE, temp)
 
-        //알람 정보를 dHHMM로 나타내면 알람이 서로 겹치지 않는다
-        val requestCode: Int = (day * 100 + hr) * 100 + min
+            //최종적으로 맞춰진 시각이 현재보다 이전이라면 알람을 7일 뒤로 늦춘다
+            if (cal.before(Calendar.getInstance()))
+                cal.add(Calendar.DATE, 7)
 
-        //정보를 this에서 receiver까지 보내는 intent를 생성
-        val intent = Intent(context, Alarm_Receiver::class.java)
-        //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
-        intent.putExtra("timeInMillis", cal.timeInMillis)
-        intent.putExtra("requestCode", requestCode)
-        intent.putExtra("solver", solver)
-        intent.putExtra("sound", sound)
+            //알람 정보를 dHHMM로 나타내면 알람이 서로 겹치지 않는다
+            val requestCode: Int = (day * 100 + hr) * 100 + min
 
-        //정해진 요일에 맞는 PendingIntent를 설정한다
-        val dayIntent = PendingIntent.getBroadcast(
-            context, requestCode,
-            intent, PendingIntent.FLAG_UPDATE_CURRENT
-        )
+            //정보를 this에서 receiver까지 보내는 intent를 생성
+            val intent = Intent(context, Alarm_Receiver::class.java)
+            //setRepeating이 아니라 알람 해제 시 재등록을 통해 알람을 반복한다
+            intent.putExtra("timeInMillis", cal.timeInMillis)
+            intent.putExtra("requestCode", requestCode)
+            intent.putExtra("solver", solver)
+            intent.putExtra("sound", sound)
 
-        //알람을 설정하고자 한다면 알람 매니저에 알람을 설정한다
-        if (set == ALARM_ACTIVATE) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, dayIntent)
-            else
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, dayIntent)
+            //정해진 요일에 맞는 PendingIntent를 설정한다
+            val dayIntent = PendingIntent.getBroadcast(
+                context, requestCode,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            //알람을 설정하고자 한다면 알람 매니저에 알람을 설정한다
+            if (set == ALARM_ACTIVATE) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, dayIntent)
+                else
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.timeInMillis, dayIntent)
+            }
+
+            //알람을 제거하고자 한다면 alarmManager에서 알람을 취소한다
+            else if (set == ALARM_DEACTIVATE) alarmManager.cancel(dayIntent)
         }
-
-        //알람을 제거하고자 한다면 alarmManager에서 알람을 취소한다
-        else if (set == ALARM_DEACTIVATE) alarmManager.cancel(dayIntent)
     }
-
-    var i = 1
 }
 
 // data class 형식으로 알람 데이터 저장 (추가 보완이 필요함)
