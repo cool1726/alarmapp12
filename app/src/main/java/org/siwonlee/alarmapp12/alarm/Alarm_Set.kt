@@ -15,9 +15,11 @@ import android.view.View
 import android.widget.*
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.activity_main.*
+import org.siwonlee.alarmapp12.AlarmList_Activity
 import org.siwonlee.alarmapp12.solving.AlarmSolving4
 import org.siwonlee.alarmapp12.Alarm_Data
 import org.siwonlee.alarmapp12.R
+import org.siwonlee.alarmapp12.solving.AlarmSolvingBacode
 
 fun Boolean.toInt() = if (this) 1 else 0
 
@@ -249,7 +251,7 @@ class Alarm_Set : AppCompatActivity() {
                 data.category = newCat.text.toString()
 
                 if (data.solver == 3) {
-                    val intent = Intent(applicationContext, AlarmSolving4::class.java)
+                    val intent = Intent(applicationContext, AlarmSolvingBacode::class.java)
                     intent.putExtra("solving", data.solver)
 
                     startActivityForResult(intent, SOL_QR)

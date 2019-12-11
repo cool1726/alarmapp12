@@ -1,17 +1,35 @@
-package org.siwonlee.alarmapp12.friends
+package org.siwonlee.alarmapp12
 
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import org.siwonlee.alarmapp12.R
-import org.siwonlee.alarmapp12.UserData
+import com.google.firebase.database.ValueEventListener
+import com.google.gson.GsonBuilder
+import kotlinx.android.synthetic.main.google_sign_in_activity.*
+import org.siwonlee.alarmapp12.alarm.Alarm_Set
+import org.siwonlee.alarmapp12.map.Marker_Set
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
-class GoogleSignInActivity : Fragment() {
+class GoogleSignInActivity : AppCompatActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseDatabase.getInstance().getReference("users")
@@ -24,9 +42,6 @@ class GoogleSignInActivity : Fragment() {
 
     var uidForOthers = ""
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.google_sign_in_activity, container, false)
-    /*
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.google_sign_in_activity)
@@ -151,13 +166,13 @@ class GoogleSignInActivity : Fragment() {
             otherAlarmDialog.setPositiveButton("알람 추가/수정") { _, _ ->
                 //nowData와 Firebase에 해당 사용자 정보를 추가한 뒤
                 nowData.uidMap!![nameSet.text.toString()] = uidSet.text.toString()
-                db.child(nowData.uid).child("uidMap").child(nameSet.text.toString()).setValue(uidSet.text.toString())
+                db.child(nowData.uid).child("UserData").child("uidMap").child(nameSet.text.toString()).setValue(uidSet.text.toString())
 
                 //알람을 추가할 사용자의 uid를 긁어와
                 uidForOthers = uidSet.text.toString()
                 if(uidForOthers != "") {
                     //해당 사용자에게 알람을 설정한다
-                    val intent = Intent(this, MainActivity::class.java)
+                    val intent = Intent(this, Alarm_Set::class.java)
                     intent.putExtra("categories", java.util.ArrayList<String>())
 
                     startActivityForResult(intent, this.ALARM_SET)
@@ -179,7 +194,7 @@ class GoogleSignInActivity : Fragment() {
                 if(nowData.uidMap != null) {
                     //nowData와 Firebase에서 해당 사용자에 대한 정보를 삭제한다
                     nowData.uidMap!!.remove(nameSet.text.toString())
-                    db.child(nowData.uid).child("uidMap").child(nowData.uid).removeValue()
+                    db.child(nowData.uid).child("UserData").child("uidMap").child(nowData.uid).removeValue()
                 }
             }
 
@@ -199,8 +214,8 @@ class GoogleSignInActivity : Fragment() {
                         //map의 UserData 항목을 가져와 해당 항목의 list, uidmap, markerSet을 가져온 뒤
                         val mapmap = map["UserData"] as HashMap<String, Any>
                         var list = mapmap["list"] as ArrayList<Alarm_Data>?
-                        var uidMap = mapmap["uidMap"] as HashMap<String, String>?
-                        var markerSet = mapmap["uidMap"] as Marker_Set?
+                        var uidMap = map["uidMap"] as HashMap<String, String>?
+                        var markerSet = map["markerSet"] as Marker_Set?
 
                         //null 체크를 하고
                         if(list == null) list = ArrayList()
@@ -216,7 +231,7 @@ class GoogleSignInActivity : Fragment() {
                         )
 
                         //타인이 설정한 알람을 받아와 data와 nowData에 저장한다
-                        for(i in map) if(i.key != "UserData") {
+                        for(i in map) if(i.key != "UserData" && i.key != "uidMap" && i.key != "markerSet") {
                             val addData = Alarm_Data(i.value as HashMap<String, Any>)
                             data!!.add(addData)
                             nowData.add(addData)
@@ -271,12 +286,15 @@ class GoogleSignInActivity : Fragment() {
                     data = GsonBuilder().create().fromJson(strData, Alarm_Data::class.java)
 
                 //알람을 그대로 저장하는 것이 아니라, 알람의 개별 성분을 전부 뜯어내 Firebase에 저장한다
-                dbSetter.child(nowData.uid).child("timeInMillis").setValue(data.timeInMillis)
+                dbSetter.child(nowData.uid).child("category").setValue(data.category)
+                dbSetter.child(nowData.uid).child("name").setValue("타인이 설정한 알람")
+                dbSetter.child(nowData.uid).child("onoff").setValue(true)
                 dbSetter.child(nowData.uid).child("phr").setValue(data.phr)
                 dbSetter.child(nowData.uid).child("pmin").setValue(data.pmin)
-                dbSetter.child(nowData.uid).child("switch").setValue(data.switch)
                 dbSetter.child(nowData.uid).child("solver").setValue(data.solver)
-                dbSetter.child(nowData.uid).child("category").setValue(data.category)
+                dbSetter.child(nowData.uid).child("sound").setValue("")
+                dbSetter.child(nowData.uid).child("switch").setValue(data.switch)
+                dbSetter.child(nowData.uid).child("timeInMillis").setValue(data.timeInMillis)
             }
         }
     }
@@ -321,5 +339,5 @@ class GoogleSignInActivity : Fragment() {
         //AlarmList_Acitivity에 RESULT_OK 신호와 함께 intent를 넘긴다
         setResult(Activity.RESULT_OK, returnIntent)
         finish()
-    }*/
+    }
 }

@@ -78,7 +78,6 @@ class Alarm_Service : Service() {
             alarmIntent.putExtra("solver", solver)
             alarmIntent.putExtra("qr", qr)
             alarmIntent.putExtra("sound", sound)
-
         }
         else if (solver == 1) {   //(2) 수학문제 풀어 해제하는 방법
             alarmIntent = Intent(context, AlarmSolvingMath::class.java)
@@ -97,8 +96,7 @@ class Alarm_Service : Service() {
             alarmIntent.putExtra("sound", sound)
         }
         else {    //(4) 바코드 찍어 해제하는 방법
-            //alarmIntent = Intent(context, AlarmSolving4::class.java)
-            alarmIntent = Intent(context, AlarmSolving4::class.java)
+            alarmIntent = Intent(context, AlarmSolvingBacode::class.java)
             alarmIntent.putExtra("timeInMillis", timeInMillis)
             alarmIntent.putExtra("requestCode", requestCode)
             alarmIntent.putExtra("solver", solver)
