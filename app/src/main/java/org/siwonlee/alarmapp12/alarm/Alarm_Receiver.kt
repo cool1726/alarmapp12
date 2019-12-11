@@ -26,8 +26,9 @@ class Alarm_Receiver : BroadcastReceiver() {
         val solver = intent.extras!!.getInt("solver")
         val qr = intent.extras!!.getString("qr")
         val sound = intent.extras!!.getString("sound")
+        val name = intent.extras!!.getString("name")
 
-        Log.d("receiversound", sound)
+        Log.d("receiversound", qr)
 
         // RingtonePlayingService 서비스 intent 생성
         val serviceIntent = Intent(context, Alarm_Service::class.java)
@@ -36,6 +37,7 @@ class Alarm_Receiver : BroadcastReceiver() {
         serviceIntent.putExtra("solver", solver)
         serviceIntent.putExtra("qr", qr)
         serviceIntent.putExtra("sound", sound)
+        serviceIntent.putExtra("name", name)
 
         //serviceIntent를 Alarm_Service로 전달한다
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)

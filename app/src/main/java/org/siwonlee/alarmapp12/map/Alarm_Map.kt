@@ -23,6 +23,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -52,7 +54,11 @@ class Alarm_Map : Fragment(), OnMapReadyCallback {
 
     lateinit var mFusedLocationClient: FusedLocationProviderClient
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val view = inflater.inflate(R.layout.alarm_map, container, false)
         return view
     }
@@ -64,19 +70,21 @@ class Alarm_Map : Fragment(), OnMapReadyCallback {
         //val strSet = activity!!.intent.getStringExtra("set")
         val pref = activity!!.getSharedPreferences(prefStorage, Context.MODE_PRIVATE)
         val strList = pref.getString("list", "")
-        if(strList != "")
+        if (strList != "")
             alarmlist = GsonBuilder().create().fromJson(strList, UserData::class.java)
         else alarmlist = UserData()
 
-        val strSet : String = GsonBuilder().create().toJson(alarmlist.markerSet, Marker_Set::class.java)
+        val strSet: String =
+            GsonBuilder().create().toJson(alarmlist.markerSet, Marker_Set::class.java)
 
         Log.d("strSet", strSet)
-        if(strSet != "")
+        if (strSet != "")
             markerSet = GsonBuilder().create().fromJson(strSet, Marker_Set::class.java)
 
         // OS가 Marshmallow 이상일 경우 권한체크를 해야 합니다.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val permissionCheck = activity!!.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+            val permissionCheck =
+                activity!!.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 
             // 권한 없음
             if (permissionCheck == PackageManager.PERMISSION_DENIED) {
@@ -115,39 +123,31 @@ class Alarm_Map : Fragment(), OnMapReadyCallback {
         loc = activity?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         //기존에 저장된 좌표에 대해 마커를 표시해준 뒤
-        for(coord in markerSet.markerList) {
+        for (coord in markerSet.markerList) {
             try {
-                val markerOptions: MarkerOptions = MarkerOptions().position(LatLng(coord.lat, coord.lon))
+                val markerOptions: MarkerOptions =
+                    MarkerOptions().position(LatLng(coord.lat, coord.lon))
                 mMap.addMarker(markerOptions)
-            } catch(e: SecurityException) {
+            } catch (e: SecurityException) {
                 break
             }
         }
 
         //앱 실행 직후의 사용자의 위치를 지도에 표시한다
         mFusedLocationClient.lastLocation.addOnSuccessListener {
-            if(it != null) {
-                if(myPos != null) myPos!!.remove()
+            if (it != null) {
+                if (myPos != null) myPos!!.remove()
                 val myLocation = LatLng(it.latitude, it.longitude)
-                myPos = mMap.addMarker(MarkerOptions().position(myLocation).title("Current Location"))
+                myPos =
+                    mMap.addMarker(MarkerOptions().position(myLocation).title("Current Location"))
                 myPos!!.showInfoWindow()
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 17.toFloat()))
             }
         }
 
-        mMap.setOnMapClickListener{ latLng ->
-            val requestCode = (latLng.latitude * 10).toInt() * 1000 + (latLng.longitude * 10).toInt()
-
-            val intent = Intent(activity, Alarm_Receiver::class.java)
-            intent.putExtra("hr", 0)
-            intent.putExtra("min", 0)
-            intent.putExtra("requestCode", 0)
-            intent.putExtra("solver", 0)
-            intent.putExtra("sound", "")
-            val pIntent = PendingIntent.getBroadcast(
-                activity, requestCode,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT
-            )
+        mMap.setOnMapClickListener { latLng ->
+            val requestCode =
+                (latLng.latitude * 10).toInt() * 1000 + (latLng.longitude * 10).toInt()
 
             val dialog = AlertDialog.Builder(activity!!).setTitle("알람 정보를 입력하세요")
 
@@ -156,38 +156,52 @@ class Alarm_Map : Fragment(), OnMapReadyCallback {
             val range = dialogView.findViewById<EditText>(R.id.mapSettingRange)
 
             dialog.setPositiveButton("설정") { _, _ ->
-                val markerOptions: MarkerOptions = MarkerOptions().position(latLng).title(name.text.toString())
-                if(markerOptions.title == "") markerOptions.title("새 장소 알람")
+                val markerOptions: MarkerOptions =
+                    MarkerOptions().position(latLng).title(name.text.toString())
+                if (markerOptions.title == "") markerOptions.title("새 장소 알람")
 
                 var mapRange = 10
-                if(range.text.toString() != "")
+                if (range.text.toString() != "")
                     mapRange = range.text.toString().toInt()
 
                 try {
+                    val intent = Intent(activity, Alarm_Receiver::class.java)
+                    intent.putExtra("requestCode", requestCode)
+                    intent.putExtra("solver", 0)
+                    intent.putExtra("sound", "")
+                    intent.putExtra("name", markerOptions.title)
+
+                    val pIntent = PendingIntent.getBroadcast(
+                        activity, requestCode,
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+
                     loc.addProximityAlert(latLng.latitude, latLng.longitude, mapRange.toFloat(), -1, pIntent)
                     Toast.makeText(activity, "위치 알람을 설정했습니다.", Toast.LENGTH_SHORT).show()
-                } catch(e: SecurityException) {
-                    Toast.makeText(activity, "권한 에러: 위치 사용 권한을 취득하지 못했습니다.", Toast.LENGTH_SHORT).show()
+                } catch (e: SecurityException) {
+                    Toast.makeText(activity, "권한 에러: 위치 사용 권한을 취득하지 못했습니다.", Toast.LENGTH_SHORT)
+                        .show()
                 }
 
                 markerSet.add(mMap.addMarker(markerOptions))
             }
-            dialog.setNegativeButton("취소") { _, _ ->  }
+            dialog.setNegativeButton("취소") { _, _ -> }
             dialog.setView(dialogView)
             dialog.create().show()
 
-            if(myPos != null) myPos!!.showInfoWindow()
+            if (myPos != null) myPos!!.showInfoWindow()
         }
 
         mMap.setOnMarkerClickListener {
-            if(it.title != "Current Location") onMarkerClick(it)
+            if (it.title != "Current Location") onMarkerClick(it)
 
             true
         }
     }
 
     fun onMarkerClick(it: Marker) {
-        val requestCode = (it.position.latitude * 10).toInt() * 1000 + (it.position.longitude * 10).toInt()
+        val requestCode =
+            (it.position.latitude * 10).toInt() * 1000 + (it.position.longitude * 10).toInt()
 
         val intent = Intent(activity, Alarm_Receiver::class.java)
         val pIntent = PendingIntent.getBroadcast(
@@ -201,13 +215,16 @@ class Alarm_Map : Fragment(), OnMapReadyCallback {
             markerSet.pop(it)
             it.remove()
 
-            if(myPos != null) myPos!!.showInfoWindow()
+            if (myPos != null) myPos!!.showInfoWindow()
 
             Toast.makeText(activity, "위치 알람을 제거했습니다.", Toast.LENGTH_SHORT).show()
-        } catch(e: SecurityException) {
+        } catch (e: SecurityException) {
             Toast.makeText(activity, "권한 에러: 위치 사용 권한을 취득하지 못했습니다.", Toast.LENGTH_SHORT).show()
         }
     }
+
+
+
 
 
     /*override fun onBackPressed() {

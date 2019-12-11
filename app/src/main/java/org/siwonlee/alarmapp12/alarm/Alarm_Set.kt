@@ -15,7 +15,7 @@ import android.view.View
 import android.widget.*
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.activity_main.*
-import org.siwonlee.alarmapp12.solving.AlarmSolving4
+import org.siwonlee.alarmapp12.solving.AlarmSolvingBacode
 import org.siwonlee.alarmapp12.Alarm_Data
 import org.siwonlee.alarmapp12.R
 
@@ -34,8 +34,6 @@ class Alarm_Set : AppCompatActivity() {
     val SOL_QR = 44
     val REQ_RINGTONE = 55
     // 앱에서 제공하는 알람벨을 soundArray로 선언했다
-    val soundArray = arrayOf("sunny", "cloudy", "rainy", "snowy") //순서대로 believer, rockabye, vivalavida, christmasday
-    var curSound = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -249,8 +247,8 @@ class Alarm_Set : AppCompatActivity() {
                 data.category = newCat.text.toString()
 
                 if (data.solver == 3) {
-                    val intent = Intent(applicationContext, AlarmSolving4::class.java)
-                    intent.putExtra("solving", data.solver)
+                    val intent = Intent(applicationContext, Alarm_Set_Barcode::class.java)
+                    intent.putExtra("qr", data.solver)
 
                     startActivityForResult(intent, SOL_QR)
                 }
@@ -285,7 +283,6 @@ class Alarm_Set : AppCompatActivity() {
             AdapterView.OnItemSelectedListener {
             override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long ) {
                 //currentSound = soundArray[i]
-
             }
             override fun onNothingSelected(adapterView: AdapterView<*>)  {
                 sound.setSelection(0)
@@ -366,6 +363,7 @@ class Alarm_Set : AppCompatActivity() {
             Log.d("TAG", "date: ${cal.get(Calendar.DAY_OF_MONTH)}")
             Log.d("TAG", "hr: ${cal.get(Calendar.HOUR)}")
             Log.d("TAG", "minute: ${cal.get(Calendar.MINUTE)}")
+            Log.d("TAG+ALARM+DATA","${data}")
 
             finish()
         }
@@ -380,6 +378,11 @@ class Alarm_Set : AppCompatActivity() {
                     //data.sound = RingtoneManager.getRingtone(this, pickedUri).getTitle(this)    //노래 제목
                     data.sound = pickedUri.toString()
                     Toast.makeText(this, "${data.sound} selected", Toast.LENGTH_LONG).show()
+                }
+
+                SOL_QR -> {
+                    val qrnum = intent!!.getStringExtra("qr")
+                    data.qr = qrnum
                 }
             }
         }

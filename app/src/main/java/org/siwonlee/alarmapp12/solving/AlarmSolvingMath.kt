@@ -32,6 +32,8 @@ class AlarmSolvingMath : AlarmSolvingBasic() {
             answer += nums[i] * (1 - 2 * (i % 2))
         }
 
+        math_name.text = alarmName
+
         math_stop.setOnClickListener {
             val nswrnswr = nswr.text.toString()
             var answ = 0
@@ -44,7 +46,6 @@ class AlarmSolvingMath : AlarmSolvingBasic() {
                 nswr.setText("")
             }
         }
-
         math_delay.setOnClickListener { delay() }
     }
 
@@ -56,4 +57,7 @@ class AlarmSolvingMath : AlarmSolvingBasic() {
         for(i in 1..size) ret = ret * 10 + random.nextInt(9) + 1
         return ret
     }
+
+    //뒤로가기로 알람 해제를 막기 위한 빈 함수
+    override fun onBackPressed() { }
 }

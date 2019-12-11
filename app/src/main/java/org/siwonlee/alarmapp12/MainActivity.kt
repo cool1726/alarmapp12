@@ -9,14 +9,12 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.gson.GsonBuilder
+
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import androidx.fragment.app.Fragment
 import org.siwonlee.alarmapp12.alarm.AlarmList_Activity
-import org.siwonlee.alarmapp12.friends.GoogleSignInActivity
-import org.siwonlee.alarmapp12.information.GetWeatherInfo
-import org.siwonlee.alarmapp12.map.Alarm_Map
-import org.siwonlee.alarmapp12.map.Marker_Set
-
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,9 +34,6 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-
-        val mCustomView = LayoutInflater.from(this).inflate(R.layout.actionbar, null)
-        actionBar?.setCustomView(mCustomView)
     }
 
 }

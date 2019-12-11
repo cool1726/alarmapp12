@@ -25,17 +25,38 @@ data class Alarm_Data(
 )
 
 fun Alarm_Data(map: HashMap<String, Any>): Alarm_Data {
+    var category: String? = map["category"] as String
+    var name: String? = map["name"] as String
+    var onoff: Boolean? = map["onoff"] as Boolean
+    var phr: Int? = (map["phr"] as Long).toInt()
+    var pmin: Int? = (map["pmin"] as Long).toInt()
+    var qr: String? = map["qr"] as String
+    var solver: Int? = map["solver"] as Int
+    var sound: String? = map["sound"] as String
+    var switch: MutableList<Boolean> = map["switch"] as MutableList<Boolean>
+    var timeInMillis: Long? = map["timeInMillis"] as Long
+
+    if (category == null) category = ""
+    if (name == null) name = ""
+    if (onoff == null) onoff = true
+    if (phr == null) phr = 0
+    if (pmin == null) pmin = 0
+    if (qr == null) qr = ""
+    if (solver == null) solver = 0
+    if (sound == null) sound = ""
+    if (timeInMillis == null) timeInMillis = 0
+
     return Alarm_Data(
-        timeInMillis = map["timeInMillis"] as Long,
-        phr = (map["phr"] as Long).toInt(),
-        pmin = (map["pmin"] as Long).toInt(),
-        switch = map["switch"] as MutableList<Boolean>,
-        name = map["name"] as String,
-        solver = (map["solver"] as Long).toInt(),
-        qr = map["qr"] as String,
-        category = map["category"] as String,
-        sound = map["sound"] as String,
-        onoff = map["onoff"] as Boolean
+        category = category,
+        name = name,
+        onoff = onoff,
+        phr = phr,
+        pmin = pmin,
+        qr = qr,
+        solver = solver,
+        sound = sound,
+        switch = switch,
+        timeInMillis = timeInMillis
     )
 }
 
@@ -136,7 +157,9 @@ fun Alarm_Data.setAlarm(context: Context, set: Int) {
             intent.putExtra("timeInMillis", cal.timeInMillis)
             intent.putExtra("requestCode", requestCode)
             intent.putExtra("solver", solver)
+            intent.putExtra("qr", qr)
             intent.putExtra("sound", sound)
+            intent.putExtra("name", name)
 
             //정해진 요일에 맞는 PendingIntent를 설정한다
             val dayIntent = PendingIntent.getBroadcast(
@@ -157,5 +180,3 @@ fun Alarm_Data.setAlarm(context: Context, set: Int) {
         }
     }
 }
-
-// data class 형식으로 알람 데이터 저장 (추가 보완이 필요함)

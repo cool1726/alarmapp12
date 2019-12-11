@@ -181,7 +181,7 @@ class AlarmList_Activity : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.alarm_list_menu, menu)
         return super.onCreateOptionsMenu(menu)
-    }*/
+    }
 
     //메뉴의 각 옵션을 선택했을 때 실행할 동작
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -214,7 +214,7 @@ class AlarmList_Activity : Fragment() {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
+    }*/
 
     fun makeCategory() {
         categorize = alarmlist.category()

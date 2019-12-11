@@ -25,6 +25,7 @@ abstract class AlarmSolvingBasic : AppCompatActivity(){
     lateinit var v: Vibrator
     lateinit var ringtone: Ringtone
     var sound = ""
+    var alarmName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,10 +77,14 @@ abstract class AlarmSolvingBasic : AppCompatActivity(){
             ringtone.streamType = AudioManager.STREAM_ALARM
         }
 
-        Toast.makeText(this, "${uri} 알람소리", Toast.LENGTH_LONG).show()
+        //Toast.makeText(this, "${uri} 알람소리", Toast.LENGTH_LONG).show()
 
         // 알람 울릴 때 소리 : 기본 알람소리
         ringtone.play()
+
+        //알람의 이름을 가져온다
+        var aName = intent.getStringExtra("name")
+        if(aName != null) alarmName = aName
     }
 
     fun stop() {
@@ -123,5 +128,5 @@ abstract class AlarmSolvingBasic : AppCompatActivity(){
     //뒤로가기로 알람 해제를 막기 위한 빈 함수
     override fun onBackPressed() { }
     //홈버튼으로 알람 해제를 막기 위한 빈 함수
-    //eoverride fun onMenuOpened(featureId: Int, menu: Menu): Boolean { return false }
+    //override fun onMenuOpened(featureId: Int, menu: Menu): Boolean { return false }
 }

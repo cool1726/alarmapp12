@@ -24,8 +24,12 @@ class AlarmSolvingButton : AlarmSolvingBasic() {
         if(hr == 0) hr = 12
 
         time_now.text = "${hr.toTime()}:${min.toTime()}"
+        button_name.text = alarmName
 
         button_stop.setOnClickListener { stop() }
         button_delay.setOnClickListener { delay() }
     }
+
+    //뒤로가기로 알람 해제를 막기 위한 빈 함수
+    override fun onBackPressed() { }
 }

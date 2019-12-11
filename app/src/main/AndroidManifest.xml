@@ -31,10 +31,6 @@
             android:screenOrientation="portrait" />
         <activity android:name=".Alarm_Data" />
         <activity
-            android:name=".solving.AlarmSolving4"
-            android:screenOrientation="fullSensor"
-            tools:replace="screenOrientation" />
-        <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -43,7 +39,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".solving.AlarmSolvingBasic"/>
+        <activity android:name=".alarm.Alarm_Set_Barcode" />
+        <activity
+            android:name=".solving.AlarmSolvingBasic"
+            android:screenOrientation="fullSensor"
+            tools:replace="screenOrientation"/>
         <activity
             android:name=".solving.AlarmSolvingButton"
             android:screenOrientation="portrait"/>
@@ -53,6 +53,10 @@
         <activity
             android:name=".solving.AlarmSolvingShake"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".solving.AlarmSolvingBacode"
+            android:screenOrientation="fullSensor"
+            tools:replace="screenOrientation" />
         <receiver android:name=".alarm.Alarm_Receiver" />
         <service
             android:name=".alarm.Alarm_Service"
