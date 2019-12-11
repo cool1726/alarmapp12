@@ -25,6 +25,7 @@ abstract class AlarmSolvingBasic : AppCompatActivity(){
     lateinit var v: Vibrator
     lateinit var ringtone: Ringtone
     var sound = ""
+    var alarmName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +81,10 @@ abstract class AlarmSolvingBasic : AppCompatActivity(){
 
         // 알람 울릴 때 소리 : 기본 알람소리
         ringtone.play()
+
+        //알람의 이름을 가져온다
+        var aName = intent.getStringExtra("name")
+        if(aName != null) alarmName = aName
     }
 
     fun stop() {

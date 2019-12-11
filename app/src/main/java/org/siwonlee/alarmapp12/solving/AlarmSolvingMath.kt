@@ -32,6 +32,8 @@ class AlarmSolvingMath : AlarmSolvingBasic() {
             answer += nums[i] * (1 - 2 * (i % 2))
         }
 
+        math_name.text = alarmName
+
         math_stop.setOnClickListener {
             val nswrnswr = nswr.text.toString()
             var answ = 0
@@ -44,7 +46,6 @@ class AlarmSolvingMath : AlarmSolvingBasic() {
                 nswr.setText("")
             }
         }
-
         math_delay.setOnClickListener { delay() }
     }
 

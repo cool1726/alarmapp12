@@ -158,6 +158,7 @@ fun Alarm_Data.setAlarm(context: Context, set: Int) {
             intent.putExtra("requestCode", requestCode)
             intent.putExtra("solver", solver)
             intent.putExtra("sound", sound)
+            intent.putExtra("name", name)
 
             //정해진 요일에 맞는 PendingIntent를 설정한다
             val dayIntent = PendingIntent.getBroadcast(

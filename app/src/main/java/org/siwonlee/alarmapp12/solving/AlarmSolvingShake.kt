@@ -46,6 +46,8 @@ class AlarmSolvingShake : AlarmSolvingBasic(), SensorEventListener {
 
         shake_time.text = mustShakeTime.toString()
 
+        shake_name.text = alarmName
+
         //딜레이 버튼을 눌렀을 때
         shake_delay.setOnClickListener { delay() }
     }
@@ -81,7 +83,7 @@ class AlarmSolvingShake : AlarmSolvingBasic(), SensorEventListener {
                 mShakeCount++
 
                 val shakeToStop: Int = mustShakeTime - mShakeCount
-                if(shakeToStop <= 0) finish()
+                if(shakeToStop <= 0) stop()
                 shake_time.text = shakeToStop.toString()
             }
         }

@@ -17,6 +17,7 @@ class Alarm_Service : Service() {
     var solver = 0
     var qr: String? = ""
     var sound: String? = ""
+    var name: String? = ""
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -28,6 +29,7 @@ class Alarm_Service : Service() {
         solver = intent.extras!!.getInt("solver")
         qr = intent.extras!!.getString("qr")
         sound = intent.extras!!.getString("sound")
+        name = intent.extras!!.getString("name")
 
         Log.d("servicesound", sound)
         Log.d("servicesolver", "${solver}")
@@ -55,12 +57,13 @@ class Alarm_Service : Service() {
             startForeground(1, notification)
         }
 
-        //알람을 울리게 만들 액티비티를 실행한다
-        alarmService()
         //0번 requestCode에는 알람을 5분 뒤에 울리게 만드는 임시 알람을 배정한다
         //requestCode가 8만보다 크거나 같다면, 즉 요일 반복으로 설정한 것이 아니라면 알람을 재등록하지 않는다
         if(requestCode != 0 && (requestCode < 80000))
             alarmReassign()
+
+        //알람을 울리게 만들 액티비티를 실행한다
+        alarmService()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             stopForeground(true)
@@ -70,6 +73,10 @@ class Alarm_Service : Service() {
 
     private fun alarmService() {
         var alarmIntent = Intent(context, AlarmSolvingButton::class.java)
+
+        //알람 해제 방식이 랜덤일 경우 알람을 랜덤한 방법으로 울린다
+        if(solver == 4) solver = Random().nextInt(4)
+
         if(solver == 0) {   //(1) 버튼 눌러 해제하는 방법
             //pendingIntent 설정을 위한 intent
             alarmIntent = Intent(context, AlarmSolvingButton::class.java)
@@ -78,6 +85,7 @@ class Alarm_Service : Service() {
             alarmIntent.putExtra("solver", solver)
             alarmIntent.putExtra("qr", qr)
             alarmIntent.putExtra("sound", sound)
+            alarmIntent.putExtra("name", name)
         }
         else if (solver == 1) {   //(2) 수학문제 풀어 해제하는 방법
             alarmIntent = Intent(context, AlarmSolvingMath::class.java)
@@ -86,6 +94,7 @@ class Alarm_Service : Service() {
             alarmIntent.putExtra("solver", solver)
             alarmIntent.putExtra("qr", qr)
             alarmIntent.putExtra("sound", sound)
+            alarmIntent.putExtra("name", name)
         }
         else if (solver == 2) {
             alarmIntent = Intent(context, AlarmSolvingShake::class.java)    //흔들기 부분 수정 필요
@@ -94,14 +103,16 @@ class Alarm_Service : Service() {
             alarmIntent.putExtra("solver", solver)
             alarmIntent.putExtra("qr", qr)
             alarmIntent.putExtra("sound", sound)
+            alarmIntent.putExtra("name", name)
         }
-        else {    //(4) 바코드 찍어 해제하는 방법
+        else if (solver == 3) {    //(4) 바코드 찍어 해제하는 방법
             alarmIntent = Intent(context, AlarmSolvingBacode::class.java)
             alarmIntent.putExtra("timeInMillis", timeInMillis)
             alarmIntent.putExtra("requestCode", requestCode)
             alarmIntent.putExtra("solver", solver)
             alarmIntent.putExtra("qr", qr)
             alarmIntent.putExtra("sound", sound)
+            alarmIntent.putExtra("name", name)
         }
 
         //알람 해제 액티비티를 띄울 PendingIntent
@@ -137,6 +148,7 @@ class Alarm_Service : Service() {
         repeatIntent.putExtra("solver", solver)
         repeatIntent.putExtra("qr", qr)
         repeatIntent.putExtra("sound", sound)
+        repeatIntent.putExtra("name", name)
 
         //intent에 해당하는 pendingIntent를 생성
         val pendingIntent = PendingIntent.getBroadcast(this, requestCode, repeatIntent, PendingIntent.FLAG_UPDATE_CURRENT)

@@ -111,18 +111,6 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
 
         mMap.setOnMapClickListener{ latLng ->
             val requestCode = (latLng.latitude * 10).toInt() * 1000 + (latLng.longitude * 10).toInt()
-
-            val intent = Intent(this, Alarm_Receiver::class.java)
-            intent.putExtra("hr", 0)
-            intent.putExtra("min", 0)
-            intent.putExtra("requestCode", 0)
-            intent.putExtra("solver", 0)
-            intent.putExtra("sound", "")
-            val pIntent = PendingIntent.getBroadcast(
-                this, requestCode,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT
-            )
-
             val dialog = AlertDialog.Builder(this).setTitle("알람 정보를 입력하세요")
 
             val dialogView = layoutInflater.inflate(R.layout.map_alarm_setting, null)
@@ -138,6 +126,17 @@ class Alarm_Map : AppCompatActivity(), OnMapReadyCallback {
                     mapRange = range.text.toString().toInt()
 
                 try {
+                    val intent = Intent(this, Alarm_Receiver::class.java)
+                    intent.putExtra("requestCode", requestCode)
+                    intent.putExtra("solver", 0)
+                    intent.putExtra("sound", "")
+                    intent.putExtra("name", markerOptions.title)
+
+                    val pIntent = PendingIntent.getBroadcast(
+                        this, requestCode,
+                        intent, PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+
                     loc.addProximityAlert(latLng.latitude, latLng.longitude, mapRange.toFloat(), -1, pIntent)
                     Toast.makeText(this, "위치 알람을 설정했습니다.", Toast.LENGTH_SHORT).show()
                 } catch(e: SecurityException) {
