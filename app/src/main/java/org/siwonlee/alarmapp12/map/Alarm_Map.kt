@@ -70,7 +70,6 @@ class Alarm_Map : Fragment(), OnMapReadyCallback {
 
         val strSet : String = GsonBuilder().create().toJson(alarmlist.markerSet, Marker_Set::class.java)
 
-
         Log.d("strSet", strSet)
         if(strSet != "")
             markerSet = GsonBuilder().create().fromJson(strSet, Marker_Set::class.java)
@@ -88,8 +87,8 @@ class Alarm_Map : Fragment(), OnMapReadyCallback {
             }
         }
 
-        val mapFragment = activity!!.supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
-        mapFragment!!.getMapAsync(this)
+        val mapFragment = getChildFragmentManager().findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
     }

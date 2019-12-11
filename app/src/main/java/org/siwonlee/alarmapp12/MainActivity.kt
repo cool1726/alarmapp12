@@ -1,6 +1,7 @@
 package org.siwonlee.alarmapp12
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.navigation.findNavController
@@ -14,6 +15,8 @@ import org.siwonlee.alarmapp12.friends.GoogleSignInActivity
 import org.siwonlee.alarmapp12.information.GetWeatherInfo
 import org.siwonlee.alarmapp12.map.Alarm_Map
 import org.siwonlee.alarmapp12.map.Marker_Set
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +36,9 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        val mCustomView = LayoutInflater.from(this).inflate(R.layout.actionbar, null)
+        actionBar?.setCustomView(mCustomView)
     }
 
 }
