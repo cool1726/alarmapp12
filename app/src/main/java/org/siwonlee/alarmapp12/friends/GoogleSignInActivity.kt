@@ -248,6 +248,8 @@ class GoogleSignInActivity : AppCompatActivity() {
         })
     }
 
+    //강제로 push하기 위한 의미없는 수정
+
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
