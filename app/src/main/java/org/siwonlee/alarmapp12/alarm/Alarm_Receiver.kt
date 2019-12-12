@@ -28,7 +28,7 @@ class Alarm_Receiver : BroadcastReceiver() {
         val sound = intent.extras!!.getString("sound")
         val name = intent.extras!!.getString("name")
 
-        Log.d("receiversound", qr)
+        //Log.d("receiversound", sound)
 
         // RingtonePlayingService 서비스 intent 생성
         val serviceIntent = Intent(context, Alarm_Service::class.java)

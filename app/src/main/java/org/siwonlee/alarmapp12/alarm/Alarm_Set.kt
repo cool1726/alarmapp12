@@ -344,6 +344,10 @@ class Alarm_Set : AppCompatActivity() {
                 cal.set(Calendar.MINUTE, timePicker.currentMinute)
             }
 
+            if(data.sound == "" || data.sound == null){
+                data.sound = "0"
+            }
+
             //알람을 설정한 시간을 data에 저장한다
             data.timeInMillis = cal.timeInMillis
             //AlarmList_Activity에 정보를 넘길 intent

@@ -30,8 +30,8 @@ fun Alarm_Data(map: HashMap<String, Any>): Alarm_Data {
     var onoff: Boolean? = map["onoff"] as Boolean
     var phr: Int? = (map["phr"] as Long).toInt()
     var pmin: Int? = (map["pmin"] as Long).toInt()
-    var qr: String? = map["qr"] as String
-    var solver: Int? = map["solver"] as Int
+    var qr: String? = map["qr"] as String?
+    var solver: Int? = (map["solver"] as Long).toInt()
     var sound: String? = map["sound"] as String
     var switch: MutableList<Boolean> = map["switch"] as MutableList<Boolean>
     var timeInMillis: Long? = map["timeInMillis"] as Long
