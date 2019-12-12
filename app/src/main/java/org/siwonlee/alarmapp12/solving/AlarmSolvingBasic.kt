@@ -67,14 +67,18 @@ abstract class AlarmSolvingBasic : AppCompatActivity(){
         var uri = Uri.parse(sound)
 
         //알람음을 울릴 RingtoneManager
-        ringtone = RingtoneManager.getRingtone(applicationContext, uri)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val aa = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)    //RingTone이 알람 볼륨으로 울리도록
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
-            ringtone.audioAttributes = aa
-        } else {
-            ringtone.streamType = AudioManager.STREAM_ALARM
+        if(sound == "0")
+            ringtone = RingtoneManager.getRingtone(applicationContext, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
+        else {
+            ringtone = RingtoneManager.getRingtone(applicationContext, uri)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val aa = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)    //RingTone이 알람 볼륨으로 울리도록
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
+                ringtone.audioAttributes = aa
+            } else {
+                ringtone.streamType = AudioManager.STREAM_ALARM
+            }
         }
 
         Toast.makeText(this, "${uri} 알람소리", Toast.LENGTH_LONG).show()
