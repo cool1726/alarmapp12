@@ -35,7 +35,7 @@ class GoogleSignInActivity : AppCompatActivity() {
     private val db = FirebaseDatabase.getInstance().getReference("users")
 
     //서버에서 UserData를 읽어와 nowData에 저장할 변수
-    var data: UserData? = null
+    var data: UserData = UserData()
     //앱 내부 저장소에서 UserData를 받아와 서버에 저장할 변수
     lateinit var nowData: UserData
     val ALARM_SET: Int = 1000
@@ -163,8 +163,9 @@ class GoogleSignInActivity : AppCompatActivity() {
 
             //어느 사용자의 알람을 추가하거나 삭제할 경우
             otherAlarmDialog.setPositiveButton("알람 추가/수정") { _, _ ->
-                //nowData와 Firebase에 해당 사용자 정보를 추가한 뒤
+                //nowData, data와 Firebase에 해당 사용자 정보를 추가한 뒤
                 nowData.uidMap!![nameSet.text.toString()] = uidSet.text.toString()
+                data.uidMap!![nameSet.text.toString()] = uidSet.text.toString()
                 db.child(nowData.uid).child("UserData").child("uidMap").child(nameSet.text.toString()).setValue(uidSet.text.toString())
 
                 //알람을 추가할 사용자의 uid를 긁어와
@@ -267,9 +268,6 @@ class GoogleSignInActivity : AppCompatActivity() {
                 //Firebasse에서 uid를 받아온다
                 nowData.uid = FirebaseAuth.getInstance().currentUser!!.uid
                 uidText.setText("uid: ${nowData.uid}")
-
-                //로그인 직후에는 반드시 액티비티를 종료한다
-                endActivity()
             } catch (e: ApiException) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e)
@@ -300,6 +298,8 @@ class GoogleSignInActivity : AppCompatActivity() {
                 dbSetter.child(nowData.uid).child("timeInMillis").setValue(data.timeInMillis)
             }
         }
+
+        endActivity()
     }
 
     private fun firebaseAuthWithGoogle(acct: GoogleSignInAccount) {
