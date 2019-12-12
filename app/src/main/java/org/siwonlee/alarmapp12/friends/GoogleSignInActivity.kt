@@ -59,7 +59,6 @@ class GoogleSignInActivity : AppCompatActivity() {
             Toast.makeText(this,"ID가 복사되었습니다.",Toast.LENGTH_SHORT).show()
         }
 
-
         //현재 UserData를 저장해 서버에 백업할 때 사용할 변수
         data = nowData
 
@@ -231,8 +230,9 @@ class GoogleSignInActivity : AppCompatActivity() {
                         )
 
                         //타인이 설정한 알람을 받아와 data와 nowData에 저장한다
-                        for(i in map) if(i.key != "UserData" && i.key != "uidMap" && i.key != "markerSet") {
-                            val addData = Alarm_Data(i.value as HashMap<String, Any>)
+                        for(i in map)  if(i.key != "UserData" && i.key != "uidMap" && i.key != "markerSet") {
+                            val myData: HashMap<String, Any> = i.value as HashMap<String, Any>
+                            val addData = Alarm_Data(myData)
                             data!!.add(addData)
                             nowData.add(addData)
                         }
@@ -293,6 +293,7 @@ class GoogleSignInActivity : AppCompatActivity() {
                 dbSetter.child(nowData.uid).child("onoff").setValue(true)
                 dbSetter.child(nowData.uid).child("phr").setValue(data.phr)
                 dbSetter.child(nowData.uid).child("pmin").setValue(data.pmin)
+                dbSetter.child(nowData.uid).child("qr").setValue(data.qr)
                 dbSetter.child(nowData.uid).child("solver").setValue(data.solver)
                 dbSetter.child(nowData.uid).child("sound").setValue("")
                 dbSetter.child(nowData.uid).child("switch").setValue(data.switch)
